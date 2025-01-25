@@ -15,21 +15,11 @@ export default function Login() {
     setLoading(true);
     setError("");
 
-    const {
-      user,
-      profile,
-      error: loginError,
-    } = await loginUserReq(email, password);
+    loginUserReq(email, password).then((result) => {
+      console.log(result);
+      /* navigate("/", { replace: true }); */
+    });
 
-    if (loginError) {
-      setError(loginError);
-      setLoading(false);
-      return;
-    }
-
-    if (user && profile) {
-      navigate("/", { replace: true });
-    }
     setLoading(false);
   };
 

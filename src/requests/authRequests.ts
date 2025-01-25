@@ -1,20 +1,19 @@
+import api from "../server/axios";
+
 export const loginUserReq = async (email: string, password: string) => {
+  console.log("REQUEST", email, password);
   try {
-    const response = await fetch("http://localhost:3000/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    const response = await api.post(
+      "/auth/login",
+      { email, password },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Erro ao fazer login.");
-    }
-
-    return data;
+    return response.data;
   } catch (error: any) {
     throw new Error(error.message || "Erro inesperado.");
   }

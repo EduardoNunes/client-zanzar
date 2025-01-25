@@ -18,11 +18,10 @@ export default function Register() {
     setLoading(true);
     setError("");
 
-    registerUserReq(email, password).then((result) => {
+    registerUserReq(email, password, username).then((result) => {
       console.log(result);
+      /* navigate("/login", { replace: true }); */
     });
-
-    navigate("/login");
   };
 
   return (

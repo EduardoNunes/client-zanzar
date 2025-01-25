@@ -1,21 +1,12 @@
-export const registerUserReq = async (email: string, password: string) => {
+import api from "../server/axios";
+
+export const registerUserReq = async (email: string, password: string, username: string) => {
   try {
-    const response = await fetch("http://localhost:3000/register/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    const response = await api.post("/register", { email, password, username });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Erro ao cadastrar.");
-    }
-
-    return data;
+    return response.data;
   } catch (error: any) {
-    throw new Error(error.message || "Erro inesperado.");
+    const errorMessage = error.response?.data?.error || "Erro ao cadastrar.";
+    throw new Error(errorMessage);
   }
 };
