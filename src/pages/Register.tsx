@@ -1,27 +1,45 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 import { UserPlus } from "lucide-react";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { registerUserReq } from "../requests/registerRequests";
+import { registerValidation } from "../validations/authSchema";
 
 export default function Register() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminCode, setAdminCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<string[]>([]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setErrors([]);
 
-    registerUserReq(email, password, username).then((result) => {
-      console.log(result);
-      /* navigate("/login", { replace: true }); */
-    });
+    try {
+      await registerValidation.validate(
+        { email, password, username },
+        { abortEarly: false }
+      );
+
+      await registerUserReq(email, password, username);
+
+      toast.success("Conta criada com sucesso!");
+
+      navigate("/login", { replace: true });
+    } catch (error: any) {
+      if (error.name === "ValidationError") {
+        setErrors(error.inner.map((err: any) => err.message));
+      } else {
+        setErrors([error.message]);
+      }
+
+      toast.error("Erro ao criar conta!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,9 +51,13 @@ export default function Register() {
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
           Register
         </h2>
-        {error && (
+        {errors.length > 0 && (
           <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-            {error}
+            <ul className="list-disc pl-5">
+              {errors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
           </div>
         )}
         <form onSubmit={handleRegister} className="space-y-6">
@@ -75,40 +97,7 @@ export default function Register() {
               required
             />
           </div>
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="isAdmin"
-              checked={isAdmin}
-              onChange={(e) => {
-                setIsAdmin(e.target.checked);
-                if (!e.target.checked) {
-                  setAdminCode("");
-                }
-              }}
-              className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-400"
-            />
-            <label
-              htmlFor="isAdmin"
-              className="text-gray-700 text-sm font-semibold"
-            >
-              Register as Admin
-            </label>
-          </div>
-          {isAdmin && (
-            <div>
-              <label className="block text-gray-700 text-sm font-semibold mb-2">
-                Admin Code
-              </label>
-              <input
-                type="password"
-                value={adminCode}
-                onChange={(e) => setAdminCode(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
-                required
-              />
-            </div>
-          )}
+
           <button
             type="submit"
             disabled={loading}
