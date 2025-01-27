@@ -1,7 +1,6 @@
 import api from "../server/axios";
 
 export const loginUserReq = async (email: string, password: string) => {
-  console.log("REQUEST", email, password);
   try {
     const response = await api.post(
       "/auth/login",
@@ -15,6 +14,7 @@ export const loginUserReq = async (email: string, password: string) => {
 
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message || "Erro inesperado.");
+    const errorMessage = error.response?.data?.message || "Erro ao logar.";
+    throw new Error(errorMessage);
   }
 };

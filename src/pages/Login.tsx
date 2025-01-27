@@ -4,6 +4,7 @@ import { LogIn } from "lucide-react";
 import { loginUserReq } from "../requests/authRequests";
 import { loginSchema } from "../validations/loginSchema";
 import { toast } from "react-toastify";
+import Cookie from "js-cookie"
 
 export default function Login() {
   const navigate = useNavigate();
@@ -20,11 +21,13 @@ export default function Login() {
     try {
       await loginSchema.validate({ email, password }, { abortEarly: false });
 
-      await loginUserReq(email, password);
+      await loginUserReq(email, password).then((data) => {
+        console.log("DATA", data)
+      });
 
-      toast.success("Conta criada com sucesso!");
+      toast.success("Autenticado com sucesso!");
 
-      navigate("/login", { replace: true });
+      navigate("/", { replace: true });
     } catch (error: any) {
       if (error.name === "ValidationError") {
         setErrors(error.inner.map((err: any) => err.message));
@@ -32,7 +35,7 @@ export default function Login() {
         setErrors([error.message]);
       }
 
-      toast.error("Erro ao criar conta!");
+      toast.error("Erro ao tentar logar!");
     } finally {
       setLoading(false);
     }
