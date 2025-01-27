@@ -4,7 +4,7 @@ import { LogIn } from "lucide-react";
 import { loginUserReq } from "../requests/authRequests";
 import { loginSchema } from "../validations/loginSchema";
 import { toast } from "react-toastify";
-import Cookie from "js-cookie"
+import Cookies from "js-cookie";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -22,11 +22,12 @@ export default function Login() {
       await loginSchema.validate({ email, password }, { abortEarly: false });
 
       await loginUserReq(email, password).then((data) => {
-        console.log("DATA", data)
+        Cookies.set("access_token", data.token);
+        Cookies.set("user_id", data.id);
+        Cookies.set("user_name", data.userName);
       });
 
       toast.success("Autenticado com sucesso!");
-
       navigate("/", { replace: true });
     } catch (error: any) {
       if (error.name === "ValidationError") {
