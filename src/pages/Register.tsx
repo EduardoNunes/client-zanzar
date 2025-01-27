@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { registerUserReq } from "../requests/registerRequests";
-import { registerValidation } from "../validations/authSchema";
+import { registerSchema } from "../validations/registerSchema";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function Register() {
     setErrors([]);
 
     try {
-      await registerValidation.validate(
+      await registerSchema.validate(
         { email, password, username },
         { abortEarly: false }
       );
