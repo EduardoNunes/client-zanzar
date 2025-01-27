@@ -2,25 +2,40 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { LogIn } from "lucide-react";
 import { loginUserReq } from "../requests/authRequests";
+import { loginSchema } from "../validations/loginSchema";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<string[]>([]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setErrors([]);
 
-    loginUserReq(email, password).then((result) => {
-      console.log(result);
-      /* navigate("/", { replace: true }); */
-    });
+    try {
+      await loginSchema.validate({ email, password }, { abortEarly: false });
 
-    setLoading(false);
+      await loginUserReq(email, password);
+
+      toast.success("Conta criada com sucesso!");
+
+      navigate("/login", { replace: true });
+    } catch (error: any) {
+      if (error.name === "ValidationError") {
+        setErrors(error.inner.map((err: any) => err.message));
+      } else {
+        setErrors([error.message]);
+      }
+
+      toast.error("Erro ao criar conta!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,9 +47,13 @@ export default function Login() {
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
           Login
         </h2>
-        {error && (
+        {errors.length > 0 && (
           <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-            {error}
+            <ul className="list-disc pl-5">
+              {errors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
           </div>
         )}
         <form onSubmit={handleLogin} className="space-y-6">
