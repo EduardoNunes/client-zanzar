@@ -1,0 +1,162 @@
+import Cookies from "js-cookie";
+import { Loader2, Upload } from "lucide-react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createPostWithMediaReq } from "../requests/postsRequests";
+
+export default function CreatePost() {
+  const navigate = useNavigate();
+  const [caption, setCaption] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+
+      const objectUrl = URL.createObjectURL(selectedFile);
+      setPreview(objectUrl);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) {
+      setError("Por favor, selecione uma imagem.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      setLoading(true);
+
+      const userId = Cookies.get("user_id");
+
+      if (!userId) {
+        throw new Error("Usuário não autenticado.");
+      }
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${userId}/${fileName}`;
+
+      await createPostWithMediaReq(userId, file, caption, filePath).then(
+        (data: any) => {
+          navigate("/");
+        }
+      );
+
+      navigate("/");
+    } catch (error) {
+      setError("Erro ao criar postagem. Por favor, tente novamente.");
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Criar Nova Postagem</h1>
+
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-gray-700 text-sm font-semibold mb-2">
+            Imagem
+          </label>
+          <div className="flex flex-col items-center justify-center w-full">
+            <label
+              className={`w-full h-64 border-2 border-dashed rounded-lg cursor-pointer
+                ${
+                  preview
+                    ? "border-transparent"
+                    : "border-gray-300 hover:border-indigo-400"
+                }
+                transition-colors duration-200 ease-in-out
+                flex flex-col items-center justify-center relative overflow-hidden`}
+            >
+              {preview ? (
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className="w-12 h-12 text-gray-400 mb-3" />
+                  <p className="mb-2 text-sm text-gray-500">
+                    <span className="font-semibold">
+                      Clique para fazer upload
+                    </span>{" "}
+                    ou arraste e solte
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    PNG, JPG ou GIF (Máx. 10MB)
+                  </p>
+                </div>
+              )}
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-gray-700 text-sm font-semibold mb-2">
+            Legenda
+          </label>
+          <textarea
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            placeholder="Escreva uma legenda para sua postagem..."
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent min-h-[100px]"
+          />
+        </div>
+
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={() => {
+              if (preview) {
+                URL.revokeObjectURL(preview);
+              }
+              navigate("/");
+            }}
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={loading || !file}
+            className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Publicando...</span>
+              </div>
+            ) : (
+              "Publicar"
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
