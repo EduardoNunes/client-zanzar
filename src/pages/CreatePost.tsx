@@ -45,11 +45,9 @@ export default function CreatePost() {
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `${userId}/${fileName}`;
 
-      await createPostWithMediaReq(userId, file, caption, filePath).then(
-        (data: any) => {
-          navigate("/");
-        }
-      );
+      await createPostWithMediaReq(userId, file, caption, filePath).then(() => {
+        navigate("/");
+      });
 
       navigate("/");
     } catch (error) {
