@@ -7,9 +7,11 @@ import ImageViewer from "../components/ImageViewer";
 import {
   handleLikeReq,
   getFeedReq,
+  handleCommentReq,
 } from "../requests/feedRequests";
 
 interface Post {
+  commentCount: number;
   likeCount: number;
   likedByLoggedInUser: boolean;
   createdAt: string | number | Date;
@@ -26,6 +28,7 @@ interface Post {
     id: string;
   }[];
   comments: {
+    profile: any;
     id: string;
     content: string;
     profiles: {
@@ -85,6 +88,7 @@ export default function Feed() {
 
     try {
       const userId = Cookies.get("user_id");
+
       if (!userId) {
         redirect("/login");
         return;
@@ -115,26 +119,44 @@ export default function Feed() {
   }
 
   async function handleComment(postId: string) {
-    /* if (!session) {
-      navigate("/login");
-      return;
-    }
-
     if (!newComment.trim()) return;
 
     try {
-      await supabase.from("comments").insert({
-        post_id: postId,
-        user_id: session.user.id,
-        content: newComment.trim(),
-      });
+      const userId = Cookies.get("user_id");
+      const userName = Cookies.get("user_name");
+
+      if (!userId) {
+        redirect("/login");
+        return;
+      }
+
+      const newCommentData = await handleCommentReq(postId, userId, newComment);
+
+      const userProfile = {
+        username: userName || "Phantom",
+        avatarUrl: "https://via.placeholder.com/40", // Ajuste para o avatar correto
+      };
+
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                comments: [
+                  ...post.comments,
+                  { ...newCommentData, profile: userProfile },
+                ],
+                commentCount: post.commentCount + 1, // Atualiza contagem de comentários
+              }
+            : post
+        )
+      );
 
       setNewComment("");
       setCommentingOn(null);
-      fetchPosts();
     } catch (error) {
       console.error("Error posting comment:", error);
-    } */
+    }
   }
 
   const navigateToProfile = (username: string) => {
@@ -218,8 +240,7 @@ export default function Feed() {
                       userLikes[post.id] ? "fill-red-600 text-red-600" : ""
                     }`}
                   />
-                  <span>{post.likeCount}</span>{" "}
-                  {/* Exibe a contagem de likes */}
+                  <span>{post.likeCount}</span>
                 </button>
                 <button
                   onClick={() =>
@@ -228,7 +249,7 @@ export default function Feed() {
                   className="flex items-center space-x-1 text-gray-600 hover:text-blue-600"
                 >
                   <MessageCircle className="w-6 h-6" />
-                  <span>{post.comments.length}</span>
+                  <span>{post.commentCount}</span>
                 </button>
                 <button className="flex items-center space-x-1 text-gray-600 hover:text-green-600">
                   <Share2 className="w-6 h-6" />
@@ -241,7 +262,7 @@ export default function Feed() {
                     className="font-semibold hover:text-indigo-600 transition-colors"
                   >
                     {post.profile.username}
-                  </button>{" "}
+                  </button>
                   {post.caption}
                 </p>
               )}
@@ -250,12 +271,14 @@ export default function Feed() {
                   <div key={comment.id} className="text-sm">
                     <button
                       onClick={() =>
-                        navigateToProfile(comment.profiles.username)
+                        comment.profile
+                          ? navigateToProfile(comment.profile.username)
+                          : null
                       }
-                      className="font-semibold hover:text-indigo-600 transition-colors"
+                      className="font-semibold hover:text-indigo-600 transition-colors mr-1"
                     >
-                      {comment.profiles.username}
-                    </button>{" "}
+                      {comment.profile.username}{":"}
+                    </button>
                     {comment.content}
                   </div>
                 ))}
