@@ -2,13 +2,10 @@ import { formatDistanceToNow } from "date-fns";
 import Cookies from "js-cookie";
 import { Heart, LogIn, MessageCircle, Share2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { redirect, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ImageViewer from "../components/ImageViewer";
-import {
-  handleLikeReq,
-  getFeedReq,
-  handleCommentReq,
-} from "../requests/feedRequests";
+import { handleLikeReq, getFeedReq } from "../requests/feedRequests";
+import CommentModal from "../components/CommentsModal";
 
 interface Post {
   commentCount: number;
@@ -19,6 +16,8 @@ interface Post {
   mediaUrl: string;
   caption: string;
   created_at: string;
+  post: string;
+  comments: { id: string; profile: { username: string }; content: string }[];
   profile: {
     avatarUrl: string;
     username: string;
@@ -27,24 +26,15 @@ interface Post {
   likes: {
     id: string;
   }[];
-  comments: {
-    profile: any;
-    id: string;
-    content: string;
-    profiles: {
-      username: string;
-    };
-  }[];
 }
 
 export default function Feed() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newComment, setNewComment] = useState("");
-  const [commentingOn, setCommentingOn] = useState<string | null>(null);
   const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const token = Cookies.get("access_token");
 
   useEffect(() => {
@@ -60,10 +50,8 @@ export default function Feed() {
 
     try {
       setLoading(true);
-
       const data = await getFeedReq(userId);
       setPosts(data || []);
-
       const likesMap = data.reduce(
         (acc: Record<string, boolean>, post: Post) => {
           acc[post.id] = post.likedByLoggedInUser || false;
@@ -71,7 +59,6 @@ export default function Feed() {
         },
         {}
       );
-
       setUserLikes(likesMap);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -79,88 +66,35 @@ export default function Feed() {
       setLoading(false);
     }
   }
-
-  async function handleLike(
+  console.log("POSTS", posts);
+  const handleLike = async (
     e: React.MouseEvent<HTMLButtonElement>,
     postId: string
-  ) {
+  ) => {
     e.preventDefault();
+    const userId = Cookies.get("user_id");
+    if (!userId) {
+      navigate("/login");
+      return;
+    }
 
-    try {
-      const userId = Cookies.get("user_id");
-
-      if (!userId) {
-        redirect("/login");
-        return;
-      }
-
-      const isLiked = userLikes[postId];
-      setPosts((prevPosts) =>
-        prevPosts.map((post) => {
-          if (post.id === postId) {
-            return {
+    const isLiked = userLikes[postId];
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? {
               ...post,
               likeCount: isLiked ? post.likeCount - 1 : post.likeCount + 1,
-            };
-          }
-          return post;
-        })
-      );
+            }
+          : post
+      )
+    );
 
-      setUserLikes((prev) => ({
-        ...prev,
-        [postId]: !isLiked,
-      }));
-
-      await handleLikeReq(postId, userId);
-    } catch (error) {
-      console.error("Error handling like:", error);
-    }
-  }
-
-  async function handleComment(postId: string) {
-    if (!newComment.trim()) return;
-
-    try {
-      const userId = Cookies.get("user_id");
-      const userName = Cookies.get("user_name");
-
-      if (!userId) {
-        redirect("/login");
-        return;
-      }
-
-      const newCommentData = await handleCommentReq(postId, userId, newComment);
-
-      const userProfile = {
-        username: userName || "Phantom",
-        avatarUrl: "https://via.placeholder.com/40", // Ajuste para o avatar correto
-      };
-
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                comments: [
-                  ...post.comments,
-                  { ...newCommentData, profile: userProfile },
-                ],
-                commentCount: post.commentCount + 1, // Atualiza contagem de comentários
-              }
-            : post
-        )
-      );
-
-      setNewComment("");
-      setCommentingOn(null);
-    } catch (error) {
-      console.error("Error posting comment:", error);
-    }
-  }
+    setUserLikes((prev) => ({ ...prev, [postId]: !isLiked }));
+    await handleLikeReq(postId, userId);
+  };
 
   const navigateToProfile = (username: string) => {
-    navigate("/login");
     navigate(`/profile/${username}`);
   };
 
@@ -243,68 +177,35 @@ export default function Feed() {
                   <span>{post.likeCount}</span>
                 </button>
                 <button
-                  onClick={() =>
-                    token ? setCommentingOn(post.id) : navigate("/login")
-                  }
-                  className="flex items-center space-x-1 text-gray-600 hover:text-blue-600"
+                  onClick={() => setSelectedPost(post)}
+                  className="flex items-center space-x-1 text-gray-600 hover:text-indigo-600"
                 >
                   <MessageCircle className="w-6 h-6" />
                   <span>{post.commentCount}</span>
                 </button>
-                <button className="flex items-center space-x-1 text-gray-600 hover:text-green-600">
+                <button className="flex items-center space-x-1 text-gray-600 hover:text-indigo-600">
                   <Share2 className="w-6 h-6" />
                 </button>
               </div>
-              {post.caption && (
-                <p className="mb-4">
-                  <button
-                    onClick={() => navigateToProfile(post.profile.username)}
-                    className="font-semibold hover:text-indigo-600 transition-colors"
-                  >
-                    {post.profile.username}
-                  </button>
-                  {post.caption}
-                </p>
-              )}
-              <div className="space-y-2">
-                {post.comments.map((comment) => (
-                  <div key={comment.id} className="text-sm">
-                    <button
-                      onClick={() =>
-                        comment.profile
-                          ? navigateToProfile(comment.profile.username)
-                          : null
-                      }
-                      className="font-semibold hover:text-indigo-600 transition-colors mr-1"
-                    >
-                      {comment.profile.username}{":"}
-                    </button>
-                    {comment.content}
-                  </div>
-                ))}
-              </div>
-              {commentingOn === post.id && (
-                <div className="mt-4 flex space-x-2">
-                  <input
-                    type="text"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Add a comment..."
-                    className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  />
-                  <button
-                    onClick={() => handleComment(post.id)}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                  >
-                    Post
-                  </button>
-                </div>
-              )}
+              <p className="text-gray-900">{post.caption}</p>
             </div>
           </div>
         ))}
+        <div
+          className={`md:hidden transition-all duration-100 ease-in-out ${
+            selectedPost
+              ? "max-h-screen opacity-100 visible"
+              : "max-h-0 opacity-0 invisible"
+          }`}
+        >
+          {selectedPost && (
+            <CommentModal
+              post={selectedPost}
+              onClose={() => setSelectedPost(null)}
+            />
+          )}
+        </div>
       </div>
-
       {fullscreenImage && (
         <ImageViewer
           imageUrl={fullscreenImage}
