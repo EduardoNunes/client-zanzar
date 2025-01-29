@@ -66,7 +66,7 @@ export default function Feed() {
       setLoading(false);
     }
   }
-  console.log("POSTS", posts);
+
   const handleLike = async (
     e: React.MouseEvent<HTMLButtonElement>,
     postId: string
