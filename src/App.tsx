@@ -8,6 +8,8 @@ import Layout from "./components/Layout";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import CreatePost from "./pages/CreatePost";
+import Chats from "./pages/Chats";
+import Profile from "./pages/Profile";
 
 export default function App() {
   const [isTokenLoaded, setIsTokenLoaded] = useState(false);
@@ -67,6 +69,26 @@ export default function App() {
               <ProtectedRoute>
                 <Layout>
                   <CreatePost />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Chats />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />  
+          <Route
+            path="/profile/:username"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Profile />
                 </Layout>
               </ProtectedRoute>
             }
