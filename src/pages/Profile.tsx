@@ -18,9 +18,12 @@ import {
   getPostsReq,
   getProfileReq,
   updateProfileImage,
+  followProfileReq,
 } from "../requests/profileRequests";
+import { toast } from "react-toastify";
 
 interface Profile {
+  profileId: string;
   id: string;
   username: string;
   avatarUrl: string | null;
@@ -72,6 +75,8 @@ export default function Profile() {
       const profileData = username && (await getProfileReq(username));
       profileData && setProfile(profileData);
 
+      setIsFollowing(profileData.isFollowed);
+
       const isCurrentUserProfile = userId === profileData.profileId;
       setIsCurrentUser(isCurrentUserProfile);
 
@@ -88,8 +93,6 @@ export default function Profile() {
 
       setUserLikes(likesMap);
 
-      console.log("POSTS", posts);
-
       // Fetch follow stats
       const { data: followersCount } = await supabase
         .from("followers")
@@ -105,17 +108,6 @@ export default function Profile() {
         followers: followersCount?.length || 0,
         following: followingCount?.length || 0,
       });
-
-      // Check if current user is following this profile
-      if (user && !isCurrentUserProfile) {
-        const { data: followData } = await supabase
-          .from("followers")
-          .select("*")
-          .eq("follower_id", user.id)
-          .eq("following_id", profileData.id);
-
-        setIsFollowing(followData && followData.length > 0);
-      }
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
@@ -127,30 +119,29 @@ export default function Profile() {
     if (!profile) return;
 
     setFollowLoading(true);
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
 
+    try {
+      const token = Cookies.get("access_token");
+      const userId = Cookies.get("user_id");
+
+      if (!token) {
+        navigate("/");
+        return;
+      }
+
+      if (!userId) {
+        toast.error("Algo deu errado, contate algum adm");
+        return;
+      }
       if (isFollowing) {
-        // Unfollow
-        await supabase
-          .from("followers")
-          .delete()
-          .eq("follower_id", user.id)
-          .eq("following_id", profile.id);
+        userId && (await followProfileReq(userId, profile.profileId));
 
         setFollowStats((prev) => ({
           ...prev,
           followers: prev.followers - 1,
         }));
       } else {
-        // Follow
-        await supabase.from("followers").insert({
-          follower_id: user.id,
-          following_id: profile.id,
-        });
+        userId && (await followProfileReq(userId, profile.profileId));
 
         setFollowStats((prev) => ({
           ...prev,
