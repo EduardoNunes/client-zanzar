@@ -11,7 +11,11 @@ export const getProfileReq = async (username: string) => {
   }
 
   try {
-    const { data } = await api.get(`/profile/user-profile/${username}`);
+    const { data } = await api.get(`/profile/user-profile/${username}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return data;
   } catch (error: any) {
@@ -30,7 +34,11 @@ export const getPostsReq = async (username: string) => {
   }
 
   try {
-    const response = await api.get(`/profile/user-posts/${username}`);
+    const response = await api.get(`/profile/user-posts/${username}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return response.data;
   } catch (error: any) {
@@ -65,6 +73,33 @@ export const updateProfileImage = async (userId: string, file: File) => {
   } catch (error: any) {
     const errorMessage =
       error.response?.data?.message || "Erro ao atualizar a imagem de perfil.";
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+export const followProfileReq = async (userId: string, profileId: string) => {
+  const token = Cookies.get("access_token");
+
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+  console.log("REQ", userId, profileId);
+  const payload = { userId, profileId };
+
+  try {
+    const response = await api.post("/profile/follow-profile", payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    toast.success("Seguindo");
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Erro ao seguir perfil.";
     toast.error(errorMessage);
     throw new Error(errorMessage);
   }
