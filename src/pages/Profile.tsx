@@ -94,19 +94,10 @@ export default function Profile() {
       setUserLikes(likesMap);
 
       // Fetch follow stats
-      const { data: followersCount } = await supabase
-        .from("followers")
-        .select("id", { count: "exact" })
-        .eq("following_id", profileData.id);
-
-      const { data: followingCount } = await supabase
-        .from("followers")
-        .select("id", { count: "exact" })
-        .eq("follower_id", profileData.id);
 
       setFollowStats({
-        followers: followersCount?.length || 0,
-        following: followingCount?.length || 0,
+        followers: profileData.followersCount || 0,
+        following: profileData.followingCount || 0,
       });
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -297,15 +288,15 @@ export default function Profile() {
                 </div>
                 <div>
                   <span className="font-bold text-gray-900">
-                    {followStats.followers}
-                  </span>{" "}
-                  seguidores
-                </div>
-                <div>
-                  <span className="font-bold text-gray-900">
                     {followStats.following}
                   </span>{" "}
                   seguindo
+                </div>
+                <div>
+                  <span className="font-bold text-gray-900">
+                    {followStats.followers}
+                  </span>{" "}
+                  seguidores
                 </div>
               </div>
             </div>
