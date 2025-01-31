@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 
 export const getFeedReq = async (userId: string) => {
   const token = Cookies.get("access_token");
+
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -31,10 +32,12 @@ export const getFeedReq = async (userId: string) => {
 
 export const handleLikeReq = async (postId: string, userId: string) => {
   const token = Cookies.get("access_token");
+
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
   }
+
   try {
     const response = await api.post(
       "/posts/likes",
@@ -46,6 +49,7 @@ export const handleLikeReq = async (postId: string, userId: string) => {
         },
       }
     );
+
     return response.data;
   } catch (error: any) {
     const errorMessage =
@@ -60,6 +64,7 @@ export const newCommentReq = async (
   content: string
 ) => {
   const token = Cookies.get("access_token");
+
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -76,6 +81,7 @@ export const newCommentReq = async (
         },
       }
     );
+
     return response.data;
   } catch (error: any) {
     const errorMessage =
@@ -86,6 +92,7 @@ export const newCommentReq = async (
 
 export const get15commentsReq = async (postId: string, page: number = 1) => {
   const token = Cookies.get("access_token");
+  
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;

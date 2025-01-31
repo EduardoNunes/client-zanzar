@@ -38,16 +38,19 @@ export default function CreatePost() {
       const userId = Cookies.get("user_id");
 
       if (!userId) {
-        throw new Error("Usuário não autenticado.");
+        navigate("/login");
       }
 
       const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `${userId}/${fileName}`;
 
-      await createPostWithMediaReq(userId, file, caption, filePath).then(() => {
-        navigate("/");
-      });
+      userId &&
+        (await createPostWithMediaReq(userId, file, caption, filePath).then(
+          () => {
+            navigate("/");
+          }
+        ));
 
       navigate("/");
     } catch (error) {

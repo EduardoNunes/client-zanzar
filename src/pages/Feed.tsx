@@ -21,7 +21,6 @@ interface Post {
   profile: {
     avatarUrl: string;
     username: string;
-    avatar_url: string;
   };
   likes: {
     id: string;

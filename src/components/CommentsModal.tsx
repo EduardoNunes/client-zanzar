@@ -134,7 +134,7 @@ export default function CommentModal({ post, onClose }: CommentModalProps) {
           <div className="space-y-4">
             {comments && Array.isArray(comments) && comments.length > 0 ? (
               comments.map((comment) => (
-                <div key={comment.id} className="text-sm">
+                <div key={comment.id} className="flex flex-col items-start text-sm">
                   <button className="font-semibold text-indigo-600 mr-1">
                     {comment.profile.username}:
                   </button>
