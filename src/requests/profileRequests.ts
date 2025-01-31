@@ -85,7 +85,7 @@ export const followProfileReq = async (userId: string, profileId: string) => {
     toast.error("Token de acesso não encontrado.");
     return;
   }
-  console.log("REQ", userId, profileId);
+
   const payload = { userId, profileId };
 
   try {
