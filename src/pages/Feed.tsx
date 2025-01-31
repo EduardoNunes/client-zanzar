@@ -1,11 +1,12 @@
 import { formatDistanceToNow } from "date-fns";
 import Cookies from "js-cookie";
-import { Heart, LogIn, MessageCircle, Share2 } from "lucide-react";
+import { Heart, LogIn, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ImageViewer from "../components/ImageViewer";
-import { handleLikeReq, getFeedReq } from "../requests/feedRequests";
+import userImageDefault from "../assets/user.svg";
 import CommentModal from "../components/CommentsModal";
+import ImageViewer from "../components/ImageViewer";
+import { getFeedReq, handleLikeReq } from "../requests/feedRequests";
 
 interface Post {
   commentCount: number;
@@ -132,9 +133,7 @@ export default function Feed() {
             <div className="p-4 border-b">
               <div className="flex items-center space-x-3">
                 <img
-                  src={
-                    post.profile.avatarUrl || "https://via.placeholder.com/40"
-                  }
+                  src={post.profile.avatarUrl || userImageDefault}
                   alt={post.profile.username}
                   className="w-10 h-10 rounded-full cursor-pointer"
                   onClick={() => navigateToProfile(post.profile.username)}
@@ -182,9 +181,9 @@ export default function Feed() {
                   <MessageCircle className="w-6 h-6" />
                   <span>{post.commentCount}</span>
                 </button>
-                <button className="flex items-center space-x-1 text-gray-600 hover:text-indigo-600">
+                {/* <button className="flex items-center space-x-1 text-gray-600 hover:text-indigo-600">
                   <Share2 className="w-6 h-6" />
-                </button>
+                </button> */}
               </div>
               <p className="text-gray-900">{post.caption}</p>
             </div>
