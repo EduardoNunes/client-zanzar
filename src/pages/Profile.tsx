@@ -35,7 +35,7 @@ interface Post {
   caption: string;
   created_at: string;
   post: string;
-  comments: string[];
+  comments: { id: string; profile: { username: string }; content: string }[];
 }
 
 interface FollowStats {
@@ -69,13 +69,13 @@ export default function Profile() {
     try {
       const userId = Cookies.get("user_id");
 
-      const profileData = userId && (await getProfileReq(userId));
+      const profileData = username && (await getProfileReq(username));
       profileData && setProfile(profileData);
 
       const isCurrentUserProfile = userId === profileData.profileId;
       setIsCurrentUser(isCurrentUserProfile);
 
-      const posts = userId && (await getPostsReq(userId));
+      const posts = username && (await getPostsReq(username));
       posts && setPosts(posts || []);
 
       const likesMap = posts.reduce(

@@ -2,7 +2,7 @@ import api from "../server/axios";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 
-export const getProfileReq = async (userId: string) => {
+export const getProfileReq = async (username: string) => {
   const token = Cookies.get("access_token");
 
   if (!token) {
@@ -11,7 +11,7 @@ export const getProfileReq = async (userId: string) => {
   }
 
   try {
-    const { data } = await api.get(`/profile/user-profile/${userId}`);
+    const { data } = await api.get(`/profile/user-profile/${username}`);
 
     return data;
   } catch (error: any) {
@@ -21,7 +21,7 @@ export const getProfileReq = async (userId: string) => {
   }
 };
 
-export const getPostsReq = async (userId: string) => {
+export const getPostsReq = async (username: string) => {
   const token = Cookies.get("access_token");
 
   if (!token) {
@@ -30,7 +30,7 @@ export const getPostsReq = async (userId: string) => {
   }
 
   try {
-    const response = await api.get(`/profile/user-posts/${userId}`);
+    const response = await api.get(`/profile/user-posts/${username}`);
 
     return response.data;
   } catch (error: any) {
