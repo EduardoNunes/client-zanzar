@@ -1,26 +1,16 @@
 import Cookies from "js-cookie";
-import {
-  Camera,
-  Heart,
-  Loader2,
-  MessageCircle,
-  Share2,
-  UserMinus,
-  UserPlus,
-} from "lucide-react";
+import { Camera, Loader2, UserMinus, UserPlus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import Cam from "../assets/cam.svg";
-import CommentModal from "../components/CommentsModal";
-import ImageViewer from "../components/ImageViewer";
-import { handleLikeReq } from "../requests/feedRequests";
 import {
+  followProfileReq,
   getPostsReq,
   getProfileReq,
   updateProfileImage,
-  followProfileReq,
 } from "../requests/profileRequests";
-import { toast } from "react-toastify";
+import PostsGridProfile from "../components/PostsGridProfile";
 
 interface Profile {
   profileId: string;
@@ -61,8 +51,6 @@ export default function Profile() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProfileAndPosts();
@@ -172,33 +160,6 @@ export default function Profile() {
     }
   };
 
-  const handleLike = async (
-    e: React.MouseEvent<HTMLButtonElement>,
-    postId: string
-  ) => {
-    e.preventDefault();
-    const userId = Cookies.get("user_id");
-    if (!userId) {
-      navigate("/login");
-      return;
-    }
-
-    const isLiked = userLikes[postId];
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              likeCount: isLiked ? post.likeCount - 1 : post.likeCount + 1,
-            }
-          : post
-      )
-    );
-
-    setUserLikes((prev) => ({ ...prev, [postId]: !isLiked }));
-    await handleLikeReq(postId, userId);
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -302,76 +263,13 @@ export default function Profile() {
             </div>
           </div>
         </div>
-
-        {/* Posts Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {posts.map((post) => (
-            <div
-              key={post.id}
-              className="rounded-lg overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity cursor-zoom-in"
-            >
-              <img
-                src={post.mediaUrl}
-                alt={post.caption}
-                className="w-full h-[100%-96px] object-cover"
-                onClick={() => setFullscreenImage(post.mediaUrl)}
-              />
-              <div className="p-4 h-[96px]">
-                <div className="flex items-center space-x-4 mb-4">
-                  <button
-                    onClick={(e) => handleLike(e, post.id)}
-                    className="flex items-center space-x-1 text-gray-600 hover:text-red-600"
-                  >
-                    <Heart
-                      className={`w-6 h-6 ${
-                        userLikes[post.id] ? "fill-red-600 text-red-600" : ""
-                      }`}
-                    />
-                    <span>{post.likeCount}</span>
-                  </button>
-                  <button
-                    onClick={() => setSelectedPost(post)}
-                    className="flex items-center space-x-1 text-gray-600 hover:text-indigo-600"
-                  >
-                    <MessageCircle className="w-6 h-6" />
-                    <span>{post.commentCount}</span>
-                  </button>
-                  <button className="flex items-center space-x-1 text-gray-600 hover:text-indigo-600">
-                    <Share2 className="w-6 h-6" />
-                  </button>
-                </div>
-                <p className="text-gray-900">{post.caption}</p>
-              </div>
-            </div>
-          ))}
-          <div
-            className={`md:hidden transition-all duration-100 ease-in-out ${
-              selectedPost
-                ? "max-h-screen opacity-100 visible"
-                : "max-h-0 opacity-0 invisible"
-            }`}
-          >
-            {selectedPost && (
-              <CommentModal
-                post={selectedPost}
-                onClose={() => setSelectedPost(null)}
-              />
-            )}
-          </div>
-        </div>
-
-        {posts.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            Nenhuma postagem ainda
-          </div>
-        )}
-      </div>
-      {fullscreenImage && (
-        <ImageViewer
-          imageUrl={fullscreenImage}
-          onClose={() => setFullscreenImage(null)}
+        <PostsGridProfile
+          userLikes={userLikes}
+          setPosts={setPosts}
+          setUserLikes={setUserLikes}
+          posts={posts}
         />
-      )}
+      </div>
     </>
   );
 }
