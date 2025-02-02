@@ -1,15 +1,15 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import "./App.css";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import { ToastContainer } from "react-toastify";
-import Feed from "./pages/Feed";
-import Layout from "./components/Layout";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "./App.css";
+import Layout from "./components/Layout";
 import CreatePost from "./pages/CreatePost";
-import Chats from "./pages/Chats";
+import Feed from "./pages/Feed";
+import Login from "./pages/Login";
+import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
+import Register from "./pages/Register";
 
 export default function App() {
   const [isTokenLoaded, setIsTokenLoaded] = useState(false);
@@ -78,7 +78,7 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <Chats />
+                  <Messages />
                 </Layout>
               </ProtectedRoute>
             }
