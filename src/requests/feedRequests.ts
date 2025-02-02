@@ -2,7 +2,7 @@ import api from "../server/axios";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 
-export const getFeedReq = async (userId: string) => {
+export const getFeedReq = async (profileId: string) => {
   const token = Cookies.get("access_token");
 
   if (!token) {
@@ -17,7 +17,7 @@ export const getFeedReq = async (userId: string) => {
         Authorization: `Bearer ${token}`,
       },
       params: {
-        userId: userId,
+        profileId: profileId,
       },
     });
 
@@ -30,7 +30,7 @@ export const getFeedReq = async (userId: string) => {
   }
 };
 
-export const handleLikeReq = async (postId: string, userId: string) => {
+export const handleLikeReq = async (postId: string, profileId: string) => {
   const token = Cookies.get("access_token");
 
   if (!token) {
@@ -41,7 +41,7 @@ export const handleLikeReq = async (postId: string, userId: string) => {
   try {
     const response = await api.post(
       "/posts/likes",
-      { postId, userId },
+      { postId, profileId },
       {
         headers: {
           "Content-Type": "application/json",
@@ -60,7 +60,7 @@ export const handleLikeReq = async (postId: string, userId: string) => {
 
 export const newCommentReq = async (
   postId: string,
-  userId: string,
+  profileId: string,
   content: string
 ) => {
   const token = Cookies.get("access_token");
@@ -73,7 +73,7 @@ export const newCommentReq = async (
   try {
     const response = await api.post(
       "/posts/comments",
-      { postId, userId, content },
+      { postId, profileId, content },
       {
         headers: {
           "Content-Type": "application/json",
@@ -92,7 +92,7 @@ export const newCommentReq = async (
 
 export const get15commentsReq = async (postId: string, page: number = 1) => {
   const token = Cookies.get("access_token");
-  
+
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;

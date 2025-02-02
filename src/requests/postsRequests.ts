@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 
 export const createPostWithMediaReq = async (
-  userId: string,
+  profileId: string,
   file: File,
   caption: string,
   filePath: string
@@ -19,7 +19,7 @@ export const createPostWithMediaReq = async (
     const formData = new FormData();
     formData.append("file", file);
     formData.append("filePath", filePath);
-    formData.append("userId", userId);
+    formData.append("profileId", profileId);
     formData.append("caption", caption);
 
     const response = await api.post("/posts/upload-and-create", formData, {

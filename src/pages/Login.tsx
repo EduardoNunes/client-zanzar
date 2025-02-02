@@ -22,8 +22,9 @@ export default function Login() {
       await loginSchema.validate({ email, password }, { abortEarly: false });
 
       await loginUserReq(email, password).then((data) => {
+        console.log("DATA", data);
         Cookies.set("access_token", data.token);
-        Cookies.set("user_id", data.id);
+        Cookies.set("profile_id", data.profileId);
         Cookies.set("user_name", data.userName);
       });
 

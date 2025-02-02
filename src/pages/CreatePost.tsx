@@ -35,18 +35,18 @@ export default function CreatePost() {
     try {
       setLoading(true);
 
-      const userId = Cookies.get("user_id");
+      const profileId = Cookies.get("profile_id");
 
-      if (!userId) {
+      if (!profileId) {
         navigate("/login");
       }
 
       const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${userId}/${fileName}`;
+      const filePath = `${profileId}/${fileName}`;
 
-      userId &&
-        (await createPostWithMediaReq(userId, file, caption, filePath).then(
+      profileId &&
+        (await createPostWithMediaReq(profileId, file, caption, filePath).then(
           () => {
             navigate("/");
           }

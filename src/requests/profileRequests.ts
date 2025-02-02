@@ -48,7 +48,7 @@ export const getPostsReq = async (username: string) => {
   }
 };
 
-export const updateProfileImage = async (userId: string, file: File) => {
+export const updateProfileImageReq = async (profileId: string, file: File) => {
   const token = Cookies.get("access_token");
 
   if (!token) {
@@ -57,7 +57,7 @@ export const updateProfileImage = async (userId: string, file: File) => {
   }
 
   const formData = new FormData();
-  formData.append("userId", userId);
+  formData.append("profileId", profileId);
   formData.append("avatar", file);
 
   try {
@@ -78,7 +78,10 @@ export const updateProfileImage = async (userId: string, file: File) => {
   }
 };
 
-export const followProfileReq = async (userId: string, profileId: string) => {
+export const followProfileReq = async (
+  profileId: string,
+  currentProfileId: string
+) => {
   const token = Cookies.get("access_token");
 
   if (!token) {
@@ -86,7 +89,7 @@ export const followProfileReq = async (userId: string, profileId: string) => {
     return;
   }
 
-  const payload = { userId, profileId };
+  const payload = { profileId, currentProfileId };
 
   try {
     const response = await api.post("/profile/follow-profile", payload, {
@@ -95,7 +98,7 @@ export const followProfileReq = async (userId: string, profileId: string) => {
       },
     });
 
-    toast.success("Seguindo");
+    toast.success("Sucesso!");
     return response.data;
   } catch (error: any) {
     const errorMessage =

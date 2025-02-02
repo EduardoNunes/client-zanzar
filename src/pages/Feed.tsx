@@ -42,15 +42,15 @@ export default function Feed() {
   }, []);
 
   async function fetchPosts() {
-    const userId = Cookies.get("user_id");
-    if (!userId) {
+    const profileId = Cookies.get("profile_id");
+    if (!profileId) {
       navigate("/login");
       return;
     }
 
     try {
       setLoading(true);
-      const data = await getFeedReq(userId);
+      const data = await getFeedReq(profileId);
       setPosts(data || []);
       const likesMap = data.reduce(
         (acc: Record<string, boolean>, post: Post) => {
@@ -72,8 +72,8 @@ export default function Feed() {
     postId: string
   ) => {
     e.preventDefault();
-    const userId = Cookies.get("user_id");
-    if (!userId) {
+    const profileId = Cookies.get("profile_id");
+    if (!profileId) {
       navigate("/login");
       return;
     }
@@ -91,7 +91,7 @@ export default function Feed() {
     );
 
     setUserLikes((prev) => ({ ...prev, [postId]: !isLiked }));
-    await handleLikeReq(postId, userId);
+    await handleLikeReq(postId, profileId);
   };
 
   const navigateToProfile = (username: string) => {

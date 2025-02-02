@@ -8,7 +8,7 @@ import {
   followProfileReq,
   getPostsReq,
   getProfileReq,
-  updateProfileImage,
+  updateProfileImageReq,
 } from "../requests/profileRequests";
 import PostsGridProfile from "../components/PostsGridProfile";
 
@@ -58,14 +58,14 @@ export default function Profile() {
 
   async function fetchProfileAndPosts() {
     try {
-      const userId = Cookies.get("user_id");
+      const profileId = Cookies.get("profile_id");
 
       const profileData = username && (await getProfileReq(username));
       profileData && setProfile(profileData);
 
       setIsFollowing(profileData.isFollowed);
 
-      const isCurrentUserProfile = userId === profileData.profileId;
+      const isCurrentUserProfile = profileId === profileData.profileId;
       setIsCurrentUser(isCurrentUserProfile);
 
       const posts = username && (await getPostsReq(username));
@@ -101,26 +101,26 @@ export default function Profile() {
 
     try {
       const token = Cookies.get("access_token");
-      const userId = Cookies.get("user_id");
+      const profileId = Cookies.get("profile_id");
 
       if (!token) {
         navigate("/");
         return;
       }
 
-      if (!userId) {
+      if (!profileId) {
         toast.error("Algo deu errado, contate algum adm");
         return;
       }
       if (isFollowing) {
-        userId && (await followProfileReq(userId, profile.profileId));
+        profileId && (await followProfileReq(profileId, profile.profileId));
 
         setFollowStats((prev) => ({
           ...prev,
           followers: prev.followers - 1,
         }));
       } else {
-        userId && (await followProfileReq(userId, profile.profileId));
+        profileId && (await followProfileReq(profileId, profile.profileId));
 
         setFollowStats((prev) => ({
           ...prev,
@@ -139,9 +139,9 @@ export default function Profile() {
   const handleAvatarChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const userId = Cookies.get("user_id");
+    const profileId = Cookies.get("profile_id");
 
-    if (!userId) {
+    if (!profileId) {
       navigate("/login");
     }
 
@@ -151,8 +151,10 @@ export default function Profile() {
 
       setUploadingAvatar(true);
 
-      userId &&
-        (await updateProfileImage(userId, file)).then(fetchProfileAndPosts());
+      profileId &&
+        (await updateProfileImageReq(profileId, file)).then(
+          fetchProfileAndPosts()
+        );
     } catch (error) {
       console.error("Error updating avatar:", error);
     } finally {

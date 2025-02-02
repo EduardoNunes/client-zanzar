@@ -92,12 +92,12 @@ export default function CommentModal({ post, onClose }: CommentModalProps) {
     if (!newComment.trim()) return;
 
     try {
-      const userId = Cookies.get("user_id");
+      const profileId = Cookies.get("profile_id");
       const userName = Cookies.get("user_name");
 
-      if (!userId) navigate("/login");
+      if (!profileId) navigate("/login");
 
-      userId && newCommentReq(post.id, userId, newComment);
+      profileId && newCommentReq(post.id, profileId, newComment);
 
       const newCommentData = {
         id: String(new Date().getTime()),
@@ -134,7 +134,10 @@ export default function CommentModal({ post, onClose }: CommentModalProps) {
           <div className="space-y-4">
             {comments && Array.isArray(comments) && comments.length > 0 ? (
               comments.map((comment) => (
-                <div key={comment.id} className="flex flex-col items-start text-sm">
+                <div
+                  key={comment.id}
+                  className="flex flex-col items-start text-sm"
+                >
                   <button className="font-semibold text-indigo-600 mr-1">
                     {comment.profile.username}:
                   </button>
