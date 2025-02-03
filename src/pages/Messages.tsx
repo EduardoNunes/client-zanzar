@@ -1,17 +1,15 @@
+import Cookies from "js-cookie";
 import { MessageSquare, Search, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import ChatModal from "../components/ChatModal";
-import { set } from "date-fns";
-import Cookies from "js-cookie";
-import {
-  getFollowedUsersReq,
-  getUsersSearchReq,
-  getUserChatsReq,
-  createChatReq,
-} from "../requests/chatRequests";
-import userImageDefault from "../assets/user.svg";
 import { useNavigate } from "react-router-dom";
 import ImageChats from "../assets/chats.svg";
+import userImageDefault from "../assets/user.svg";
+import ChatModal from "../components/ChatModal";
+import {
+  createChatReq,
+  getFollowedUsersReq,
+  getUserChatsReq,
+} from "../requests/chatRequests";
 
 interface FollowedUser {
   avatarUrl: any;
@@ -72,18 +70,17 @@ export default function Messages() {
 
   const fetchUserChats = async (profileId: string) => {
     const data = await getUserChatsReq(profileId);
-    console.log("DATA", data);
+
     const chats = data.map((item: UserChats) => ({
       conversationId: item.conversationId,
       chatName: item.name,
       participants: item.participants,
     }));
 
-    console.log("CHATS", chats);
     setUserChats(chats);
   };
 
-  const handleSearchIfollow = async (userName: string) => {
+  const handleSearchIfollow = (userName: string) => {
     setSearchQuery(userName);
 
     if (userName.length <= 2) {
@@ -91,29 +88,12 @@ export default function Messages() {
       return;
     }
 
-    const data = await getUsersSearchReq(userName);
-    setSearchResults(data);
-  };
-
-  /* const findExistingChat = async (userId: string) => {
-    const { data: participations } = await getExistingChat(userId);
-
-    const chatIds = participations.map(
-      (participation: { chat_id: any }) => participation.chat_id
+    const filteredUsers = followedUsers.filter((user) =>
+      user.username.toLowerCase().includes(userName.toLowerCase())
     );
 
-    // Faz uma única consulta ao banco de dados
-    const { data: otherParticipants } = await supabase
-      .from("chat_participants")
-      .select("chat_id")
-      .in("chat_id", chatIds) // Verifica se o chat_id está na lista de chatIds
-      .eq("user_id", userId); // Filtra pelo user_id
-
-    // Se houver resultados, retorna o primeiro chat_id encontrado
-    if (otherParticipants && otherParticipants.length > 0) {
-      return otherParticipants[0].chat_id;
-    }
-  }; */
+    setSearchResults(filteredUsers);
+  };
 
   const startChat = async (selectedProfileId: string) => {
     const profileId = Cookies.get("profile_id");
@@ -135,8 +115,9 @@ export default function Messages() {
     );
 
     if (conversation) {
-      console.log("CONVERSATION", conversation);
-      openChat(conversation.conversationId);
+      setSearchQuery("");
+      setSearchResults([]);
+      setSelectedChatId(conversation.conversationId);
       return;
     }
 
@@ -154,7 +135,9 @@ export default function Messages() {
 
       fetchUserChats(profileId);
 
-      openChat(newChat.conversationId);
+      setSearchQuery("");
+      setSearchResults([]);
+      setSelectedChatId(newChat.conversationId);
     } catch (error) {
       console.error("Error starting chat:", error);
     } finally {
@@ -163,9 +146,9 @@ export default function Messages() {
   };
 
   const openChat = async (chatId: string) => {
-    console.log("CHAT", chatId);
+    setSelectedChatId(chatId);
   };
-  console.log("USERCHATS", userChats);
+
   return (
     <div className="max-w-2xl mx-auto p-4">
       <div className="bg-white rounded-lg shadow-md p-6">
