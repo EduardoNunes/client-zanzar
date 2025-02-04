@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   Shield,
   LogIn,
+  StickyNote,
 } from "lucide-react";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
@@ -49,6 +50,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     ...(token
       ? [
           {
+            icon: <StickyNote className="w-5 h-5" />,
+            label: "Notifications",
+            path: `/notifications`,
+            onClick: () => userName && navigate(`/notifications`),
+          },
+          {
+            icon: <User className="w-5 h-5" />,
+            label: "Profile",
+            path: `/profile/${userName}`,
+            onClick: () => userName && navigate(`/profile/${userName}`),
+          },
+          {
             icon: <PlusSquare className="w-5 h-5" />,
             label: "Create Post",
             path: "/create",
@@ -66,12 +79,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             path: "/store",
             onClick: () => navigate("/store"),
           },
-          {
-            icon: <User className="w-5 h-5" />,
-            label: "Profile",
-            path: `/profile/${userName}`,
-            onClick: () => userName && navigate(`/profile/${userName}`),
-          },
+
           ...(isAdmin
             ? [
                 {

@@ -8,6 +8,7 @@ import CreatePost from "./pages/CreatePost";
 import Feed from "./pages/Feed";
 import Login from "./pages/Login";
 import Messages from "./pages/Messages";
+import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 
@@ -82,7 +83,17 @@ export default function App() {
                 </Layout>
               </ProtectedRoute>
             }
-          />  
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Notifications />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/profile/:username"
             element={
