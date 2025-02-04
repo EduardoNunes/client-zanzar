@@ -83,7 +83,7 @@ export const createChatReq = async (
   }
 
   try {
-    const response  = await api.post(`/chat/create-chat`, {
+    const response = await api.post(`/chat/create-chat`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -98,6 +98,37 @@ export const createChatReq = async (
   } catch (error: any) {
     const errorMessage = error.response?.data?.message || "Erro ao criar chat.";
     toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+export const getMessagesReq = async (
+  conversationId: string,
+  limit: number,
+  offset: number
+) => {
+  const token = Cookies.get("access_token");
+
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.get(
+      `/chat/conversation/${conversationId}/messages`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: { limit, offset },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Erro ao buscar chats.";
     throw new Error(errorMessage);
   }
 };
