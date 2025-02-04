@@ -21,17 +21,20 @@ const NotificationsPage = () => {
   }, []);
 
   useEffect(() => {
-    const fetchNotifications = async () => {
-      console.log("PROFILEID", profileId);
-      try {
-        const res = await api.get(`/notifications/read-all/${profileId}`);
-        console.log("RESPONSTA", res.data);
-        setNotifications(res.data);
-      } catch (error) {
-        console.error("Erro ao buscar notificações:", error);
-      }
-    };
-    fetchNotifications();
+    if (profileId) {
+      const fetchNotifications = async () => {
+        console.log("PROFILEID", profileId);
+        try {
+          const res = await api.get(`/notifications/read-all/${profileId}`);
+
+          setNotifications(res.data);
+        } catch (error) {
+          console.error("Erro ao buscar notificações:", error);
+        }
+      };
+      
+      fetchNotifications();
+    }
   }, [profileId]);
 
   useEffect(() => {
@@ -77,7 +80,9 @@ const NotificationsPage = () => {
           ))}
         </ul>
       )}
-      {isShowPost && postId && <SinglePostModal postId={postId} onClose={closePost} />}
+      {isShowPost && postId && (
+        <SinglePostModal postId={postId} onClose={closePost} />
+      )}
     </div>
   );
 };
