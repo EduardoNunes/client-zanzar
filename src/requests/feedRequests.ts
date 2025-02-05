@@ -2,7 +2,11 @@ import api from "../server/axios";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 
-export const getFeedReq = async (profileId: string) => {
+export const getFeedReq = async (
+  profileId: string,
+  page: number,
+  limit: number
+) => {
   const token = Cookies.get("access_token");
 
   if (!token) {
@@ -18,6 +22,8 @@ export const getFeedReq = async (profileId: string) => {
       },
       params: {
         profileId: profileId,
+        page: page,
+        limit: limit,
       },
     });
 
