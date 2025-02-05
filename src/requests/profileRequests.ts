@@ -25,25 +25,33 @@ export const getProfileReq = async (username: string) => {
   }
 };
 
-export const getPostsReq = async (username: string) => {
+export const getPostsReq = async (
+  username: string,
+  page: number,
+  limit: number
+) => {
   const token = Cookies.get("access_token");
 
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
   }
-
   try {
     const response = await api.get(`/profile/user-posts/${username}`, {
       headers: {
         Authorization: `Bearer ${token}`,
+      },
+      params: {
+        page: page,
+        limit: limit,
       },
     });
 
     return response.data;
   } catch (error: any) {
     const errorMessage =
-      error.response?.data?.message || "Erro ao encontrar usuários.";
+      error.response?.data?.message || "Erro ao buscar posts.";
+    toast.error(errorMessage);
     throw new Error(errorMessage);
   }
 };

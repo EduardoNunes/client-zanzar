@@ -1,15 +1,14 @@
 import Cookies from "js-cookie";
-import { Camera, Loader2, UserMinus, UserPlus } from "lucide-react";
+import { Camera, Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
+import PostsGridProfile from "../components/PostsGridProfile";
+import FollowButton from "../components/handleFollowToggle";
 import {
-  followProfileReq,
   getPostsReq,
   getProfileReq,
   updateProfileImageReq,
 } from "../requests/profileRequests";
-import PostsGridProfile from "../components/PostsGridProfile";
 
 interface Profile {
   profileId: string;
@@ -48,39 +47,40 @@ export default function Profile() {
     following: 0,
   });
   const [isFollowing, setIsFollowing] = useState(false);
-  const [followLoading, setFollowLoading] = useState(false);
   const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  let scrollTriggered = false;
 
   useEffect(() => {
+    const profileId = Cookies.get("profile_id");
+    if (!profileId) {
+      navigate("/login");
+    }
     fetchProfileAndPosts();
   }, [username]);
 
   async function fetchProfileAndPosts() {
     try {
       const profileId = Cookies.get("profile_id");
-
       const profileData = username && (await getProfileReq(username));
       profileData && setProfile(profileData);
-
       setIsFollowing(profileData.isFollowed);
-
       const isCurrentUserProfile = profileId === profileData.profileId;
       setIsCurrentUser(isCurrentUserProfile);
 
-      const posts = username && (await getPostsReq(username));
-      posts && setPosts(posts || []);
-
-      const likesMap = posts.reduce(
-        (acc: Record<string, boolean>, post: Post) => {
-          acc[post.id] = post.likedByLoggedInUser || false;
-          return acc;
-        },
-        {}
-      );
-
-      setUserLikes(likesMap);
-
-      // Fetch follow stats
+      const initialPosts = username && (await getPostsReq(username, 1, 2));
+      if (initialPosts) {
+        setPosts(initialPosts || []);
+        const likesMap = initialPosts.reduce(
+          (acc: Record<string, boolean>, post: Post) => {
+            acc[post.id] = post.likedByLoggedInUser || false;
+            return acc;
+          },
+          {}
+        );
+        setUserLikes(likesMap);
+      }
 
       setFollowStats({
         followers: profileData.followersCount || 0,
@@ -93,63 +93,65 @@ export default function Profile() {
     }
   }
 
-  const handleFollowToggle = async () => {
-    if (!profile) return;
+  const loadMorePosts = async () => {
+    if (loadingMore) return;
 
-    setFollowLoading(true);
-
+    setLoadingMore(true);
     try {
-      const token = Cookies.get("access_token");
-      const profileId = Cookies.get("profile_id");
+      const newPosts = username && (await getPostsReq(username, page + 1, 2));
+      if (newPosts && newPosts.length > 0) {
+        const newLikesMap = newPosts.reduce(
+          (acc: Record<string, boolean>, post: Post) => {
+            acc[post.id] = post.likedByLoggedInUser || false;
+            return acc;
+          },
+          {}
+        );
 
-      if (!token) {
-        navigate("/");
-        return;
-      }
-
-      if (!profileId) {
-        toast.error("Algo deu errado, contate algum adm");
-        return;
-      }
-      if (isFollowing) {
-        profileId && (await followProfileReq(profileId, profile.profileId));
-
-        setFollowStats((prev) => ({
-          ...prev,
-          followers: prev.followers - 1,
-        }));
+        setPosts((prevPosts) => [...prevPosts, ...newPosts]);
+        setUserLikes((prevLikes) => ({ ...prevLikes, ...newLikesMap }));
+        setPage((prevPage) => prevPage + 1);
       } else {
-        profileId && (await followProfileReq(profileId, profile.profileId));
-
-        setFollowStats((prev) => ({
-          ...prev,
-          followers: prev.followers + 1,
-        }));
+        setLoadingMore(false);
       }
-
-      setIsFollowing(!isFollowing);
     } catch (error) {
-      console.error("Error toggling follow:", error);
+      console.error("Error loading more posts:", error);
     } finally {
-      setFollowLoading(false);
+      setLoadingMore(false);
     }
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      //esse if foi adicionado para evitar carregamento automático da segunda req de postagens, pois ao carregar a página vindo de uma página com o scroll rolado p baixo a página automaticamente carrega com o scroll em baixo resultando na chamada indesejada da função loadMorePosts
+      if (!scrollTriggered) {
+        scrollTriggered = true;
+        return;
+      }
+
+      if (
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.scrollHeight - 10
+      ) {
+        loadMorePosts();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loadingMore]);
 
   const handleAvatarChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const profileId = Cookies.get("profile_id");
-
     if (!profileId) {
       navigate("/login");
     }
-
     try {
       const file = event.target.files?.[0];
       if (!file) return;
-
       setUploadingAvatar(true);
-
       profileId &&
         (await updateProfileImageReq(profileId, file)).then(
           fetchProfileAndPosts()
@@ -169,28 +171,17 @@ export default function Profile() {
     );
   }
 
-  if (!profile) {
-    return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-gray-800">
-          Usuário não encontrado
-        </h2>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="max-w-4xl mx-auto">
-        {/* Profile Header */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative group">
               <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200">
-                {profile.avatarUrl ? (
+                {profile?.avatarUrl ? (
                   <img
-                    src={profile.avatarUrl}
-                    alt={profile.username}
+                    src={profile?.avatarUrl}
+                    alt={profile?.username}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -217,51 +208,34 @@ export default function Profile() {
             <div className="text-center md:text-left flex-grow">
               <div className="flex flex-col md:flex-row items-center gap-4">
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {profile.username}
+                  {profile?.username}
                 </h1>
                 {!isCurrentUser && (
-                  <button
-                    onClick={handleFollowToggle}
-                    disabled={followLoading}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                      isFollowing
-                        ? "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                        : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                    }`}
-                  >
-                    {followLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : isFollowing ? (
-                      <>
-                        <UserMinus className="w-5 h-5" />
-                        Deixar de Seguir
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="w-5 h-5" />
-                        Seguir
-                      </>
-                    )}
-                  </button>
+                  <FollowButton
+                    profile={profile}
+                    isFollowing={isFollowing}
+                    setIsFollowing={setIsFollowing}
+                    setFollowStats={setFollowStats}
+                  />
                 )}
               </div>
               <div className="mt-4 flex gap-6 text-gray-600">
                 <div>
                   <span className="font-bold text-gray-900">
                     {posts.length}
-                  </span>{" "}
+                  </span>
                   posts
                 </div>
                 <div>
                   <span className="font-bold text-gray-900">
                     {followStats.following}
-                  </span>{" "}
+                  </span>
                   seguindo
                 </div>
                 <div>
                   <span className="font-bold text-gray-900">
                     {followStats.followers}
-                  </span>{" "}
+                  </span>
                   seguidores
                 </div>
               </div>
@@ -274,6 +248,16 @@ export default function Profile() {
           setUserLikes={setUserLikes}
           posts={posts}
         />
+        {loadingMore && (
+          <div className="flex justify-center items-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+          </div>
+        )}
+        {!loadingMore && posts.length > 0 && (
+          <div className="text-center text-gray-500 py-4">
+            No more posts to load.
+          </div>
+        )}
       </div>
     </>
   );
