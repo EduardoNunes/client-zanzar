@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import api from "../server/axios";
 import SinglePostModal from "../components/SinglePostModal";
+import { CircleAlert, CircleCheckBig } from "lucide-react";
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const NotificationsPage = () => {
   const [profileId, setProfileId] = useState("");
   const [isShowPost, setIsShowPost] = useState(false);
   const [postId, setPostId] = useState<string | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
     const profile = Cookies.get("profile_id");
@@ -23,35 +25,48 @@ const NotificationsPage = () => {
   useEffect(() => {
     if (profileId) {
       const fetchNotifications = async () => {
-        console.log("PROFILEID", profileId);
         try {
           const res = await api.get(`/notifications/read-all/${profileId}`);
-
           setNotifications(res.data);
         } catch (error) {
           console.error("Erro ao buscar notificações:", error);
         }
       };
-      
       fetchNotifications();
     }
   }, [profileId]);
 
   useEffect(() => {
-    const socket = io("http://localhost:3001", {
-      query: { userId: profileId },
-    });
-    socket.on("newNotification", (newNotification) => {
-      setNotifications((prev) => [newNotification, ...prev]);
-    });
-    return () => {
-      socket.disconnect();
-    };
+    if (profileId) {
+      const newSocket = io("http://localhost:3001", {
+        query: { userId: profileId },
+      });
+      newSocket.on("newNotification", (newNotification) => {
+        setNotifications((prev) => [newNotification, ...prev]);
+      });
+      setSocket(newSocket);
+      return () => {
+        newSocket.disconnect();
+      };
+    }
   }, [profileId]);
 
-  const openPost = (postId: string) => {
-    setPostId(postId);
+  const markNotificationAsRead = (notificationId: string) => {
+    if (socket) {
+      socket.emit("markAsRead", notificationId);
+    }
+  };
+
+  const openPost = (notification: any) => {    
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((n) =>
+        n.id === notification.id ? { ...n, isRead: true } : n
+      )
+    );
+
+    setPostId(notification.referenceId);
     setIsShowPost(true);
+    markNotificationAsRead(notification.id);
   };
 
   const closePost = () => {
@@ -69,9 +84,21 @@ const NotificationsPage = () => {
           {notifications.map((notification, index) => (
             <li
               key={index}
-              className="p-4 bg-gray-100 border rounded-lg shadow-sm cursor-pointer"
-              onClick={() => openPost(notification.referenceId)}
-            >
+              className="p-4 bg-gray-100 border rounded-lg shadow-sm cursor-pointer relative"
+              onClick={() => openPost(notification)}
+            >              
+              <div className="absolute top-4 right-4">
+                {notification.isRead ? (
+                  <span className="w-6 h-6 text-green-500 text-lg">
+                    <CircleCheckBig />
+                  </span>
+                ) : (
+                  <span className="w-6 h-6 text-red-500 rounded-full">
+                    <CircleAlert />
+                  </span>
+                )}
+              </div>
+             
               <strong className="block text-lg">{notification.content}</strong>
               <small className="text-gray-500">
                 {new Date(notification.createdAt).toLocaleString()}
