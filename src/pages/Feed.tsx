@@ -1,9 +1,8 @@
 import { formatDistanceToNow } from "date-fns";
 import Cookies from "js-cookie";
-import { Heart, LogIn, MessageCircle } from "lucide-react";
+import { CircleUserRound, Heart, LogIn, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import userImageDefault from "../assets/user.svg";
 import CommentModal from "../components/CommentsModal";
 import ImageViewer from "../components/ImageViewer";
 import { getFeedReq, handleLikeReq } from "../requests/feedRequests";
@@ -132,12 +131,16 @@ export default function Feed() {
           <div key={post.id} className="bg-white rounded-lg shadow">
             <div className="p-4 border-b">
               <div className="flex items-center space-x-3">
-                <img
-                  src={post.profile.avatarUrl || userImageDefault}
-                  alt={post.profile.username}
-                  className="w-10 h-10 rounded-full cursor-pointer"
-                  onClick={() => navigateToProfile(post.profile.username)}
-                />
+                {post.profile.avatarUrl ? (
+                  <img
+                    src={post.profile.avatarUrl}
+                    alt={post.profile.username}
+                    className="w-10 h-10 rounded-full cursor-pointer"
+                    onClick={() => navigateToProfile(post.profile.username)}
+                  />
+                ) : (
+                  <CircleUserRound />
+                )}
                 <div>
                   <button
                     onClick={() => navigateToProfile(post.profile.username)}

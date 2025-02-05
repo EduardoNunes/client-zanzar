@@ -3,7 +3,6 @@ import { Camera, Loader2, UserMinus, UserPlus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import Cam from "../assets/cam.svg";
 import {
   followProfileReq,
   getPostsReq,
@@ -188,11 +187,15 @@ export default function Profile() {
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative group">
               <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200">
-                <img
-                  src={profile.avatarUrl || Cam}
-                  alt={profile.username}
-                  className="w-full h-full object-cover"
-                />
+                {profile.avatarUrl ? (
+                  <img
+                    src={profile.avatarUrl}
+                    alt={profile.username}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Camera />
+                )}
               </div>
               {isCurrentUser && (
                 <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">

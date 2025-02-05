@@ -1,7 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
-import userImageDefault from "../assets/user.svg";
 import Cookies from "js-cookie";
-import { Heart, LogIn, MessageCircle } from "lucide-react";
+import { CircleUserRound, Heart, LogIn, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleLikeReq } from "../requests/feedRequests";
@@ -115,12 +114,16 @@ export default function SinglePostModal({
         </button>
         <div className="p-4 border-b">
           <div className="flex items-center space-x-3">
-            <img
-              src={post.profile.avatarUrl || userImageDefault}
-              alt={post.profile.username}
-              className="w-10 h-10 rounded-full cursor-pointer"
-              onClick={() => navigateToProfile(post.profile.username)}
-            />
+            {post.profile.avatarUrl ? (
+              <img
+                src={post.profile.avatarUrl}
+                alt={post.profile.username}
+                className="w-10 h-10 rounded-full cursor-pointer"
+                onClick={() => navigateToProfile(post.profile.username)}
+              />
+            ) : (
+              <CircleUserRound />
+            )}
             <div>
               <button
                 onClick={() => navigateToProfile(post.profile.username)}

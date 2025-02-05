@@ -1,9 +1,7 @@
 import Cookies from "js-cookie";
-import { Search, Users } from "lucide-react";
+import { CircleUserRound, MessagesSquare, Search, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ImageChats from "../assets/chats.svg";
-import userImageDefault from "../assets/user.svg";
 import ChatModal from "../components/ChatModal";
 import {
   createChatReq,
@@ -207,11 +205,15 @@ export default function Messages() {
                             zIndex: userChat.participants.length - index,
                           }}
                         >
-                          <img
-                            src={participant.avatarUrl || ImageChats}
-                            alt={participant.username || "Usuário"}
-                            className="w-full h-full object-cover"
-                          />
+                          {participant.avatarUrl ? (
+                            <img
+                              src={participant.avatarUrl}
+                              alt={participant.username || "Usuário"}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <MessagesSquare />
+                          )}
                         </div>
                       ))}
                     </div>
@@ -241,13 +243,17 @@ export default function Messages() {
                   className="w-full px-3 py-1 text-left hover:bg-gray-50 rounded-lg flex items-center space-x-3 transition-colors disabled:opacity-50"
                 >
                   <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                    <img
-                      src={user.avatarUrl || userImageDefault}
-                      alt={user.username}
-                      className={` object-cover ${
-                        !user.avatarUrl ? "h-6 w-6" : "w-full h-full"
-                      }`}
-                    />
+                    {user.avatarUrl ? (
+                      <img
+                        src={user.avatarUrl}
+                        alt={user.username}
+                        className={` object-cover ${
+                          !user.avatarUrl ? "h-6 w-6" : "w-full h-full"
+                        }`}
+                      />
+                    ) : (
+                      <CircleUserRound />
+                    )}
                   </div>
                   <span className="text-gray-700">{user.username}</span>
                 </button>
