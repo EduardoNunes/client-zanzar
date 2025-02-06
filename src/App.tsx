@@ -11,6 +11,7 @@ import Messages from "./pages/Messages";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
+import AdminRoutes from "./routes/AdminRoutes";
 
 export default function App() {
   const [isTokenLoaded, setIsTokenLoaded] = useState(false);
@@ -53,7 +54,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Rota protegida */}
+          {/* Protected routes */}
           <Route
             path="/"
             element={
@@ -100,6 +101,16 @@ export default function App() {
               <ProtectedRoute>
                 <Layout>
                   <Profile />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AdminRoutes />
                 </Layout>
               </ProtectedRoute>
             }
