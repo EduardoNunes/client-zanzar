@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Activity } from 'lucide-react';
-import { 
-  UserProfile, 
-  UserStats, 
-  getAllUsersReq, 
+import {
+  UserProfile,
+  UserStats,
+  getAllUsersReq,
   getUsersCountReq,
   getActiveUsers24hReq,
   getActiveUsers7dReq,
@@ -162,11 +162,10 @@ export default function UsersManagement() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      user.role === 'admin' 
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'admin'
                         ? 'bg-indigo-100 text-indigo-800'
                         : 'bg-green-100 text-green-800'
-                    }`}>
+                      }`}>
                       {user.role}
                     </span>
                   </td>
