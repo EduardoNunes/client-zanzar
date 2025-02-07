@@ -4,6 +4,7 @@ import PostsManagement from '../pages/admin/PostsManagement';
 import MessagesManagement from '../pages/admin/MessagesManagement';
 import UsersManagement from '../pages/admin/UsersManagement';
 import RecentActivityManagement from '../pages/admin/RecentActivityManagement';
+import { AdvertisementsManagementPage } from '../pages/admin/AdvertisementsManagementPage';
 
 
 export default function AdminRoutes() {
@@ -14,6 +15,7 @@ export default function AdminRoutes() {
       <Route path="users" element={<UsersManagement />} />
       <Route path="posts" element={<PostsManagement />} />
       <Route path="messages" element={<MessagesManagement />} />
+      <Route path="ads" element={<AdvertisementsManagementPage />} />
     </Routes>
   );
 }
