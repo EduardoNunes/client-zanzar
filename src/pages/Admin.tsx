@@ -1,13 +1,14 @@
 import { Activity, Bell, Image, MessageSquare, Package, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RecentUser, getPostsCountReq, getProductsCountReq, getMessagesCountReq, getAdsCountReq, getRecentUsersReq } from '../requests/adminRequests';
+import { TotalUser, getAdsCountReq, getMessagesCountReq, getPostsCountReq, getProductsCountReq, getTotalUsersReq } from '../requests/adminRequests';
 
 interface Stats {
   totalPosts: number;
   totalProducts: number;
   totalMessages: number;
   totalAds: number;
+  totalUsers: number;
 }
 
 export default function Admin() {
@@ -16,19 +17,26 @@ export default function Admin() {
     totalPosts: 0,
     totalProducts: 0,
     totalMessages: 0,
-    totalAds: 0
+    totalAds: 0,
+    totalUsers: 0
   });
-  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
-    fetchRecentUsers();
   }, []);
 
   const fetchStats = async () => {
     try {
-      const [postsCount, productsCount, messagesCount, adsCount] = await Promise.all([
+      setLoading(true);
+      const [
+        totalUsers,
+        postsCount,
+        productsCount,
+        messagesCount,
+        adsCount
+      ] = await Promise.all([
+        getTotalUsersReq(),
         getPostsCountReq(),
         getProductsCountReq(),
         getMessagesCountReq(),
@@ -36,6 +44,7 @@ export default function Admin() {
       ]);
 
       setStats({
+        totalUsers: totalUsers.count || 0,
         totalPosts: postsCount.count || 0,
         totalProducts: productsCount.count || 0,
         totalMessages: messagesCount.count || 0,
@@ -48,27 +57,20 @@ export default function Admin() {
     }
   };
 
-  const fetchRecentUsers = async () => {
-    try {
-      const users = await getRecentUsersReq();
-      setRecentUsers(users);
-    } catch (error) {
-      console.error('Error fetching recent users:', error);
-    }
-  };
-
   const adminModules = [
     {
       title: 'Recent Activity',
       description: 'Monitor user activity and engagement',
       icon: <Activity className="w-8 h-8 text-indigo-600" />,
-      path: '/admin/activity'
+      path: '/admin/activity',
+      stat: stats.totalUsers,
+      statLabel: 'Total Users'
     },
     {
       title: 'Users Management',
       description: 'Manage users, roles, and permissions',
       icon: <Users className="w-8 h-8 text-indigo-600" />,
-      path: '/admin/users'
+      path: '/admin/users',
     },
     {
       title: 'Posts Management',

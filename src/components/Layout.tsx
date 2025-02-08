@@ -4,8 +4,6 @@ import {
   LogOut,
   Home,
   PlusSquare,
-  Menu,
-  X,
   User,
   MessageSquare,
   ShoppingBag,
@@ -42,68 +40,67 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const menuItems = [
     {
-      icon: <Home className="w-5 h-5" />,
+      icon: <Home className="w-8 h-8" />,
       label: "Home",
       path: "/",
       onClick: () => navigate("/"),
     },
     ...(token
       ? [
-          {
-            icon: <StickyNote className="w-5 h-5" />,
-            label: "Notifications",
-            path: `/notifications`,
-            onClick: () => userName && navigate(`/notifications`),
-          },
-          {
-            icon: <User className="w-5 h-5" />,
-            label: "Profile",
-            path: `/profile/${userName}`,
-            onClick: () => userName && navigate(`/profile/${userName}`),
-          },
-          {
-            icon: <PlusSquare className="w-5 h-5" />,
-            label: "Create Post",
-            path: "/create",
-            onClick: () => navigate("/create"),
-          },
-          {
-            icon: <MessageSquare className="w-5 h-5" />,
-            label: "Messages",
-            path: "/messages",
-            onClick: () => navigate("/messages"),
-          },
-          {
-            icon: <ShoppingBag className="w-5 h-5" />,
-            label: "Store",
-            path: "/store",
-            onClick: () => navigate("/store"),
-          },
-
-          ...(isAdmin
-            ? [
-                {
-                  icon: <Shield className="w-5 h-5" />,
-                  label: "Admin",
-                  path: "/admin",
-                  onClick: () => navigate("/admin"),
-                },
-              ]
-            : []),
-          {
-            icon: <LogOut className="w-5 h-5" />,
-            label: "Logout",
-            className: "text-red-600",
-            onClick: handleLogout,
-          },
-        ]
+        {
+          icon: <StickyNote className="w-8 h-8" />,
+          label: "Notifications",
+          path: "/notifications",
+          onClick: () => userName && navigate(`/notifications`),
+        },
+        {
+          icon: <User className="w-8 h-8" />,
+          label: "Profile",
+          path: `/profile/${userName}`,
+          onClick: () => userName && navigate(`/profile/${userName}`),
+        },
+        {
+          icon: <PlusSquare className="w-8 h-8" />,
+          label: "Create Post",
+          path: "/create",
+          onClick: () => navigate("/create"),
+        },
+        {
+          icon: <MessageSquare className="w-8 h-8" />,
+          label: "Messages",
+          path: "/messages",
+          onClick: () => navigate("/messages"),
+        },
+        {
+          icon: <ShoppingBag className="w-8 h-8" />,
+          label: "Store",
+          path: "/store",
+          onClick: () => navigate("/store"),
+        },
+        ...(isAdmin
+          ? [
+            {
+              icon: <Shield className="w-8 h-8" />,
+              label: "Admin",
+              path: "/admin",
+              onClick: () => navigate("/admin"),
+            },
+          ]
+          : []),
+        {
+          icon: <LogOut className="w-8 h-8" />,
+          label: "Logout",
+          className: "text-red-600",
+          onClick: handleLogout,
+        },
+      ]
       : [
-          {
-            icon: <LogIn className="w-5 h-5" />,
-            label: "Login",
-            onClick: () => navigate("/login"),
-          },
-        ]),
+        {
+          icon: <LogIn className="w-8 h-8" />,
+          label: "Login",
+          onClick: () => navigate("/login"),
+        },
+      ]),
   ];
 
   return (
@@ -116,47 +113,70 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Home className="w-6 h-6 text-indigo-600" />
               <span className="ml-2 font-semibold text-lg">Zanzar</span>
             </div>
-
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-4">
               {menuItems.map((item, index) => (
                 <button
                   key={index}
                   onClick={item.onClick}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-gray-100 ${
-                    item.path === location.pathname
-                      ? "text-indigo-600"
-                      : "text-gray-700"
-                  } ${item.className || ""}`}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-gray-100 ${item.path === location.pathname
+                    ? "text-indigo-600"
+                    : "text-gray-700"
+                    } ${item.className || ""}`}
                 >
                   {item.icon}
                   <span>{item.label}</span>
                 </button>
               ))}
             </div>
-
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden p-2 rounded-md hover:bg-gray-100"
+              style={{
+                position: "fixed",
+                bottom: "0",
+                left: "0",
+                width: "50px",
+                height: "50px",
+                clipPath: "polygon(0% 0%, 100% 0%, 0% 100%)",
+                backgroundColor: "#4f46e5",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                transition: "transform 0.3s ease-in-out",
+                transform: isMenuOpen ? "rotate(90deg)" : "rotate(270deg)",
+              }}
             >
-              {isMenuOpen ? (
-                <X className="w-6 h-6 text-gray-600" />
-              ) : (
-                <Menu className="w-6 h-6 text-gray-600" />
-              )}
             </button>
           </div>
-
           {/* Mobile Menu */}
           <div
-            className={`md:hidden transition-all duration-300 ease-in-out ${
-              isMenuOpen
-                ? "max-h-screen opacity-100 visible"
-                : "max-h-0 opacity-0 invisible"
-            }`}
+            className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen
+              ? "opacity-100 visible scale-100"
+              : "opacity-0 invisible scale-0"
+              }`}
+            style={{
+              position: "fixed",
+              bottom: "60px",
+              left: "0",
+              width: "100%",
+              maxHeight: "calc(100vh - 60px)",
+              backgroundColor: "white",
+              borderTopLeftRadius: "16px",
+              borderTopRightRadius: "16px",
+              boxShadow: "0px -4px 6px rgba(0, 0, 0, 0.1)",
+              overflowY: "auto",
+              zIndex: 1000,
+            }}
           >
-            <div className="py-2 space-y-1">
+            <div
+              className="grid grid-cols-3 gap-4 p-4"
+              style={{
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              }}
+            >
               {menuItems.map((item, index) => (
                 <button
                   key={index}
@@ -164,14 +184,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     item.onClick();
                     setIsMenuOpen(false);
                   }}
-                  className={`w-full flex items-center space-x-2 px-4 py-3 rounded-md hover:bg-gray-100 ${
-                    item.path === location.pathname
-                      ? "text-indigo-600"
-                      : "text-gray-700"
-                  } ${item.className || ""}`}
+                  className="flex flex-col items-center space-y-2 p-2 rounded-md hover:bg-gray-100 text-gray-700"
                 >
-                  {item.icon}
-                  <span>{item.label}</span>
+                  {React.cloneElement(item.icon, {
+                    className: "w-8 h-8",
+                  })}
+                  <span className="text-xs">{item.label}</span>
                 </button>
               ))}
             </div>

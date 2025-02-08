@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Users, Activity } from 'lucide-react';
+import { Activity, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import {
   UserProfile,
   UserStats,
-  getAllUsersReq,
-  getUsersCountReq,
   getActiveUsers24hReq,
+  getActiveUsers30dReq,
   getActiveUsers7dReq,
-  getActiveUsers30dReq
+  getAllUsersReq,
+  getUsersCountReq
 } from '../../requests/usersManagementRequests';
 
 export default function UsersManagement() {

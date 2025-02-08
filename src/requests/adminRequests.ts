@@ -102,26 +102,23 @@ export const getAdsCountReq = async (): Promise<CountResponse> => {
     }
 };
 
-export interface RecentUser {
+export interface TotalUser {
     username: string;
     last_sign_in_at: string;
 }
 
-export const getRecentUsersReq = async (): Promise<RecentUser[]> => {
+export const getTotalUsersReq = async (): Promise<CountResponse> => {
     const token = Cookies.get("access_token");
 
     if (!token) {
         toast.error("Token de acesso não encontrado.");
-        return [];
+        return { count: 0 };
     }
 
     try {
-        const response = await api.get("/admin/users/recent", {
+        const response = await api.get("/admin/users/total", {
             headers: {
                 Authorization: `Bearer ${token}`,
-            },
-            params: {
-                limit: 5,
             },
         });
 
