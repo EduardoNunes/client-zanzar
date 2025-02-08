@@ -1,7 +1,7 @@
 import { Activity, Bell, Image, MessageSquare, Package, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TotalUser, getAdsCountReq, getMessagesCountReq, getPostsCountReq, getProductsCountReq, getTotalUsersReq } from '../requests/adminRequests';
+import { getAdsCountReq, getMessagesCountReq, getPostsCountReq, getProductsCountReq, getTotalUsersReq } from '../requests/adminRequests';
 
 interface Stats {
   totalPosts: number;
