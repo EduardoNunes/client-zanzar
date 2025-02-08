@@ -7,12 +7,23 @@ export default function AdModal() {
   const [ad, setAd] = useState<Advertisement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [hasShownAd, setHasShownAd] = useState(false);
+  const [showCloseButton, setShowCloseButton] = useState(false);
 
   useEffect(() => {
     if (!hasShownAd) {
       checkAndShowAd();
     }
   }, [hasShownAd]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        setShowCloseButton(true);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   const checkAndShowAd = async () => {
     try {
@@ -56,12 +67,14 @@ export default function AdModal() {
         {/* Header - Fixed */}
         <div className="p-4 border-b flex justify-between items-center">
           <h2 className="text-xl font-semibold">{ad.title}</h2>
-          <button
-            onClick={handleClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
+          {showCloseButton && (
+            <button
+              onClick={handleClose}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          )}
         </div>
 
         {/* Content - Scrollable */}
