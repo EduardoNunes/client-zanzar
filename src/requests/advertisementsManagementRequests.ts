@@ -6,9 +6,9 @@ export interface Advertisement {
     id: string;
     title: string;
     description: string | null;
-    media_url: string;
-    media_type: 'image' | 'video';
-    link_url: string | null;
+    mediaUrl: string;
+    mediaType: 'image' | 'video';
+    linkUrl: string | null;
     startDate: string;
     endDate: string;
     dailyLimit: string;
@@ -23,15 +23,15 @@ export interface Advertisement {
 export interface CreateAdvertisementDto {
     title: string;
     description?: string;
-    media_url: string;
-    media_type: 'image' | 'video';
-    link_url?: string;
-    start_date: string;
-    end_date: string;
-    daily_limit?: string;
-    schedule_start?: string;
-    schedule_end?: string;
-    show_on_startup: boolean;
+    mediaUrl: string;
+    mediaType: 'image' | 'video';
+    linkUrl?: string;
+    startDate: string;
+    endDate: string;
+    dailyLimit?: string;
+    scheduleStart?: string;
+    scheduleEnd?: string;
+    showOnStartup: boolean;
     active: boolean;
 }
 

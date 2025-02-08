@@ -36,7 +36,7 @@ export const AdvertisementsManagementPage: React.FC = () => {
     setEditingAd(ad);
     setIsModalOpen(true);
   };
-console.log("ADVERT", advertisements)
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">

@@ -31,9 +31,7 @@ export const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
     file: null as File | null,
     mediaPreview: ''
   });
-
   const [loading, setLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -41,7 +39,6 @@ export const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
 
     try {
       setLoading(true);
-      setUploadProgress(0);
 
       const filePreviewUrl = URL.createObjectURL(file);
       const fileType = file.type.startsWith('video/') ? 'video' : 'image';
