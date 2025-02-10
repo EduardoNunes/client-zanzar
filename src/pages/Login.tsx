@@ -28,8 +28,8 @@ export default function Login() {
         Cookies.set("user_name", data.userName);
       });
 
+      navigate("/");
       toast.success("Autenticado com sucesso!");
-      navigate("/", { replace: true });
     } catch (error: any) {
       if (error.name === "ValidationError") {
         setErrors(error.inner.map((err: any) => err.message));
