@@ -34,7 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const handleLogout = async () => {
     navigate("/login");
     Cookies.remove("access_token");
-    Cookies.remove("user_id");
+    Cookies.remove("profile_id");
     Cookies.remove("user_name");
   };
 
