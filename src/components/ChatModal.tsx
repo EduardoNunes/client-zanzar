@@ -3,8 +3,9 @@ import { io } from "socket.io-client";
 import { formatDistanceToNow } from "date-fns";
 import { Send, X } from "lucide-react";
 import { getMessagesReq } from "../requests/chatRequests";
+import { SOCKET_URL } from "../server/socket";
 
-const socket = io("http://localhost:3001");
+const socket = io(SOCKET_URL);
 
 interface Message {
   profileId: string;
@@ -178,9 +179,8 @@ export default function ChatModal({
             return (
               <div
                 key={message.id}
-                className={`flex items-start space-x-3 ${
-                  isCurrentUser ? "justify-end" : "justify-start"
-                }`}
+                className={`flex items-start space-x-3 ${isCurrentUser ? "justify-end" : "justify-start"
+                  }`}
               >
                 {!isCurrentUser && (
                   <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0 flex items-center justify-center">
@@ -198,11 +198,10 @@ export default function ChatModal({
                   </div>
                 )}
                 <div
-                  className={`max-w-[75%] rounded-lg p-3 ${
-                    isCurrentUser
+                  className={`max-w-[75%] rounded-lg p-3 ${isCurrentUser
                       ? "bg-indigo-600 text-white self-end"
                       : "bg-gray-200 text-gray-900 self-start"
-                  }`}
+                    }`}
                 >
                   <p className="text-sm mb-1">{message.content}</p>
                   <p className="text-xs opacity-75">

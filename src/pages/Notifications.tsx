@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../server/axios";
 import SinglePostModal from "../components/SinglePostModal";
 import { CircleAlert, CircleCheckBig } from "lucide-react";
+import {SOCKET_URL} from "../server/socket";
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ const NotificationsPage = () => {
 
   useEffect(() => {
     if (profileId) {
-      const newSocket = io("http://localhost:3001", {
+      const newSocket = io(SOCKET_URL, {
         query: { userId: profileId },
       });
       newSocket.on("newNotification", (newNotification) => {
