@@ -1,13 +1,12 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import Cookies from "js-cookie";
 import { LogIn } from "lucide-react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import { loginUserReq } from "../requests/authRequests";
 import { loginSchema } from "../validations/loginSchema";
-import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 
 export default function Login() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
