@@ -21,15 +21,28 @@ export default function Login() {
     try {
       await loginSchema.validate({ email, password }, { abortEarly: false });
 
-      await loginUserReq(email, password).then((data) => {
-        Cookies.set("access_token", data.token);
-        Cookies.set("profile_id", data.profileId);
-        Cookies.set("user_name", data.userName);
-      });
+      const data = await loginUserReq(email, password);
+      
+      // Explicitly set cookies
+      Cookies.set("access_token", data.token, { path: '/' });
+      Cookies.set("profile_id", data.profileId, { path: '/' });
+      Cookies.set("user_name", data.userName, { path: '/' });
 
+      // Log the tokens for debugging
+      console.log("Token set:", Cookies.get("access_token"));
+      console.log("Profile ID set:", Cookies.get("profile_id"));
+
+      // Show success toast
       toast.success("Autenticado com sucesso!");
-      navigate("/", { replace: true });
+
+      // Delay navigation slightly to ensure toast is visible
+      setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 500);
+
     } catch (error: any) {
+      console.error("Login error:", error);
+
       if (error.name === "ValidationError") {
         setErrors(error.inner.map((err: any) => err.message));
       } else {
