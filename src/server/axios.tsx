@@ -5,3 +5,6 @@ export default axios.create({
   timeout: 100000,
   headers: { "Content-Type": "application/json" },
 });
+
+//http://localhost:3001
+//https://server-zanzar.onrender.com
