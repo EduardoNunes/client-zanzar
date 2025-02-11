@@ -1,9 +1,8 @@
 import Cookies from "js-cookie";
-import { Camera, Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PostsGridProfile from "../components/PostsGridProfile";
-import FollowButton from "../components/handleFollowToggle";
+import ProfileHeader from "../components/ProfileHeader";
 import {
   getPostsReq,
   getProfileReq,
@@ -159,10 +158,10 @@ export default function Profile() {
       const file = event.target.files?.[0];
       if (!file) return;
       setUploadingAvatar(true);
-      profileId &&
-        (await updateProfileImageReq(profileId, file)).then(
-          fetchProfileAndPosts()
-        );
+      if (profileId) {
+        await updateProfileImageReq(profileId, file);
+        await fetchProfileAndPosts();
+      }
     } catch (error) {
       console.error("Error updating avatar:", error);
     } finally {
@@ -181,74 +180,15 @@ export default function Profile() {
   return (
     <>
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="relative group">
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200">
-                {profile?.avatarUrl ? (
-                  <img
-                    src={profile?.avatarUrl}
-                    alt={profile?.username}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Camera />
-                )}
-              </div>
-              {isCurrentUser && (
-                <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleAvatarChange}
-                    disabled={uploadingAvatar}
-                  />
-                  {uploadingAvatar ? (
-                    <Loader2 className="w-8 h-8 text-white animate-spin" />
-                  ) : (
-                    <Camera className="w-8 h-8 text-white" />
-                  )}
-                </label>
-              )}
-            </div>
-            <div className="text-center md:text-left flex-grow">
-              <div className="flex flex-col md:flex-row items-center gap-4">
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {profile?.username}
-                </h1>
-                {!isCurrentUser && (
-                  <FollowButton
-                    profile={profile}
-                    isFollowing={isFollowing}
-                    setIsFollowing={setIsFollowing}
-                    setFollowStats={setFollowStats}
-                  />
-                )}
-              </div>
-              <div className="mt-4 flex gap-6 text-gray-600">
-                <div>
-                  <span className="font-bold text-gray-900">
-                    {profile?.totalPosts}{' '}
-                  </span>
-                  posts
-                </div>
-                <div>
-                  <span className="font-bold text-gray-900">
-                    {followStats.following}{' '}
-                  </span>
-                  seguindo
-                </div>
-                <div>
-                  <span className="font-bold text-gray-900">
-                    {followStats.followers}{' '}
-                  </span>
-                  seguidores
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ProfileHeader
+          profile={profile}
+          isCurrentUser={isCurrentUser}
+          isFollowing={isFollowing}
+          followStats={followStats}
+          uploadingAvatar={uploadingAvatar}
+          handleAvatarChange={handleAvatarChange}
+          setIsFollowing={setIsFollowing}
+        />
         <PostsGridProfile
           userLikes={userLikes}
           setPosts={setPosts}
