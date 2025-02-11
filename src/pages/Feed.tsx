@@ -44,6 +44,7 @@ export default function Feed() {
 
   async function fetchPosts() {
     const profileId = Cookies.get("profile_id");
+
     if (!profileId) {
       navigate("/login");
       return;
@@ -192,7 +193,7 @@ export default function Feed() {
                   <img
                     src={post.profile.avatarUrl}
                     alt={post.profile.username}
-                    className="w-10 h-10 rounded-full cursor-pointer"
+                    className="w-10 h-10 object-cover rounded-full cursor-pointer"
                     onClick={() => navigateToProfile(post.profile.username)}
                   />
                 ) : (
