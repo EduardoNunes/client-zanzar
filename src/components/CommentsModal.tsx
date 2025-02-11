@@ -131,8 +131,12 @@ export default function CommentModal({ post, onClose }: CommentModalProps) {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-6" ref={commentContainerRef}>
-          <div className="space-y-4">
-            {comments && Array.isArray(comments) && comments.length > 0 ? (
+          <div className="space-y-4 pb-40">
+            {loading ? (
+              <div className="flex justify-center items-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
+              </div>
+            ) : comments && Array.isArray(comments) && comments.length > 0 ? (
               comments.map((comment) => (
                 <div
                   key={comment.id}
@@ -145,9 +149,8 @@ export default function CommentModal({ post, onClose }: CommentModalProps) {
                 </div>
               ))
             ) : (
-              <div>No comments yet</div>
+              <div className="text-center text-gray-500 py-4">No comments yet</div>
             )}
-            {loading && <div>Loading more comments...</div>}
           </div>
         </div>
         <div className="p-6 border-t border-gray-200">
