@@ -15,6 +15,9 @@ interface Profile {
   id: string;
   username: string;
   avatarUrl: string | null;
+  totalPosts: number;
+  totalFollowers: number;
+  totalFollowing: number;
 }
 
 interface Post {
@@ -63,13 +66,17 @@ export default function Profile() {
   async function fetchProfileAndPosts() {
     try {
       const profileId = Cookies.get("profile_id");
+
       const profileData = username && (await getProfileReq(username));
       profileData && setProfile(profileData);
+
       setIsFollowing(profileData.isFollowed);
+
       const isCurrentUserProfile = profileId === profileData.profileId;
       setIsCurrentUser(isCurrentUserProfile);
 
       const initialPosts = username && (await getPostsReq(username, 1, 2));
+
       if (initialPosts) {
         setPosts(initialPosts || []);
         const likesMap = initialPosts.reduce(
@@ -222,19 +229,19 @@ export default function Profile() {
               <div className="mt-4 flex gap-6 text-gray-600">
                 <div>
                   <span className="font-bold text-gray-900">
-                    {posts.length}
+                    {profile?.totalPosts}{' '}
                   </span>
                   posts
                 </div>
                 <div>
                   <span className="font-bold text-gray-900">
-                    {followStats.following}
+                    {followStats.following}{' '}
                   </span>
                   seguindo
                 </div>
                 <div>
                   <span className="font-bold text-gray-900">
-                    {followStats.followers}
+                    {followStats.followers}{' '}
                   </span>
                   seguidores
                 </div>
