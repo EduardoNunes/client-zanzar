@@ -70,14 +70,31 @@ export default function PostsGridProfile({
         {posts.map((post) => (
           <div
             key={post.id}
-            className="rounded-lg overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity cursor-zoom-in"
+            className="rounded-lg overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity cursor-zoom-in relative"
           >
-            <img
-              src={post.mediaUrl}
-              alt={post.caption}
-              className="w-full h-[100%-96px] object-cover"
-              onClick={() => setFullscreenImage(post.mediaUrl)}
-            />
+            <div className="relative w-full aspect-square">
+              <img
+                src={post.mediaUrl}
+                alt={post.caption}
+                className="w-full h-full object-cover opacity-0"
+                onLoad={(e) => {
+                  const img = e.currentTarget;
+                  const spinner = img.nextElementSibling as HTMLDivElement;
+                  img.classList.remove('opacity-0');
+                  spinner.classList.add('hidden');
+                }}
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  const spinner = img.nextElementSibling as HTMLDivElement;
+                  img.classList.add('opacity-0');
+                  spinner.classList.add('hidden');
+                }}
+                onClick={() => setFullscreenImage(post.mediaUrl)}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
+              </div>
+            </div>
             <div className="p-4 h-[96px]">
               <div className="flex items-center space-x-4 mb-4">
                 <button
