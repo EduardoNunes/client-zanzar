@@ -141,9 +141,9 @@ export default function Feed() {
       prevPosts.map((post) =>
         post.id === postId
           ? {
-              ...post,
-              likeCount: isLiked ? post.likeCount - 1 : post.likeCount + 1,
-            }
+            ...post,
+            likeCount: isLiked ? post.likeCount - 1 : post.likeCount + 1,
+          }
           : post
       )
     );
@@ -151,7 +151,7 @@ export default function Feed() {
     await handleLikeReq(postId, profileId);
   };
 
-  const navigateToProfile = (username: string) => {    
+  const navigateToProfile = (username: string) => {
     navigate(`/profile/${username}`);
   };
 
@@ -214,13 +214,38 @@ export default function Feed() {
                 </div>
               </div>
             </div>
-            <div className="cursor-zoom-in">
-              <img
-                src={post.mediaUrl}
-                alt="Post content"
-                className="w-full max-h-[600px] object-cover"
-                onClick={() => setFullscreenImage(post.mediaUrl)}
-              />
+            <div className="relative w-full aspect-square bg-gray-100">
+              {post.mediaUrl ? (
+                <div className="relative w-full h-full">
+                  <img
+                    src={post.mediaUrl}
+                    alt={`Post by ${post.profile.username}`}
+                    onLoad={(e) => {
+                      const img = e.currentTarget;
+                      const spinner = img.nextElementSibling as HTMLDivElement;
+                      img.classList.remove('opacity-0');
+                      spinner.classList.add('hidden');
+                    }}
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      const spinner = img.nextElementSibling as HTMLDivElement;
+                      img.classList.add('opacity-0');
+                      spinner.classList.add('hidden');
+                    }}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover cursor-pointer opacity-0"
+                    onClick={() => setFullscreenImage(post.mediaUrl)}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">
+                  No image available
+                </div>
+              )}
             </div>
             <div className="p-4">
               <div className="flex items-center space-x-4 mb-4">
@@ -229,9 +254,8 @@ export default function Feed() {
                   className="flex items-center space-x-1 text-gray-600 hover:text-red-600"
                 >
                   <Heart
-                    className={`w-6 h-6 ${
-                      userLikes[post.id] ? "fill-red-600 text-red-600" : ""
-                    }`}
+                    className={`w-6 h-6 ${userLikes[post.id] ? "fill-red-600 text-red-600" : ""
+                      }`}
                   />
                   <span>{post.likeCount}</span>
                 </button>
@@ -259,11 +283,10 @@ export default function Feed() {
         )}
       </div>
       <div
-        className={`md:hidden transition-all duration-100 ease-in-out ${
-          selectedPost
+        className={`md:hidden transition-all duration-100 ease-in-out ${selectedPost
             ? "max-h-screen opacity-100 visible"
             : "max-h-0 opacity-0 invisible"
-        }`}
+          }`}
       >
         {selectedPost && (
           <CommentModal
