@@ -53,9 +53,9 @@ export default function PostsGridProfile({
       prevPosts.map((post) =>
         post.id === postId
           ? {
-              ...post,
-              likeCount: isLiked ? post.likeCount - 1 : post.likeCount + 1,
-            }
+            ...post,
+            likeCount: isLiked ? post.likeCount - 1 : post.likeCount + 1,
+          }
           : post
       )
     );
@@ -63,7 +63,7 @@ export default function PostsGridProfile({
     setUserLikes((prev) => ({ ...prev, [postId]: !isLiked }));
     await handleLikeReq(postId, profileId);
   };
-  
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -102,9 +102,8 @@ export default function PostsGridProfile({
                   className="flex items-center space-x-1 text-gray-600 hover:text-red-600"
                 >
                   <Heart
-                    className={`w-6 h-6 ${
-                      userLikes[post.id] ? "fill-red-600 text-red-600" : ""
-                    }`}
+                    className={`w-6 h-6 ${userLikes[post.id] ? "fill-red-600 text-red-600" : ""
+                      }`}
                   />
                   <span>{post.likeCount}</span>
                 </button>
@@ -124,11 +123,10 @@ export default function PostsGridProfile({
           </div>
         ))}
         <div
-          className={`md:hidden transition-all duration-100 ease-in-out ${
-            selectedPost
+          className={`md:hidden transition-all duration-100 ease-in-out ${selectedPost
               ? "max-h-screen opacity-100 visible"
               : "max-h-0 opacity-0 invisible"
-          }`}
+            }`}
         >
           {selectedPost && (
             <CommentModal

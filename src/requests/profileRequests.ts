@@ -31,6 +31,7 @@ export const getPostsReq = async (
   limit: number
 ) => {
   const token = Cookies.get("access_token");
+  const profileId = Cookies.get("profile_id");
 
   if (!token) {
     toast.error("Token de acesso não encontrado.");
@@ -44,14 +45,14 @@ export const getPostsReq = async (
       params: {
         page: page,
         limit: limit,
+        profileId: profileId,
       },
     });
 
     return response.data;
   } catch (error: any) {
     const errorMessage =
-      error.response?.data?.message || "Erro ao buscar posts.";
-    toast.error(errorMessage);
+      error.response?.data?.message || "Erro ao encontrar usuários.";
     throw new Error(errorMessage);
   }
 };
