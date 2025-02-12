@@ -55,15 +55,25 @@ const NotificationsPage = () => {
   const markNotificationAsRead = (notificationId: string) => {
     if (socket) {
       socket.emit("markAsRead", notificationId);
+      
+      // Update unread notifications count
+      const updatedNotifications = notifications.map((n) =>
+        n.id === notificationId ? { ...n, isRead: true } : n
+      );
+      const unreadCount = updatedNotifications.filter(n => !n.isRead).length;
+      Cookies.set('unread_notifications', unreadCount.toString());
     }
   };
 
   const openPost = (notification: any) => {    
-    setNotifications((prevNotifications) =>
-      prevNotifications.map((n) =>
-        n.id === notification.id ? { ...n, isRead: true } : n
-      )
+    const updatedNotifications = notifications.map((n) =>
+      n.id === notification.id ? { ...n, isRead: true } : n
     );
+    setNotifications(updatedNotifications);
+
+    // Update unread notifications count
+    const unreadCount = updatedNotifications.filter(n => !n.isRead).length;
+    Cookies.set('unread_notifications', unreadCount.toString());
 
     setPostId(notification.referenceId);
     setIsShowPost(true);

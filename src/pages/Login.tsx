@@ -26,10 +26,7 @@ export default function Login() {
       Cookies.set("access_token", data.token, { path: '/' });
       Cookies.set("profile_id", data.profileId, { path: '/' });
       Cookies.set("user_name", data.userName, { path: '/' });
-
-      // Log the tokens for debugging
-      console.log("Token set:", Cookies.get("access_token"));
-      console.log("Profile ID set:", Cookies.get("profile_id"));
+      Cookies.set("unread_notifications", data.unreadNotificationsCount, { path: '/' });
 
       // Show success toast
       toast.success("Autenticado com sucesso!");

@@ -14,6 +14,7 @@ import {
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import AdModal from "./AdModal";
+import { NotificationIndicator } from "./NotificationIndicator";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     Cookies.remove("access_token");
     Cookies.remove("profile_id");
     Cookies.remove("user_name");
+    Cookies.remove("unread_notifications");
   };
 
   const menuItems = [
@@ -119,7 +121,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <button
                   key={index}
                   onClick={item.onClick}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-gray-100 ${item.path === location.pathname
+                  className={`relative flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-gray-100 ${item.path === location.pathname
                     ? "text-indigo-600"
                     : "text-gray-700"
                     } ${item.className || ""}`}
@@ -149,6 +151,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 transform: isMenuOpen ? "rotate(90deg)" : "rotate(270deg)",
               }}
             >
+              <div>
+                <NotificationIndicator isMenuOpen={isMenuOpen} />
+              </div>
             </button>
           </div>
           {/* Mobile Menu */}
@@ -184,11 +189,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     item.onClick();
                     setIsMenuOpen(false);
                   }}
-                  className="flex flex-col items-center space-y-2 p-2 rounded-md hover:bg-gray-100 text-gray-700"
+                  className="relative flex flex-col items-center space-y-2 p-2 rounded-md hover:bg-gray-100 text-gray-700"
                 >
                   {React.cloneElement(item.icon, {
                     className: "w-8 h-8",
                   })}
+                  <div className="absolute bottom-10 left-11" style={{
+                    transition: "transform 0.3s ease-in-out",
+                    transform: "rotate(90deg)"
+                  }}>
+                    {item.label === "Notifications" ? <NotificationIndicator isMenuOpen={isMenuOpen} /> : null}
+                  </div>
                   <span className="text-xs">{item.label}</span>
                 </button>
               ))}
