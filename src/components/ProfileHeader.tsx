@@ -23,6 +23,10 @@ interface ProfileHeaderProps {
   uploadingAvatar: boolean;
   handleAvatarChange: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   setIsFollowing: React.Dispatch<React.SetStateAction<boolean>>;
+  setFollowStats: React.Dispatch<React.SetStateAction<{
+    followers: number;
+    following: number;
+  }>>;
 }
 
 export default function ProfileHeader({
@@ -33,6 +37,7 @@ export default function ProfileHeader({
   uploadingAvatar,
   handleAvatarChange,
   setIsFollowing,
+  setFollowStats,
 }: ProfileHeaderProps) {
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-8">
@@ -114,7 +119,7 @@ export default function ProfileHeader({
                 profile={profile}
                 isFollowing={isFollowing}
                 setIsFollowing={setIsFollowing}
-                setFollowStats={undefined}
+                setFollowStats={setFollowStats}
               />
             </div>
           )}

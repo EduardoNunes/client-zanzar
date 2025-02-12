@@ -188,6 +188,7 @@ export default function Profile() {
           uploadingAvatar={uploadingAvatar}
           handleAvatarChange={handleAvatarChange}
           setIsFollowing={setIsFollowing}
+          setFollowStats={setFollowStats}
         />
         <PostsGridProfile
           userLikes={userLikes}
