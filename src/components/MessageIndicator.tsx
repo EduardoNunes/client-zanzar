@@ -4,14 +4,15 @@ import React from 'react';
 interface MessageIndicatorProps {
   className?: string;
   isMenuOpen?: boolean;
+  messagesCount?: number;
 }
 
-export const MessageIndicator: React.FC<MessageIndicatorProps> = ({ className, isMenuOpen }) => {
+export const MessageIndicator: React.FC<MessageIndicatorProps> = ({ className, isMenuOpen, messagesCount }) => {
   const unreadMessagesCount = parseInt(Cookies.get('unread_chat_messages') || '0');
-  
+
   if (unreadMessagesCount <= 0) {
     return null;
-  } 
+  }
 
   return (
     <div
@@ -21,7 +22,8 @@ export const MessageIndicator: React.FC<MessageIndicatorProps> = ({ className, i
         transform: "rotate(270deg)"
       }}
     >
-      {isMenuOpen ? unreadMessagesCount : ""}
+      {messagesCount ? messagesCount : 
+      isMenuOpen ? unreadMessagesCount : ""}
     </div>
   );
 };

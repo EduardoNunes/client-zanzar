@@ -8,6 +8,7 @@ import {
   getFollowedUsersReq,
   getUserChatsReq,
 } from "../requests/chatRequests";
+import { MessageIndicator } from "../components/MessageIndicator";
 
 interface FollowedUser {
   avatarUrl: any;
@@ -27,6 +28,7 @@ interface UserChats {
   name: string | null;
   isGroup: boolean;
   createdAt: Date;
+  messagesCount: number;
   participants: {
     profileId: string;
     username: string;
@@ -72,11 +74,11 @@ export default function Messages() {
 
   const fetchUserChats = async (profileId: string) => {
     const data = await getUserChatsReq(profileId);
-
     const chats = data.map((item: UserChats) => ({
       conversationId: item.conversationId,
       chatName: item.name,
       participants: item.participants,
+      messagesCount: item.messagesCount,
     }));
 
     setUserChats(chats);
@@ -137,9 +139,7 @@ export default function Messages() {
       );
 
       fetchUserChats(profileId);
-
       setSearchQuery("");
-
       setSelectedChatId(newChat.conversationId);
     } catch (error) {
       console.error("Error starting chat:", error);
@@ -181,11 +181,11 @@ export default function Messages() {
                 const participantNames =
                   userChat.participants && userChat.participants.length > 0
                     ? userChat.participants
-                        .map(
-                          (participant) =>
-                            participant.username || "Desconhecido"
-                        )
-                        .join(", ")
+                      .map(
+                        (participant) =>
+                          participant.username || "Desconhecido"
+                      )
+                      .join(", ")
                     : "Sem participantes";
 
                 return (
@@ -193,8 +193,12 @@ export default function Messages() {
                     key={userChat.conversationId}
                     onClick={() => openChat(userChat.conversationId)}
                     disabled={loading}
-                    className="w-full px-3 py-1 text-left hover:bg-gray-50 rounded-lg flex items-center space-x-3 transition-colors disabled:opacity-50"
+                    className="relative w-full px-3 py-1 text-left hover:bg-gray-50 rounded-lg flex items-center space-x-3 transition-colors disabled:opacity-50"
                   >
+                   
+                      <div className="absolute top-[-8px] left-[-24px] z-50" style={{ transform: "rotate(90deg)" }}>
+                        <MessageIndicator messagesCount={userChat.messagesCount} />
+                      </div> 
                     {/* Avatares dos participantes */}
                     <div className="flex -space-x-2">
                       {userChat.participants?.map((participant, index) => (
@@ -247,9 +251,8 @@ export default function Messages() {
                       <img
                         src={user.avatarUrl}
                         alt={user.username}
-                        className={` object-cover ${
-                          !user.avatarUrl ? "h-6 w-6" : "w-full h-full"
-                        }`}
+                        className={` object-cover ${!user.avatarUrl ? "h-6 w-6" : "w-full h-full"
+                          }`}
                       />
                     ) : (
                       <CircleUserRound />
