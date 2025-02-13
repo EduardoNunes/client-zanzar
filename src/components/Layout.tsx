@@ -39,6 +39,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     Cookies.remove("profile_id");
     Cookies.remove("user_name");
     Cookies.remove("unread_notifications");
+    Cookies.remove("unread_chat_messages");
   };
 
   const menuItems = [
