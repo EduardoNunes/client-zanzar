@@ -44,9 +44,22 @@ export default function ChatModal({
     socket.emit("joinChat", { conversationId });
     readAllMessages();
 
+    // Mark conversation as read when opening chat
+    socket.emit('openChat', {
+      conversationId,
+      profileId: currentUser,
+    });
+
     const handleNewMessage = (message: Message) => {
       // Adiciona a nova mensagem ao final da lista
       setMessages((prev) => [...prev, message]);
+      
+      // Automatically mark conversation as read when receiving a new message
+      socket.emit('openChat', {
+        conversationId,
+        profileId: currentUser,
+      });
+
       scrollToBottom();
     };
 
@@ -56,7 +69,7 @@ export default function ChatModal({
       socket.emit("leaveChat", { conversationId });
       socket.off("newMessage", handleNewMessage);
     };
-  }, [conversationId]);
+  }, [conversationId, currentUser]);
 
   useEffect(() => {
     if (shouldScrollToBottom.current && messagesContainerRef.current) {
@@ -64,6 +77,21 @@ export default function ChatModal({
         messagesContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (conversationId && socket) {
+      // Listen for conversation read confirmation
+      socket.on('conversationRead', (readResult) => {
+        console.log('Conversation marked as read:', readResult);
+        // Optional: Update UI or state if needed
+      });
+
+      // Cleanup listener
+      return () => {
+        socket.off('conversationRead');
+      };
+    }
+  }, [conversationId, socket]);
 
   const readAllMessages = async () => {
     setLoading(true);

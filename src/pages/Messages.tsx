@@ -150,6 +150,12 @@ export default function Messages() {
 
   const openChat = async (chatId: string) => {
     setSelectedChatId(chatId);
+
+    userChats.map((chat) => {
+      if (chat.conversationId === chatId) {
+        chat.messagesCount = 0;
+      }
+    })
   };
 
   return (
@@ -195,10 +201,11 @@ export default function Messages() {
                     disabled={loading}
                     className="relative w-full px-3 py-1 text-left hover:bg-gray-50 rounded-lg flex items-center space-x-3 transition-colors disabled:opacity-50"
                   >
-                   
+                    {userChat.messagesCount > 0 ?
                       <div className="absolute top-[-8px] left-[-24px] z-50" style={{ transform: "rotate(90deg)" }}>
                         <MessageIndicator messagesCount={userChat.messagesCount} />
-                      </div> 
+                      </div>
+                      : ''}
                     {/* Avatares dos participantes */}
                     <div className="flex -space-x-2">
                       {userChat.participants?.map((participant, index) => (
