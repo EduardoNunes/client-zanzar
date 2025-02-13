@@ -151,11 +151,27 @@ export default function Messages() {
   const openChat = async (chatId: string) => {
     setSelectedChatId(chatId);
 
-    userChats.map((chat) => {
+    // Update messages count to zero for the specific chat
+    const updatedChats = userChats.map((chat) => {
       if (chat.conversationId === chatId) {
-        chat.messagesCount = 0;
+        return { ...chat, messagesCount: 0 };
       }
-    })
+      return chat;
+    });
+    setUserChats(updatedChats);
+
+    // Recalculate total unread messages
+    const remainingUnreadMessages = updatedChats.reduce(
+      (total, chat) => total + chat.messagesCount, 
+      0
+    );
+
+    // Update the unread_chat_messages cookie
+    if (remainingUnreadMessages === 0) {
+      Cookies.remove('unread_chat_messages');
+    } else {
+      Cookies.set('unread_chat_messages', remainingUnreadMessages.toString(), { path: '/' });
+    }
   };
 
   return (
