@@ -15,6 +15,7 @@ import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import AdModal from "./AdModal";
 import { NotificationIndicator } from "./NotificationIndicator";
+import { MessageIndicator } from "./MessageIndicator";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -153,6 +154,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             >
               <div>
                 <NotificationIndicator isMenuOpen={isMenuOpen} />
+                <MessageIndicator isMenuOpen={isMenuOpen} />
               </div>
             </button>
           </div>
@@ -199,6 +201,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     transform: "rotate(90deg)"
                   }}>
                     {item.label === "Notifications" ? <NotificationIndicator isMenuOpen={isMenuOpen} /> : null}
+                    {item.label === "Messages" ? <MessageIndicator isMenuOpen={isMenuOpen} /> : null}
                   </div>
                   <span className="text-xs">{item.label}</span>
                 </button>

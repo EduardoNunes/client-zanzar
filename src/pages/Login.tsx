@@ -21,12 +21,13 @@ export default function Login() {
       await loginSchema.validate({ email, password }, { abortEarly: false });
 
       const data = await loginUserReq(email, password);
-      
+  
       // Explicitly set cookies
       Cookies.set("access_token", data.token, { path: '/' });
       Cookies.set("profile_id", data.profileId, { path: '/' });
       Cookies.set("user_name", data.userName, { path: '/' });
       Cookies.set("unread_notifications", data.unreadNotificationsCount, { path: '/' });
+      Cookies.set('unread_chat_messages', data.unreadChatMessages, { path: '/' });
 
       // Show success toast
       toast.success("Autenticado com sucesso!");
