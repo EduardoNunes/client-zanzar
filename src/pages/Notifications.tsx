@@ -20,6 +20,7 @@ const NotificationsPage = () => {
     if (!profile) {
       navigate("/login");
     }
+
     setProfileId(profile || "");
   }, []);
 
@@ -33,6 +34,7 @@ const NotificationsPage = () => {
           console.error("Erro ao buscar notificações:", error);
         }
       };
+
       fetchNotifications();
     }
   }, [profileId]);
@@ -42,9 +44,11 @@ const NotificationsPage = () => {
       const newSocket = io(SOCKET_URL, {
         query: { userId: profileId },
       });
+
       newSocket.on("newNotification", (newNotification) => {
         setNotifications((prev) => [newNotification, ...prev]);
       });
+      
       setSocket(newSocket);
       return () => {
         newSocket.disconnect();
