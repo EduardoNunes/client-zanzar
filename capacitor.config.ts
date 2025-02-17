@@ -1,6 +1,11 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
+  plugins: {
+    Camera: {
+      webUseInput: true, // Isso força o uso do input file no PWA
+    },
+  },
   appId: 'com.example.zanzar',
   appName: 'zanzar',
   webDir: 'dist',
