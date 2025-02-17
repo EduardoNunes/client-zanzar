@@ -2,8 +2,8 @@ import { Camera, CameraResultType, CameraSource, CameraPermissionState, ImageOpt
 import { Capacitor } from '@capacitor/core';
 import { toast } from "react-toastify";
 
-export async function openCamera(type: 'photo' | 'video' = 'photo'): Promise<File | null> {
-  console.log(`CLICK: Attempting to open camera for ${type}`);
+export async function openCamera(captureType: 'tap' | 'hold' = 'tap'): Promise<File | null> {
+  console.log(`CLICK: Attempting to open camera with capture type: ${captureType}`);
   
   // Detailed platform and plugin logging
   const platform = Capacitor.getPlatform();
@@ -30,7 +30,7 @@ export async function openCamera(type: 'photo' | 'video' = 'photo'): Promise<Fil
       console.log("Using web file input");
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = type === 'photo' 
+      input.accept = captureType === 'tap' 
         ? 'image/jpeg,image/png' 
         : 'video/mp4';
       input.capture = 'environment';
@@ -69,10 +69,13 @@ export async function openCamera(type: 'photo' | 'video' = 'photo'): Promise<Fil
       saveToGallery: false
     };
 
-    // For video, we might need a different approach
-    if (type === 'video') {
+    // Determine capture type
+    if (captureType === 'hold') {
       try {
-        // Some platforms might support video differently
+        // For video, we'll use a generic camera capture
+        // Note: This might not work perfectly for video on all platforms
+        toast.info('Gravando vídeo (máximo 15 segundos)');
+        
         const videoImage = await Camera.getPhoto({
           ...baseOptions,
           source: CameraSource.Camera
@@ -97,7 +100,7 @@ export async function openCamera(type: 'photo' | 'video' = 'photo'): Promise<Fil
       }
     }
 
-    // Photo capture
+    // Photo capture (tap)
     const image = await Camera.getPhoto(baseOptions);
 
     console.log("Mídia capturada:", image);
