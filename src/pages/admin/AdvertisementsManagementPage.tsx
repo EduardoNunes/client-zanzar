@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Eye, Pencil, Trash2, MousePointer } from 'lucide-react';
+import { Eye, Pencil, Trash2, MousePointer, Loader2 } from 'lucide-react';
 import { Advertisement, deleteAdvertisementReq, getAdvertisementsReq } from '../../requests/advertisementsManagementRequests';
 import { AdvertisementForm } from '../../components/AdvertisementForm';
 
@@ -7,13 +7,17 @@ export const AdvertisementsManagementPage: React.FC = () => {
   const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAd, setEditingAd] = useState<Advertisement | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchAdvertisements = async () => {
     try {
+      setIsLoading(true);
       const ads = await getAdvertisementsReq();
       setAdvertisements(ads);
     } catch (error) {
       console.error('Error fetching advertisements:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,7 +56,11 @@ export const AdvertisementsManagementPage: React.FC = () => {
         </button>
       </div>
 
-      {advertisements.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="animate-spin text-indigo-600" size={48} />
+        </div>
+      ) : advertisements.length === 0 ? (
         <div className="text-center text-gray-500 py-10">
           No advertisements found. Create your first advertisement!
         </div>

@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import Cookies from "js-cookie";
-import { CircleUserRound, Heart, LogIn, MessageCircle } from "lucide-react";
+import { CircleUserRound, Heart, LogIn, MessageCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleLikeReq } from "../requests/feedRequests";
@@ -23,6 +23,7 @@ export default function SinglePostModal({
   const [isLiked, setIsLiked] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<any | null>(null);
+  const [imageLoading, setImageLoading] = useState(true);
   const token = Cookies.get("access_token");
 
   useEffect(() => {
@@ -139,13 +140,20 @@ export default function SinglePostModal({
             </div>
           </div>
         </div>
-        <div className="cursor-zoom-in">
+        <div className="cursor-zoom-in relative">
           <img
             src={post.mediaUrl}
             alt="Post content"
-            className="w-full max-h-[600px] object-cover"
+            className="w-full max-h-[600px] min-h-[200px] object-cover"
             onClick={() => setFullscreenImage(post.mediaUrl)}
+            onLoad={() => setImageLoading(false)}
+            onError={() => setImageLoading(false)}
           />
+          {imageLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+              <Loader2 className="animate-spin text-indigo-600" size={48} />
+            </div>
+          )}
         </div>
 
         <div className="p-4">
