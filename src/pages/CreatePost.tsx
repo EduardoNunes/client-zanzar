@@ -103,7 +103,7 @@ export default function CreatePost() {
                     ou arraste e solte
                   </p>
                   <p className="text-xs text-gray-500">
-                    PNG, JPG ou GIF (Máx. 10MB)
+                    PNG, JPG ou MP4 (Máx. 10MB)
                   </p>
                 </div>
               )}

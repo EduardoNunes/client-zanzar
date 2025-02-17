@@ -15,6 +15,14 @@ export const createPostWithMediaReq = async (
     return;
   }
 
+  const allowedImageTypes = ["image/jpeg", "image/jpg"];
+  const allowedVideoTypes = ["video/mp4"];
+
+  if (!allowedImageTypes.includes(file.type) && !allowedVideoTypes.includes(file.type)) {
+    toast.error("Formato de arquivo não suportado. Apenas JPG, JPEG e MP4 são permitidos.");
+    return;
+  }
+
   try {
     const formData = new FormData();
     formData.append("file", file);
@@ -30,7 +38,6 @@ export const createPostWithMediaReq = async (
     });
 
     toast.success("Postagem criada com sucesso!");
-
     return response.data;
   } catch (error: any) {
     const errorMessage =
