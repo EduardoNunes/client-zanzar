@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../server/axios";
 import SinglePostModal from "../components/SinglePostModal";
 import { CircleAlert, CircleCheckBig } from "lucide-react";
-import {SOCKET_URL} from "../server/socket";
+import { SOCKET_URL } from "../server/socket";
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ const NotificationsPage = () => {
       newSocket.on("newNotification", (newNotification) => {
         setNotifications((prev) => [newNotification, ...prev]);
       });
-      
+
       setSocket(newSocket);
       return () => {
         newSocket.disconnect();
@@ -59,7 +59,7 @@ const NotificationsPage = () => {
   const markNotificationAsRead = (notificationId: string) => {
     if (socket) {
       socket.emit("markAsRead", notificationId);
-      
+
       // Update unread notifications count
       const updatedNotifications = notifications.map((n) =>
         n.id === notificationId ? { ...n, isRead: true } : n
@@ -69,10 +69,11 @@ const NotificationsPage = () => {
     }
   };
 
-  const openPost = (notification: any) => {    
+  const openPost = (notification: any) => {
     const updatedNotifications = notifications.map((n) =>
       n.id === notification.id ? { ...n, isRead: true } : n
     );
+    
     setNotifications(updatedNotifications);
 
     // Update unread notifications count
@@ -101,7 +102,7 @@ const NotificationsPage = () => {
               key={index}
               className="p-4 bg-gray-100 border rounded-lg shadow-sm cursor-pointer relative"
               onClick={() => openPost(notification)}
-            >              
+            >
               <div className="absolute top-4 right-4">
                 {notification.isRead ? (
                   <span className="w-6 h-6 text-green-500 text-lg">
@@ -113,7 +114,7 @@ const NotificationsPage = () => {
                   </span>
                 )}
               </div>
-             
+
               <strong className="block text-lg">{notification.content}</strong>
               <small className="text-gray-500">
                 {new Date(notification.createdAt).toLocaleString()}
