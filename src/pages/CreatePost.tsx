@@ -1,9 +1,9 @@
 import Cookies from "js-cookie";
-import { Camera, Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, Camera } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPostWithMediaReq } from "../requests/postsRequests";
-import {openCamera} from "../components/OpenCamera"
+import { openCamera } from "../components/OpenCamera"
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -17,14 +17,13 @@ export default function CreatePost() {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
-
       const objectUrl = URL.createObjectURL(selectedFile);
       setPreview(objectUrl);
     }
   };
 
-  const handleOpenCamera = async () => {
-    const capturedFile = await openCamera();
+  const handleOpenCamera = async (type: 'photo' | 'video') => {
+    const capturedFile = await openCamera(type);
     if (capturedFile) {
       setFile(capturedFile);
       const objectUrl = URL.createObjectURL(capturedFile);
@@ -43,8 +42,6 @@ export default function CreatePost() {
     setError("");
 
     try {
-      setLoading(true);
-
       const profileId = Cookies.get("profile_id");
 
       if (!profileId) {
@@ -61,8 +58,6 @@ export default function CreatePost() {
             navigate("/");
           }
         ));
-
-      navigate("/");
     } catch (error) {
       setError("Erro ao criar postagem. Por favor, tente novamente.");
       console.error("Error:", error);
@@ -89,9 +84,10 @@ export default function CreatePost() {
           <div className="flex flex-col items-center justify-center w-full">
             <label
               className={`w-full h-64 border-2 border-dashed rounded-lg cursor-pointer
-                ${preview
-                  ? "border-transparent"
-                  : "border-gray-300 hover:border-indigo-400"
+                ${
+                  preview
+                    ? "border-transparent"
+                    : "border-gray-300 hover:border-indigo-400"
                 }
                 transition-colors duration-200 ease-in-out
                 flex flex-col items-center justify-center relative overflow-hidden`}
@@ -108,8 +104,7 @@ export default function CreatePost() {
                   <p className="mb-2 text-sm text-gray-500">
                     <span className="font-semibold">
                       Clique para fazer upload
-                    </span>{" "}
-                    ou arraste e solte
+                    </span>
                   </p>
                   <p className="text-xs text-gray-500">
                     PNG, JPG ou MP4 (Máx. 10MB)
@@ -124,11 +119,23 @@ export default function CreatePost() {
               />
             </label>
           </div>
+          <div className="flex space-x-4 mt-4">
+            <button 
+              type="button"
+              onClick={() => handleOpenCamera('photo')}
+              className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center"
+            >
+              <Camera className="mr-2" /> Capturar Foto
+            </button>
+            <button 
+              type="button"
+              onClick={() => handleOpenCamera('video')}
+              className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 flex items-center justify-center"
+            >
+              <Camera className="mr-2" /> Gravar Vídeo
+            </button>
+          </div>
         </div>
-        <button type="button" onClick={handleOpenCamera} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 w-full">
-          <Camera className="w-5 h-5" />
-          Abrir Câmera
-        </button>
 
         <div>
           <label className="block text-gray-700 text-sm font-semibold mb-2">

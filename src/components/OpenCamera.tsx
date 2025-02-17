@@ -1,32 +1,39 @@
-import { Camera, CameraResultType, CameraSource, CameraPermissionState } from "@capacitor/camera";
+import { Camera, CameraResultType, CameraSource, CameraPermissionState, ImageOptions } from "@capacitor/camera";
 import { Capacitor } from '@capacitor/core';
 import { toast } from "react-toastify";
 
-export async function openCamera(): Promise<File | null> {
-  console.log("CLICK: Attempting to open camera");
+export async function openCamera(type: 'photo' | 'video' = 'photo'): Promise<File | null> {
+  console.log(`CLICK: Attempting to open camera for ${type}`);
   
-  // Check platform support
-  const isAvailable = Capacitor.isPluginAvailable('Camera');
-  console.log("Camera Plugin Available:", isAvailable);
-  
-  if (!isAvailable) {
-    toast.error('Câmera não suportada nesta plataforma');
+  // Detailed platform and plugin logging
+  const platform = Capacitor.getPlatform();
+  console.log("Current Platform:", platform);
+
+  // Check if Capacitor is available
+  if (!Capacitor.isNativePlatform() && platform !== 'web') {
+    toast.error('Plataforma não suportada');
+    return null;
+  }
+
+  // Check camera plugin availability
+  const isCameraAvailable = Capacitor.isPluginAvailable('Camera');
+  console.log("Camera Plugin Available:", isCameraAvailable);
+
+  if (!isCameraAvailable) {
+    toast.error('Plugin da câmera não disponível');
     return null;
   }
 
   try {
-    // Check platform
-    const platform = Capacitor.getPlatform();
-    console.log("Current Platform:", platform);
-
-    // Request and check permissions
-    let permissionResult: CameraPermissionState;
-    
+    // Web platform handling
     if (platform === 'web') {
-      // For web, we'll use the browser's native file input
+      console.log("Using web file input");
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = 'image/*';
+      input.accept = type === 'photo' 
+        ? 'image/jpeg,image/png' 
+        : 'video/mp4';
+      input.capture = 'environment';
       input.click();
       
       return new Promise((resolve) => {
@@ -37,36 +44,76 @@ export async function openCamera(): Promise<File | null> {
       });
     }
 
-    // For mobile platforms
-    permissionResult = (await Camera.checkPermissions()).camera;
+    // Mobile platform handling
+    let permissionResult: CameraPermissionState = (await Camera.checkPermissions()).camera;
     console.log("Initial Camera Permissions:", permissionResult);
 
     if (permissionResult !== 'granted') {
       const requestResult = await Camera.requestPermissions();
       console.log("Permission Request Result:", requestResult);
+      permissionResult = requestResult.camera;
 
-      if (requestResult.camera !== 'granted') {
+      if (permissionResult !== 'granted') {
         toast.error('Permissão de câmera negada');
         return null;
       }
     }
 
-    const image = await Camera.getPhoto({
+    // Prepare camera options
+    const baseOptions: ImageOptions = {
       quality: 90,
       allowEditing: false,
       resultType: CameraResultType.Uri,
-      source: CameraSource.Prompt,
-      presentationStyle: 'fullscreen'
-    });
+      source: CameraSource.Camera,
+      correctOrientation: true,
+      saveToGallery: false
+    };
 
-    console.log("Imagem capturada:", image);
+    // For video, we might need a different approach
+    if (type === 'video') {
+      try {
+        // Some platforms might support video differently
+        const videoImage = await Camera.getPhoto({
+          ...baseOptions,
+          source: CameraSource.Camera
+        });
+
+        console.log("Vídeo capturado:", videoImage);
+        
+        if (videoImage.webPath) {
+          const response = await fetch(videoImage.webPath);
+          const blob = await response.blob();
+          
+          const file = new File([blob], `captured-video.mp4`, { 
+            type: 'video/mp4'
+          });
+
+          return file;
+        }
+      } catch (videoError) {
+        toast.error('Erro ao capturar vídeo');
+        console.error('Video capture error:', videoError);
+        return null;
+      }
+    }
+
+    // Photo capture
+    const image = await Camera.getPhoto(baseOptions);
+
+    console.log("Mídia capturada:", image);
     
     if (image.webPath) {
       // Convert webPath to File
       const response = await fetch(image.webPath);
       const blob = await response.blob();
-      const file = new File([blob], `captured-image.${image.format}`, { 
-        type: `image/${image.format}` 
+      
+      // Determine mime type based on format
+      const mimeType = image.format === 'png' ? 'image/png' : 
+                       image.format === 'gif' ? 'image/gif' : 
+                       'image/jpeg';
+
+      const file = new File([blob], `captured-photo.${image.format}`, { 
+        type: mimeType
       });
 
       return file;
@@ -84,6 +131,7 @@ export async function openCamera(): Promise<File | null> {
       } else {
         toast.error(`Erro ao acessar a câmera: ${error.message}`);
       }
+      console.error('Full error details:', error);
     }
     
     return null;
