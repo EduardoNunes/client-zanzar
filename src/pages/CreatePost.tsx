@@ -1,8 +1,9 @@
 import Cookies from "js-cookie";
-import { Loader2, Upload } from "lucide-react";
+import { Camera, Loader2, Upload } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPostWithMediaReq } from "../requests/postsRequests";
+import {openCamera} from "../components/OpenCamera"
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -18,6 +19,15 @@ export default function CreatePost() {
       setFile(selectedFile);
 
       const objectUrl = URL.createObjectURL(selectedFile);
+      setPreview(objectUrl);
+    }
+  };
+
+  const handleOpenCamera = async () => {
+    const capturedFile = await openCamera();
+    if (capturedFile) {
+      setFile(capturedFile);
+      const objectUrl = URL.createObjectURL(capturedFile);
       setPreview(objectUrl);
     }
   };
@@ -79,10 +89,9 @@ export default function CreatePost() {
           <div className="flex flex-col items-center justify-center w-full">
             <label
               className={`w-full h-64 border-2 border-dashed rounded-lg cursor-pointer
-                ${
-                  preview
-                    ? "border-transparent"
-                    : "border-gray-300 hover:border-indigo-400"
+                ${preview
+                  ? "border-transparent"
+                  : "border-gray-300 hover:border-indigo-400"
                 }
                 transition-colors duration-200 ease-in-out
                 flex flex-col items-center justify-center relative overflow-hidden`}
@@ -110,12 +119,16 @@ export default function CreatePost() {
               <input
                 type="file"
                 className="hidden"
-                accept="image/*"
+                accept="image/jpg, image/jpeg, video/mp4"
                 onChange={handleFileChange}
               />
             </label>
           </div>
         </div>
+        <button type="button" onClick={handleOpenCamera} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 w-full">
+          <Camera className="w-5 h-5" />
+          Abrir Câmera
+        </button>
 
         <div>
           <label className="block text-gray-700 text-sm font-semibold mb-2">
