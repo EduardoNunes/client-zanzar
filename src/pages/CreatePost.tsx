@@ -1,10 +1,9 @@
 import Cookies from "js-cookie";
-import { Camera, Loader2, Upload, Video } from "lucide-react";
+import { Camera, Loader2, Upload } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { openCamera } from "../components/OpenCamera";
-import {openVideoRecorder} from "../components/OpenVideoRecorder";
 import { createPostWithMediaReq } from "../requests/postsRequests";
 
 export default function CreatePost() {
@@ -33,21 +32,7 @@ export default function CreatePost() {
         setPreview(objectUrl);
       }
     } catch (err) {
-      toast.error("Erro ao capturar imagem");
-      console.error(err);
-    }
-  };
-
-  const handleVideoCapture = async () => {
-    try {
-      const capturedFile = await openVideoRecorder(); // Chama a função openVideoRecorder
-      if (capturedFile) {
-        setFile(capturedFile);
-        const objectUrl = URL.createObjectURL(capturedFile);
-        setPreview(objectUrl);
-      }
-    } catch (err) {
-      toast.error("Erro ao gravar vídeo");
+      toast.error("Erro ao capturar mídia");
       console.error(err);
     }
   };
@@ -58,21 +43,16 @@ export default function CreatePost() {
       setError("Por favor, selecione uma imagem ou vídeo.");
       return;
     }
-
     setLoading(true);
     setError("");
-
     try {
       const profileId = Cookies.get("profile_id");
-
       if (!profileId) {
         navigate("/login");
       }
-
       const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `${profileId}/${fileName}`;
-
       profileId &&
         (await createPostWithMediaReq(profileId, file, caption, filePath).then(
           () => {
@@ -108,22 +88,9 @@ export default function CreatePost() {
               <input type="file" className="hidden" accept="image/*, video/mp4" onChange={handleFileChange} />
             </label>
           </div>
-          <div className="mt-4 flex gap-4">
-            <button
-              type="button"
-              onClick={handleCameraCapture}
-              className="flex-1 flex items-center justify-center gap-2 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
-              <Camera className="w-5 h-5" />
-              Capturar Foto
-            </button>
-            <button
-              type="button"
-              onClick={handleVideoCapture}
-              className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">
-              <Video className="w-5 h-5" />
-              Gravar Vídeo
-            </button>
-          </div>
+          <button type="button" onClick={handleCameraCapture} className="mt-4 flex items-center justify-center gap-2 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 w-full">
+            <Camera className="w-5 h-5" /> Capturar
+          </button>
         </div>
         <div>
           <label className="block text-gray-700 text-sm font-semibold mb-2">Legenda</label>
