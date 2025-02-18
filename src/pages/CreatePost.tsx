@@ -1,28 +1,18 @@
 import Cookies from "js-cookie";
 import { Loader2, Upload, Camera } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPostWithMediaReq } from "../requests/postsRequests";
 import { openCamera } from "../components/OpenCamera"
-import { openCameraVideo } from "../components/OpenCameraVideo"
+import {openCameraVideo} from "../components/OpenCameraVideo"
 
 export default function CreatePost() {
   const navigate = useNavigate();
   const [caption, setCaption] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
-  const [previewType, setPreviewType] = useState<'image' | 'video'>('image');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Cleanup preview URL to prevent memory leaks
-  useEffect(() => {
-    return () => {
-      if (preview) {
-        URL.revokeObjectURL(preview);
-      }
-    };
-  }, [preview]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -30,7 +20,6 @@ export default function CreatePost() {
       setFile(selectedFile);
       const objectUrl = URL.createObjectURL(selectedFile);
       setPreview(objectUrl);
-      setPreviewType(selectedFile.type.startsWith('video/') ? 'video' : 'image');
     }
   };
 
@@ -40,7 +29,6 @@ export default function CreatePost() {
       setFile(capturedFile);
       const objectUrl = URL.createObjectURL(capturedFile);
       setPreview(objectUrl);
-      setPreviewType('image');
     }
   };
 
@@ -50,14 +38,13 @@ export default function CreatePost() {
       setFile(capturedFile);
       const objectUrl = URL.createObjectURL(capturedFile);
       setPreview(objectUrl);
-      setPreviewType('video');
     }
   };  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      setError("Por favor, selecione uma imagem ou vídeo.");
+      setError("Por favor, selecione uma imagem.");
       return;
     }
 
@@ -102,7 +89,7 @@ export default function CreatePost() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-gray-700 text-sm font-semibold mb-2">
-            Mídia
+            Imagem
           </label>
           <div className="flex flex-col items-center justify-center w-full">
             <label
@@ -115,19 +102,11 @@ export default function CreatePost() {
                 flex flex-col items-center justify-center relative overflow-hidden`}
             >
               {preview ? (
-                previewType === 'image' ? (
-                  <img
-                    src={preview}
-                    alt="Preview"
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                ) : (
-                  <video
-                    src={preview}
-                    controls
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                )
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
               ) : (
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-12 h-12 text-gray-400 mb-3" />
