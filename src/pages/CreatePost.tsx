@@ -1,9 +1,9 @@
 import Cookies from "js-cookie";
 import { Loader2, Upload, Camera } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPostWithMediaReq } from "../requests/postsRequests";
-import { openCamera } from "../components/OpenCamera";
+import { openCamera } from "../components/OpenCamera"
 import { toast } from "react-toastify";
 
 export default function CreatePost() {
@@ -13,6 +13,10 @@ export default function CreatePost() {
   const [preview, setPreview] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  // Refs for tap/hold functionality
+  const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isLongPressRef = useRef(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -23,9 +27,17 @@ export default function CreatePost() {
     }
   };
 
-  const handleCameraCapture = async () => {
+  const startPressTimer = () => {
+    isLongPressRef.current = false;
+    pressTimerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      handleCameraCapture('hold');
+    }, 500); // 500ms to distinguish between tap and hold
+  };
+
+  const handleCameraCapture = async (type: 'tap' | 'hold') => {
     try {
-      const capturedFile = await openCamera();
+      const capturedFile = await openCamera(type);
       if (capturedFile) {
         setFile(capturedFile);
         const objectUrl = URL.createObjectURL(capturedFile);
@@ -34,6 +46,26 @@ export default function CreatePost() {
     } catch (err) {
       toast.error('Erro ao capturar mídia');
       console.error(err);
+    }
+  };
+
+  const handleMouseDown = () => {
+    startPressTimer();
+  };
+
+  const handleMouseUp = () => {
+    if (pressTimerRef.current) {
+      clearTimeout(pressTimerRef.current);
+    }
+    
+    if (!isLongPressRef.current) {
+      handleCameraCapture('tap');
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (pressTimerRef.current) {
+      clearTimeout(pressTimerRef.current);
     }
   };
 
@@ -128,11 +160,13 @@ export default function CreatePost() {
           
           <button 
             type="button"
-            onClick={handleCameraCapture}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
             className="mt-4 flex items-center justify-center gap-2 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 w-full"
           >
             <Camera className="w-5 h-5" />
-            Abrir Câmera
+            Capturar
           </button>
         </div>
 
