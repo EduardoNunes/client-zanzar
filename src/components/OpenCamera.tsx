@@ -44,17 +44,16 @@ export async function openCamera(): Promise<File | null> {
 
     if (image.webPath) {
       const response = await fetch(image.webPath).catch(() => {
-        toast.error('Erro ao carregar a imagem1.');
+        toast.error('Erro ao carregar a imagem.');
         return null;
       });
-      console.log("RESPPONSE AQUI", response);
+
       if (!response) return null;
 
       const blob = await response.blob();
       const mimeType = image.format === 'png' ? 'image/png' : 'image/jpeg';
       const file = new File([blob], `captured-photo.${image.format}`, { type: mimeType });
       console.log("📸 Foto convertida em arquivo:", file);
-      console.log("FILE AQUI", file);
       return file;
     }
   } catch (error) {

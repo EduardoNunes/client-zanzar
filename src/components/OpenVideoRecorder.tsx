@@ -62,7 +62,7 @@ async function captureVideoForMobile(): Promise<File | null> {
 
     const videoResult = await MediaCapture.captureVideo(options);
     console.log("🎥 Resultado da captura de vídeo:", videoResult);
-    console.log("VIDEORESULT AQUI", videoResult);
+    
     if (Array.isArray(videoResult) && videoResult.length > 0) {
       const video = videoResult[0];
 
@@ -73,7 +73,7 @@ async function captureVideoForMobile(): Promise<File | null> {
 
       const file = await fetchAndCreateFile(video.fullPath);
       if (!file) return null;
-      console.log("FILE VIDEO AQUI", file);
+
       displayVideo(file);
 
       return file;
