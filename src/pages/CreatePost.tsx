@@ -10,15 +10,65 @@ export default function CreatePost() {
   const [caption, setCaption] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
+  const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
+    console.log("SELECTED", selectedFile)
     if (selectedFile) {
+      // Validate file size (30MB = 30 * 1024 * 1024 bytes)
+      const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        setError("O arquivo de mídia não pode exceder 30MB.");
+        return;
+      }
+      
       setFile(selectedFile);
-      const objectUrl = URL.createObjectURL(selectedFile);
-      setPreview(objectUrl);
+      
+      // Check if the file is a video
+      if (selectedFile.type.startsWith('video/')) {
+        setFileType('video');
+        // For video files, create a video element preview
+        const videoElement = document.createElement('video');
+        videoElement.src = URL.createObjectURL(selectedFile);
+        videoElement.preload = 'metadata';
+        
+        videoElement.onloadedmetadata = () => {
+          // Validate video duration (15 seconds)
+          const MAX_VIDEO_DURATION = 15;
+          if (videoElement.duration > MAX_VIDEO_DURATION) {
+            setError("O vídeo não pode ter mais de 15 segundos.");
+            URL.revokeObjectURL(videoElement.src);
+            setFile(null);
+            setPreview("");
+            setFileType(null);
+            return;
+          }
+          
+          // Set preview as a video thumbnail or first frame
+          const canvas = document.createElement('canvas');
+          canvas.width = videoElement.videoWidth;
+          canvas.height = videoElement.videoHeight;
+          canvas.getContext('2d')?.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+          
+          // Improve video preview handling to create a better first frame preview
+          videoElement.currentTime = 1; // Set the current time to 1 second to get a better first frame
+          videoElement.onseeked = () => {
+            const previewUrl = canvas.toDataURL('image/jpeg');
+            setPreview(previewUrl);
+          };
+          
+          // Clean up
+          URL.revokeObjectURL(videoElement.src);
+        };
+      } else {
+        setFileType('image');
+        // For image files, use existing method
+        const objectUrl = URL.createObjectURL(selectedFile);
+        setPreview(objectUrl);
+      }
     }
   };
 
@@ -101,11 +151,21 @@ export default function CreatePost() {
                 flex flex-col items-center justify-center relative overflow-hidden`}
             >
               {preview ? (
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                fileType === 'video' ? (
+                  <video
+                    src={URL.createObjectURL(file as File)}
+                    autoPlay
+                    loop
+                    muted
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )
               ) : (
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-12 h-12 text-gray-400 mb-3" />
@@ -115,7 +175,7 @@ export default function CreatePost() {
                     </span>
                   </p>
                   <p className="text-xs text-gray-500">
-                    PNG, JPG ou MP4 (Máx. 10MB)
+                    PNG, JPG ou MP4 (Máx. 30MB, Vídeo até 15s)
                   </p>
                 </div>
               )}
