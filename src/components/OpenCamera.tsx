@@ -1,23 +1,66 @@
-import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Camera, CameraPermissionState, CameraResultType, CameraSource, ImageOptions } from "@capacitor/camera";
+import { Capacitor } from "@capacitor/core";
 import { toast } from "react-toastify";
 
 export async function openCamera(): Promise<File | null> {
+  console.log("📸 Abertura da câmera para captura de imagem...");
+
+  const platform = Capacitor.getPlatform();
+  console.log("🛠️ Plataforma atual:", platform);
+
+  if (platform !== 'ios' && platform !== 'android' && platform !== 'web') {
+    toast.error('Plataforma não suportada');
+    return null;
+  }
+
+  // 📸 Captura de imagem
   try {
-    const image = await Camera.getPhoto({
+    let permissionResult: CameraPermissionState = (await Camera.checkPermissions()).camera;
+    console.log("🔍 Permissão inicial da câmera:", permissionResult);
+
+    if (permissionResult !== 'granted') {
+      const requestResult = await Camera.requestPermissions();
+      console.log("🔑 Permissão solicitada:", requestResult);
+      permissionResult = requestResult.camera;
+
+      if (permissionResult !== 'granted') {
+        toast.error('Permissão de câmera negada.');
+        return null;
+      }
+    }
+
+    console.log("📷 Tirando foto...");
+    const imageOptions: ImageOptions = {
       quality: 90,
       allowEditing: false,
       resultType: CameraResultType.Uri,
       source: CameraSource.Camera,
-    });
+      correctOrientation: true,
+      saveToGallery: false,
+    };
+
+    const image = await Camera.getPhoto(imageOptions);
+    console.log("✅ Foto capturada:", image);
 
     if (image.webPath) {
-      const response = await fetch(image.webPath);
+      const response = await fetch(image.webPath).catch(() => {
+        toast.error('Erro ao carregar a imagem1.');
+        return null;
+      });
+      console.log("RESPPONSE AQUI", response);
+      if (!response) return null;
+
       const blob = await response.blob();
-      const file = new File([blob], `captured-photo.${image.format}`, { type: blob.type });
+      const mimeType = image.format === 'png' ? 'image/png' : 'image/jpeg';
+      const file = new File([blob], `captured-photo.${image.format}`, { type: mimeType });
+      console.log("📸 Foto convertida em arquivo:", file);
+      console.log("FILE AQUI", file);
       return file;
     }
   } catch (error) {
-    toast.info("Captura cancelada ou erro na câmera.");
+    toast.info("Captura cancelada.");
+    return null;
   }
+
   return null;
 }
