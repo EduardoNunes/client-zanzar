@@ -1,4 +1,4 @@
-import { CaptureVideoOptions, MediaCapture } from '@awesome-cordova-plugins/media-capture';
+import { MediaCapture, CaptureVideoOptions, MediaFile } from '@awesome-cordova-plugins/media-capture';
 import { Capacitor } from '@capacitor/core';
 import { toast } from "react-toastify";
 
