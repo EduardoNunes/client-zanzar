@@ -8,10 +8,10 @@ import { createPostWithMediaReq } from "../requests/postsRequests";
 
 export default function CreatePost() {
   const navigate = useNavigate();
-  const [caption, setCaption] = useState("");
+  const [caption] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
