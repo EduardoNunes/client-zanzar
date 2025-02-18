@@ -125,7 +125,6 @@ export default function CreatePost() {
                   <video
                     src={preview}
                     controls
-                    autoPlay
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 )
