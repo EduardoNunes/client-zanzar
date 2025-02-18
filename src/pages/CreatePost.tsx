@@ -1,10 +1,9 @@
 import Cookies from "js-cookie";
-import { Camera, Loader2, Upload, Video } from "lucide-react";
+import { Camera, Upload } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { openCamera } from "../components/OpenCamera";
-import {openVideoRecorder} from "../components/OpenVideoRecorder";
 import { createPostWithMediaReq } from "../requests/postsRequests";
 
 export default function CreatePost() {
@@ -27,7 +26,6 @@ export default function CreatePost() {
   const handleCameraCapture = async () => {
     try {
       const capturedFile = await openCamera();
-      console.log("CAPTURA", capturedFile)
       if (capturedFile) {
         setFile(capturedFile);
         const objectUrl = URL.createObjectURL(capturedFile);
@@ -35,21 +33,6 @@ export default function CreatePost() {
       }
     } catch (err) {
       toast.error("Erro ao capturar imagem");
-      console.error(err);
-    }
-  };
-
-  const handleVideoCapture = async () => {
-    try {
-      const capturedFile = await openVideoRecorder(); // Chama a função openVideoRecorder
-      console.log("CAPTURA", capturedFile)
-      if (capturedFile) {
-        setFile(capturedFile);
-        const objectUrl = URL.createObjectURL(capturedFile);
-        setPreview(objectUrl);
-      }
-    } catch (err) {
-      toast.error("Erro ao gravar vídeo");
       console.error(err);
     }
   };
@@ -66,21 +49,17 @@ export default function CreatePost() {
 
     try {
       const profileId = Cookies.get("profile_id");
-
       if (!profileId) {
         navigate("/login");
+        return;
       }
 
       const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `${profileId}/${fileName}`;
 
-      profileId &&
-        (await createPostWithMediaReq(profileId, file, caption, filePath).then(
-          () => {
-            navigate("/");
-          }
-        ));
+      await createPostWithMediaReq(profileId, file, caption, filePath);
+      navigate("/");
     } catch (error) {
       setError("Erro ao criar postagem. Por favor, tente novamente.");
       console.error("Error:", error);
@@ -99,7 +78,7 @@ export default function CreatePost() {
           <div className="flex flex-col items-center justify-center w-full">
             <label className="w-full h-64 border-2 border-dashed rounded-lg cursor-pointer transition-colors flex flex-col items-center justify-center relative overflow-hidden">
               {preview ? (
-                <video src={preview} controls className="absolute inset-0 w-full h-full object-cover" />
+                <img src={preview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
               ) : (
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-12 h-12 text-gray-400 mb-3" />
@@ -118,24 +97,7 @@ export default function CreatePost() {
               <Camera className="w-5 h-5" />
               Capturar Foto
             </button>
-            <button
-              type="button"
-              onClick={handleVideoCapture}
-              className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">
-              <Video className="w-5 h-5" />
-              Gravar Vídeo
-            </button>
           </div>
-        </div>
-        <div>
-          <label className="block text-gray-700 text-sm font-semibold mb-2">Legenda</label>
-          <textarea value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Escreva uma legenda para sua postagem..." className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 min-h-[100px]" />
-        </div>
-        <div className="flex gap-4">
-          <button type="button" onClick={() => { if (preview) { URL.revokeObjectURL(preview); } navigate("/"); }} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">Cancelar</button>
-          <button type="submit" disabled={loading || !file} className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
-            {loading ? (<div className="flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /><span>Publicando...</span></div>) : "Publicar"}
-          </button>
         </div>
       </form>
     </div>
