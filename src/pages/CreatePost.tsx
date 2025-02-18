@@ -1,10 +1,9 @@
 import Cookies from "js-cookie";
-import { Loader2, Upload, Camera } from "lucide-react";
-import React, { useState, useRef } from "react";
+import { Camera, Loader2, Upload } from "lucide-react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CustomCamera } from "../components/CustomCamera";
 import { createPostWithMediaReq } from "../requests/postsRequests";
-import { openCamera } from "../components/OpenCamera"
-import { toast } from "react-toastify";
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -13,10 +12,7 @@ export default function CreatePost() {
   const [preview, setPreview] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
-  // Refs for tap/hold functionality
-  const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isLongPressRef = useRef(false);
+  const [showCustomCamera, setShowCustomCamera] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -27,46 +23,11 @@ export default function CreatePost() {
     }
   };
 
-  const startPressTimer = () => {
-    isLongPressRef.current = false;
-    pressTimerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
-      handleCameraCapture('hold');
-    }, 500); // 500ms to distinguish between tap and hold
-  };
-
-  const handleCameraCapture = async (type: 'tap' | 'hold') => {
-    try {
-      const capturedFile = await openCamera(type);
-      if (capturedFile) {
-        setFile(capturedFile);
-        const objectUrl = URL.createObjectURL(capturedFile);
-        setPreview(objectUrl);
-      }
-    } catch (err) {
-      toast.error('Erro ao capturar mídia');
-      console.error(err);
-    }
-  };
-
-  const handleMouseDown = () => {
-    startPressTimer();
-  };
-
-  const handleMouseUp = () => {
-    if (pressTimerRef.current) {
-      clearTimeout(pressTimerRef.current);
-    }
-    
-    if (!isLongPressRef.current) {
-      handleCameraCapture('tap');
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (pressTimerRef.current) {
-      clearTimeout(pressTimerRef.current);
-    }
+  const handleCameraCapture = (capturedFile: File) => {
+    setFile(capturedFile);
+    const objectUrl = URL.createObjectURL(capturedFile);
+    setPreview(objectUrl);
+    setShowCustomCamera(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,6 +67,13 @@ export default function CreatePost() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
+      {showCustomCamera && (
+        <CustomCamera 
+          onCapture={handleCameraCapture} 
+          onClose={() => setShowCustomCamera(false)} 
+        />
+      )}
+
       <h1 className="text-2xl font-bold mb-6">Criar Nova Postagem</h1>
 
       {error && (
@@ -160,13 +128,11 @@ export default function CreatePost() {
           
           <button 
             type="button"
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseLeave}
+            onClick={() => setShowCustomCamera(true)}
             className="mt-4 flex items-center justify-center gap-2 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 w-full"
           >
             <Camera className="w-5 h-5" />
-            Capturar (Toque para foto, Segure para vídeo)
+            Abrir Câmera
           </button>
         </div>
 

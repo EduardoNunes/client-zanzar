@@ -1,4 +1,4 @@
-import { Camera, CameraResultType, CameraSource, CameraPermissionState, ImageOptions } from "@capacitor/camera";
+/* import { Camera, CameraPermissionState, CameraResultType, CameraSource, ImageOptions } from "@capacitor/camera";
 import { Capacitor } from '@capacitor/core';
 import { toast } from "react-toastify";
 
@@ -140,3 +140,4 @@ export async function openCamera(captureType: 'tap' | 'hold' = 'tap'): Promise<F
     return null;
   }
 }
+ */
