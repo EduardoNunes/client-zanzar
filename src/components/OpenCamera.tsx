@@ -4,10 +4,11 @@ import { toast } from "react-toastify";
 
 export async function openCamera(): Promise<File | null> {
   console.log("CLICK: Attempting to open camera for photo");
-  
+
   const platform = Capacitor.getPlatform();
   console.log("Current Platform:", platform);
 
+  // Verificar se a plataforma não é suportada
   if (!Capacitor.isNativePlatform() && platform !== 'web') {
     toast.error('Plataforma não suportada');
     return null;
@@ -16,12 +17,14 @@ export async function openCamera(): Promise<File | null> {
   const isCameraAvailable = Capacitor.isPluginAvailable('Camera');
   console.log("Camera Plugin Available:", isCameraAvailable);
 
+  // Verificar se o plugin da câmera está disponível
   if (!isCameraAvailable) {
     toast.error('Plugin da câmera não disponível');
     return null;
   }
 
   try {
+    // Se estiver em uma plataforma web
     if (platform === 'web') {
       console.log("Using web file input");
       const input = document.createElement('input');
@@ -29,7 +32,7 @@ export async function openCamera(): Promise<File | null> {
       input.accept = 'image/jpeg,image/png';
       input.capture = 'environment';
       input.click();
-      
+
       return new Promise((resolve) => {
         input.onchange = (event: Event) => {
           const file = (event.target as HTMLInputElement).files?.[0];
@@ -38,6 +41,7 @@ export async function openCamera(): Promise<File | null> {
       });
     }
 
+    // Verificar permissões de câmera
     let permissionResult: CameraPermissionState = (await Camera.checkPermissions()).camera;
     console.log("Initial Camera Permissions:", permissionResult);
 
@@ -52,6 +56,7 @@ export async function openCamera(): Promise<File | null> {
       }
     }
 
+    // Configuração da captura de imagem
     const options: ImageOptions = {
       quality: 90,
       allowEditing: false,
@@ -63,11 +68,13 @@ export async function openCamera(): Promise<File | null> {
 
     const image = await Camera.getPhoto(options);
     console.log("Foto capturada:", image);
-    
+
+    // Verificar se a webPath está presente e obter o arquivo
     if (image.webPath) {
       const response = await fetch(image.webPath);
       const blob = await response.blob();
-      
+
+      // Definir o mimeType corretamente
       const mimeType = image.format === 'png' ? 'image/png' : 'image/jpeg';
       const file = new File([blob], `captured-photo.${image.format}`, { type: mimeType });
 
@@ -77,15 +84,16 @@ export async function openCamera(): Promise<File | null> {
     return null;
   } catch (error) {
     console.error("Camera Error:", error);
-    
+
     if (error instanceof Error) {
+      // Tratamento do erro
       if (error.message.includes('User cancelled')) {
         toast.info('Captura cancelada');
       } else {
         toast.error(`Erro ao acessar a câmera: ${error.message}`);
       }
     }
-    
+
     return null;
   }
 }
