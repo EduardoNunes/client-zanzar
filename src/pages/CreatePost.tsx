@@ -27,6 +27,7 @@ export default function CreatePost() {
   const handleCameraCapture = async () => {
     try {
       const capturedFile = await openCamera();
+      console.log("CAPTURA", capturedFile)
       if (capturedFile) {
         setFile(capturedFile);
         const objectUrl = URL.createObjectURL(capturedFile);
@@ -41,6 +42,7 @@ export default function CreatePost() {
   const handleVideoCapture = async () => {
     try {
       const capturedFile = await openVideoRecorder(); // Chama a função openVideoRecorder
+      console.log("CAPTURA", capturedFile)
       if (capturedFile) {
         setFile(capturedFile);
         const objectUrl = URL.createObjectURL(capturedFile);
