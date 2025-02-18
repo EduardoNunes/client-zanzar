@@ -22,7 +22,7 @@ export default function CreatePost() {
     }
   };
 
-  const handleOpenCamera = async () => {
+  const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
     if (capturedFile) {
       setFile(capturedFile);
@@ -30,6 +30,15 @@ export default function CreatePost() {
       setPreview(objectUrl);
     }
   };
+
+  const handleOpenVideo = async () => {
+    const capturedFile = await openCamera();
+    if (capturedFile) {
+      setFile(capturedFile);
+      const objectUrl = URL.createObjectURL(capturedFile);
+      setPreview(objectUrl);
+    }
+  };  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,14 +130,14 @@ export default function CreatePost() {
           <div className="flex space-x-4 mt-4">
             <button
               type="button"
-              onClick={() => handleOpenCamera()}
+              onClick={() => handleOpenPhoto()}
               className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center"
             >
               <Camera className="mr-2" /> Capturar Foto
             </button>
             <button
               type="button"
-              onClick={() => handleOpenCamera()}
+              onClick={() => handleOpenVideo()}
               className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 flex items-center justify-center"
             >
               <Camera className="mr-2" /> Gravar Vídeo
