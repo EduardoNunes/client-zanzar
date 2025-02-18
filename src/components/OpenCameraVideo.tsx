@@ -17,8 +17,11 @@ function handleCaptureError(error: CaptureError): null {
 // Function to convert MediaFile to File
 async function mediaFileToFile(mediaFile: MediaFile): Promise<File | null> {
   try {
+    console.log('MediaFile received:', JSON.stringify(mediaFile, null, 2));
+
     if (!mediaFile.fullPath) {
       console.error('Caminho do arquivo não encontrado');
+      toast.error('Caminho do arquivo de vídeo não encontrado');
       return null;
     }
 
@@ -27,19 +30,30 @@ async function mediaFileToFile(mediaFile: MediaFile): Promise<File | null> {
       path: mediaFile.fullPath
     } as ReadFileOptions);
 
+    console.log('Filesystem readFile result:', JSON.stringify(fileResult, null, 2));
+
     // Ensure fileResult.data is a string
     const base64Data = typeof fileResult.data === 'string' 
       ? fileResult.data 
       : JSON.stringify(fileResult.data);
 
+    console.log('Base64 data length:', base64Data.length);
+
     // Convert base64 to blob
     const blob = base64ToBlob(base64Data, mediaFile.type || 'video/mp4');
     
-    return new File([blob], mediaFile.name || 'captured-video.mp4', { 
+    console.log('Blob created:', blob.type, blob.size);
+
+    const file = new File([blob], mediaFile.name || 'captured-video.mp4', { 
       type: mediaFile.type || 'video/mp4' 
     });
+
+    console.log('File created:', file.name, file.type, file.size);
+
+    return file;
   } catch (error) {
     console.error('Erro ao converter MediaFile para File:', error);
+    toast.error('Erro ao processar vídeo capturado');
     return null;
   }
 }
@@ -72,6 +86,8 @@ export async function openCameraVideo(): Promise<File | null> {
     };
 
     const mediaFiles = await MediaCapture.captureVideo(options);
+
+    console.log('MediaCapture result:', JSON.stringify(mediaFiles, null, 2));
 
     // Verifica se o retorno é um erro
     if (Array.isArray(mediaFiles)) {
