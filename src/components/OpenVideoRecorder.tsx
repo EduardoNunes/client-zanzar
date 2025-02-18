@@ -13,7 +13,7 @@ export async function openVideoRecorder(): Promise<File | null> {
     return null;
   }
 
-  // Captura de vídeo com o MediaCapture (apenas para dispositivos móveis)
+  // Captura de vídeo para plataformas móveis (iOS/Android)
   if (platform === 'ios' || platform === 'android') {
     try {
       const options: CaptureVideoOptions = {
