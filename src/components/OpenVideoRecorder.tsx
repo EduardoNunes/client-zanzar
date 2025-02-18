@@ -2,34 +2,12 @@ import { CaptureVideoOptions, MediaCapture } from "@awesome-cordova-plugins/medi
 import { Capacitor } from "@capacitor/core";
 import { toast } from "react-toastify";
 declare var cordova: any;
-declare var window: any;
-
-// Extend window interface to include Cordova-specific methods
-interface ExtendedWindow extends Window {
-  resolveLocalFileSystemURL?: (
-    url: string, 
-    successCallback: (fileEntry: any) => void, 
-    errorCallback: (error: any) => void
-  ) => void;
-}
-
-// Define an extended interface for MediaFile with known properties
-interface ExtendedMediaFile {
-  fullPath?: string;
-  path?: string;
-  localURL?: string;
-  nativeURL?: string;
-  name?: string;
-  type?: string;
-  lastModified?: number;
-  size?: number;
-}
 
 export async function openVideoRecorder(): Promise<File | null> {
-  console.log(" Abertura para captura de vídeo...");
+  console.log("🎥 Abertura para captura de vídeo...");
   
   const platform = Capacitor.getPlatform();
-  console.log(" Plataforma atual:", platform);
+  console.log("🛠️ Plataforma atual:", platform);
   
   if (platform !== 'ios' && platform !== 'android' && platform !== 'web') {
     toast.error('Plataforma não suportada');
@@ -58,24 +36,24 @@ export async function openVideoRecorder(): Promise<File | null> {
 
 async function checkCameraPermission(): Promise<boolean> {
   try {
-    console.log(" Solicitação de permissão de câmera...");
+    console.log("🔒 Solicitação de permissão de câmera...");
     const permissionStatus = await new Promise<any>((resolve, reject) => {
       cordova.plugins.permissions.requestPermission(cordova.plugins.permissions.CAMERA, (status: { hasPermission: any; }) => {
-        console.log(" Permissão de câmera status:", status);
+        console.log("📝 Permissão de câmera status:", status);
         resolve(status.hasPermission);
       }, (err: any) => reject(err));
     });
 
     return permissionStatus;
   } catch (error) {
-    console.error(' Erro ao verificar permissão de câmera:', error);
+    console.error('❌ Erro ao verificar permissão de câmera:', error);
     return false;
   }
 }
 
 async function captureVideoForMobile(): Promise<File | null> {
   try {
-    console.log(" Iniciando captura de vídeo...");
+    console.log("🎬 Iniciando captura de vídeo...");
     const options: CaptureVideoOptions = {
       limit: 1, 
       duration: 15, 
@@ -83,55 +61,19 @@ async function captureVideoForMobile(): Promise<File | null> {
     };
 
     const videoResult = await MediaCapture.captureVideo(options);
-    console.log(" Resultado da captura de vídeo (RAW):", JSON.stringify(videoResult, null, 2));
-    
+    console.log("🎥 Resultado da captura de vídeo:", videoResult);
+    console.log("VIDEORESULT AQUI", videoResult);
     if (Array.isArray(videoResult) && videoResult.length > 0) {
-      const video = videoResult[0] as ExtendedMediaFile;
-      console.log(" Vídeo capturado detalhes:", JSON.stringify(video, null, 2));
+      const video = videoResult[0];
 
-      // Log all properties of the video object using type-safe method
-      const videoProperties = Object.keys(video) as (keyof ExtendedMediaFile)[];
-      videoProperties.forEach(key => {
-        console.log(`Video property ${key}:`, video[key]);
-      });
-
-      // Try multiple ways to get the file path
-      const filePath = 
-        video.fullPath || 
-        video.path || 
-        video.localURL || 
-        video.nativeURL;
-
-      console.log(" Caminho do arquivo tentado:", filePath);
-
-      if (!filePath) {
-        toast.error('Erro: caminho do vídeo não encontrado.');
+      if (!video.fullPath) {
+        toast.error('Erro: caminho do vídeo inválido.');
         return null;
       }
 
-      // Try to create file using different methods
-      let file: File | null = null;
-      
-      try {
-        // Method 1: Direct file creation
-        file = await createFileFromPath(filePath);
-      } catch (directError) {
-        console.error(' Erro ao criar arquivo direto:', directError);
-        
-        try {
-          // Method 2: Fetch and create file
-          file = await fetchAndCreateFile(filePath);
-        } catch (fetchError) {
-          console.error(' Erro ao buscar arquivo:', fetchError);
-        }
-      }
-
-      if (!file) {
-        toast.error('Erro: não foi possível processar o vídeo.');
-        return null;
-      }
-
-      console.log(" Arquivo de vídeo criado:", file);
+      const file = await fetchAndCreateFile(video.fullPath);
+      if (!file) return null;
+      console.log("FILE VIDEO AQUI", file);
       displayVideo(file);
 
       return file;
@@ -139,69 +81,12 @@ async function captureVideoForMobile(): Promise<File | null> {
       toast.error('Nenhum vídeo capturado.');
       return null;
     }
-  } catch (error) {
-    console.error(' Erro ao capturar vídeo:', error);
+} catch (error) {
+    console.error('❌ Erro ao capturar vídeo:', error);
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
     toast.error(`Erro ao capturar vídeo: ${errorMessage}`);
     return null;
-  }
 }
-
-// New function to create file directly from path
-async function createFileFromPath(path: string): Promise<File | null> {
-  try {
-    // Use Cordova File plugin if available
-    const extendedWindow = window as ExtendedWindow;
-    
-    if (extendedWindow.resolveLocalFileSystemURL) {
-      return new Promise((resolve, reject) => {
-        extendedWindow.resolveLocalFileSystemURL!(path, 
-          (fileEntry: any) => {
-            // Use fileEntry to get file
-            fileEntry.file((file: File) => {
-              console.log(" Arquivo criado via Cordova:", file);
-              resolve(file);
-            }, (error: any) => {
-              console.error(' Erro ao obter arquivo:', error);
-              reject(null);
-            });
-          }, 
-          (error: any) => {
-            console.error(' Erro ao resolver URL do arquivo:', error);
-            reject(null);
-          }
-        );
-      });
-    }
-    
-    throw new Error('Cordova file system not available');
-  } catch (error) {
-    console.error(' Erro ao criar arquivo via Cordova:', error);
-    return null;
-  }
-}
-
-// Existing fetchAndCreateFile function remains the same
-async function fetchAndCreateFile(url: string): Promise<File | null> {
-  try {
-    console.log(" Tentando buscar arquivo de:", url);
-    const response = await fetch(url);
-    
-    if (!response) {
-      console.error(' Resposta de fetch vazia');
-      return null;
-    }
-
-    const blob = await response.blob();
-    const file = new File([blob], 'captured-video.mp4', { type: 'video/mp4' });
-    
-    console.log(" Arquivo criado com sucesso via fetch");
-    return file;
-  } catch (error) {
-    console.error(' Erro ao carregar o vídeo:', error);
-    toast.error('Erro ao carregar o vídeo.');
-    return null;
-  }
 }
 
 async function captureVideoForWeb(): Promise<File | null> {
@@ -232,7 +117,7 @@ async function captureVideoForWeb(): Promise<File | null> {
 
     const videoBlob = new Blob(chunks, { type: 'video/mp4' });
     const videoFile = new File([videoBlob], 'captured-video.mp4', { type: 'video/mp4' });
-    console.log(" Vídeo capturado com sucesso:", videoFile);
+    console.log("✅ Vídeo capturado com sucesso:", videoFile);
 
     stream.getTracks().forEach((track) => track.stop());
 
@@ -240,30 +125,35 @@ async function captureVideoForWeb(): Promise<File | null> {
 
     return videoFile;
   } catch (error) {
-    console.error(' Erro ao capturar vídeo na web:', error);
+    console.error('❌ Erro ao capturar vídeo na web:', error);
     toast.error('Erro ao capturar vídeo.');
     return null;
   }
 }
 
-function displayVideo(file: File): void {
+async function fetchAndCreateFile(url: string): Promise<File | null> {
   try {
-    const videoElement = document.createElement('video');
-    videoElement.src = URL.createObjectURL(file);
-    videoElement.controls = true;
-    videoElement.style.width = '100%';
-    videoElement.style.height = 'auto';
+    const response = await fetch(url);
+    if (!response) return null;
 
-    const mediaContainer = document.getElementById('media-container');
-    if (mediaContainer) {
-      // Clear previous content
-      mediaContainer.innerHTML = '';
-      mediaContainer.appendChild(videoElement);
-    } else {
-      console.warn('Contêiner de mídia não encontrado');
-    }
+    const blob = await response.blob();
+    return new File([blob], 'captured-video.mp4', { type: 'video/mp4' });
   } catch (error) {
-    console.error(' Erro ao exibir vídeo:', error);
-    toast.error('Erro ao exibir vídeo.');
+    console.error('❌ Erro ao carregar o vídeo:', error);
+    toast.error('Erro ao carregar o vídeo.');
+    return null;
+  }
+}
+
+function displayVideo(file: File): void {
+  const videoElement = document.createElement('video');
+  videoElement.src = URL.createObjectURL(file);
+  videoElement.controls = true;
+  videoElement.style.width = '100%';
+  videoElement.style.height = 'auto';
+
+  const mediaContainer = document.getElementById('media-container');
+  if (mediaContainer) {
+    mediaContainer.appendChild(videoElement);
   }
 }
