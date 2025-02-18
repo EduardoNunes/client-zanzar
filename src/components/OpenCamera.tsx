@@ -2,20 +2,17 @@ import { Camera, CameraResultType, CameraSource, CameraPermissionState, ImageOpt
 import { Capacitor } from '@capacitor/core';
 import { toast } from "react-toastify";
 
-export async function openCamera(type: 'photo' | 'video' = 'photo'): Promise<File | null> {
-  console.log(`CLICK: Attempting to open camera for ${type}`);
+export async function openCamera(): Promise<File | null> {
+  console.log("CLICK: Attempting to open camera for photo");
   
-  // Detailed platform and plugin logging
   const platform = Capacitor.getPlatform();
   console.log("Current Platform:", platform);
 
-  // Check if Capacitor is available
   if (!Capacitor.isNativePlatform() && platform !== 'web') {
     toast.error('Plataforma não suportada');
     return null;
   }
 
-  // Check camera plugin availability
   const isCameraAvailable = Capacitor.isPluginAvailable('Camera');
   console.log("Camera Plugin Available:", isCameraAvailable);
 
@@ -25,14 +22,11 @@ export async function openCamera(type: 'photo' | 'video' = 'photo'): Promise<Fil
   }
 
   try {
-    // Web platform handling
     if (platform === 'web') {
       console.log("Using web file input");
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = type === 'photo' 
-        ? 'image/jpeg,image/png' 
-        : 'video/mp4';
+      input.accept = 'image/jpeg,image/png';
       input.capture = 'environment';
       input.click();
       
@@ -44,7 +38,6 @@ export async function openCamera(type: 'photo' | 'video' = 'photo'): Promise<Fil
       });
     }
 
-    // Mobile platform handling
     let permissionResult: CameraPermissionState = (await Camera.checkPermissions()).camera;
     console.log("Initial Camera Permissions:", permissionResult);
 
@@ -59,8 +52,7 @@ export async function openCamera(type: 'photo' | 'video' = 'photo'): Promise<Fil
       }
     }
 
-    // Prepare camera options
-    const baseOptions: ImageOptions = {
+    const options: ImageOptions = {
       quality: 90,
       allowEditing: false,
       resultType: CameraResultType.Uri,
@@ -69,69 +61,29 @@ export async function openCamera(type: 'photo' | 'video' = 'photo'): Promise<Fil
       saveToGallery: false
     };
 
-    // For video, we might need a different approach
-    if (type === 'video') {
-      try {
-        // Some platforms might support video differently
-        const videoImage = await Camera.getPhoto({
-          ...baseOptions,
-          source: CameraSource.Camera
-        });
-
-        console.log("Vídeo capturado:", videoImage);
-        
-        if (videoImage.webPath) {
-          const response = await fetch(videoImage.webPath);
-          const blob = await response.blob();
-          
-          const file = new File([blob], `captured-video.mp4`, { 
-            type: 'video/mp4'
-          });
-
-          return file;
-        }
-      } catch (videoError) {
-        toast.error('Erro ao capturar vídeo');
-        console.error('Video capture error:', videoError);
-        return null;
-      }
-    }
-
-    // Photo capture
-    const image = await Camera.getPhoto(baseOptions);
-
-    console.log("Mídia capturada:", image);
+    const image = await Camera.getPhoto(options);
+    console.log("Foto capturada:", image);
     
     if (image.webPath) {
-      // Convert webPath to File
       const response = await fetch(image.webPath);
       const blob = await response.blob();
       
-      // Determine mime type based on format
-      const mimeType = image.format === 'png' ? 'image/png' : 
-                       image.format === 'gif' ? 'image/gif' : 
-                       'image/jpeg';
-
-      const file = new File([blob], `captured-photo.${image.format}`, { 
-        type: mimeType
-      });
+      const mimeType = image.format === 'png' ? 'image/png' : 'image/jpeg';
+      const file = new File([blob], `captured-photo.${image.format}`, { type: mimeType });
 
       return file;
     }
 
     return null;
   } catch (error) {
-    console.error("Detailed Camera Error:", error);
+    console.error("Camera Error:", error);
     
     if (error instanceof Error) {
       if (error.message.includes('User cancelled')) {
         toast.info('Captura cancelada');
-      } else if (error.message.includes('not supported')) {
-        toast.error('Câmera não suportada nesta plataforma');
       } else {
         toast.error(`Erro ao acessar a câmera: ${error.message}`);
       }
-      console.error('Full error details:', error);
     }
     
     return null;

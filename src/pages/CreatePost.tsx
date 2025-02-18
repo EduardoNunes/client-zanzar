@@ -22,8 +22,8 @@ export default function CreatePost() {
     }
   };
 
-  const handleOpenCamera = async (type: 'photo' | 'video') => {
-    const capturedFile = await openCamera(type);
+  const handleOpenCamera = async () => {
+    const capturedFile = await openCamera();
     if (capturedFile) {
       setFile(capturedFile);
       const objectUrl = URL.createObjectURL(capturedFile);
@@ -84,10 +84,9 @@ export default function CreatePost() {
           <div className="flex flex-col items-center justify-center w-full">
             <label
               className={`w-full h-64 border-2 border-dashed rounded-lg cursor-pointer
-                ${
-                  preview
-                    ? "border-transparent"
-                    : "border-gray-300 hover:border-indigo-400"
+                ${preview
+                  ? "border-transparent"
+                  : "border-gray-300 hover:border-indigo-400"
                 }
                 transition-colors duration-200 ease-in-out
                 flex flex-col items-center justify-center relative overflow-hidden`}
@@ -120,16 +119,16 @@ export default function CreatePost() {
             </label>
           </div>
           <div className="flex space-x-4 mt-4">
-            <button 
+            <button
               type="button"
-              onClick={() => handleOpenCamera('photo')}
+              onClick={() => handleOpenCamera()}
               className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center"
             >
               <Camera className="mr-2" /> Capturar Foto
             </button>
-            <button 
+            <button
               type="button"
-              onClick={() => handleOpenCamera('video')}
+              onClick={() => handleOpenCamera()}
               className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 flex items-center justify-center"
             >
               <Camera className="mr-2" /> Gravar Vídeo
