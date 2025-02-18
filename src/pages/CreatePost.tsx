@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPostWithMediaReq } from "../requests/postsRequests";
 import { openCamera } from "../components/OpenCamera"
+import {openCameraVideo} from "../components/OpenCameraVideo"
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ export default function CreatePost() {
   };
 
   const handleOpenVideo = async () => {
-    const capturedFile = await openCamera();
+    const capturedFile = await openCameraVideo();
     if (capturedFile) {
       setFile(capturedFile);
       const objectUrl = URL.createObjectURL(capturedFile);
