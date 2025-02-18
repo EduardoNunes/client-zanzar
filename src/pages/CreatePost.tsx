@@ -1,10 +1,10 @@
 import Cookies from "js-cookie";
-import { Loader2, Upload, Camera } from "lucide-react";
-import React, { useState, useRef } from "react";
+import { Camera, Loader2, Upload } from "lucide-react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createPostWithMediaReq } from "../requests/postsRequests";
-import { openCamera } from "../components/OpenCamera";
 import { toast } from "react-toastify";
+import { openCamera } from "../components/OpenCamera";
+import { createPostWithMediaReq } from "../requests/postsRequests";
 
 export default function CreatePost() {
   const navigate = useNavigate();
