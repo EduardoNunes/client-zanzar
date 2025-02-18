@@ -1,6 +1,6 @@
-import { CaptureVideoOptions, MediaCapture } from '@awesome-cordova-plugins/media-capture';
-import { Capacitor } from '@capacitor/core';
+import { MediaCapture, MediaFile, CaptureVideoOptions } from "@awesome-cordova-plugins/media-capture";
 import { toast } from "react-toastify";
+import { Filesystem, ReadFileOptions } from '@capacitor/filesystem';
 
 // Definir tipo personalizado para CaptureError
 interface CaptureError {
@@ -8,100 +8,104 @@ interface CaptureError {
   message: string;
 }
 
-export async function openCameraVideo(): Promise<File | null> {
-  console.log("CLICK: Attempting to open camera for video");
+function handleCaptureError(error: CaptureError): null {
+  console.error(`Capture Error (Code ${error.code}): ${error.message}`);
+  toast.error(`Erro na captura: ${error.message}`);
+  return null;
+}
 
-  const platform = Capacitor.getPlatform();
-  console.log("Current Platform:", platform);
-
-  if (!Capacitor.isNativePlatform() && platform !== 'web') {
-    toast.error('Plataforma não suportada');
-    return null;
-  }
-
-  const isMediaCaptureAvailable = Capacitor.isPluginAvailable('MediaCapture');
-  console.log("MediaCapture Plugin Available:", isMediaCaptureAvailable);
-
-  if (!isMediaCaptureAvailable) {
-    toast.error('Plugin de gravação não disponível');
-    return null;
-  }
-
+// Function to convert MediaFile to File
+async function mediaFileToFile(mediaFile: MediaFile): Promise<File | null> {
   try {
-    if (platform === 'web') {
-      console.log("Using web file input for video");
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'video/mp4,video/webm,video/ogg';
-      input.capture = 'environment';
-      input.click();
-
-      return new Promise((resolve) => {
-        input.onchange = (event: Event) => {
-          const file = (event.target as HTMLInputElement).files?.[0];
-          resolve(file || null);
-        };
-      });
-    }
-
-    const options: CaptureVideoOptions = {
-      limit: 1, // Apenas um vídeo
-      duration: 30, // Tempo máximo (em segundos)
-      quality: 1, // Qualidade máxima (0 = baixa, 1 = alta)
-    };
-
-    // Captura o vídeo
-    const result = await MediaCapture.captureVideo(options);
-    console.log("Vídeo capturado:", result);
-
-    // Verifica se o resultado é um erro e trata corretamente
-    if ((result as unknown as CaptureError).code) {
-      const captureError = result as unknown as CaptureError;
-      
-      // Trate o erro corretamente
-      if (captureError.code === 3) {
-        toast.info('Gravação cancelada');
-      } else if (captureError.message) {
-        toast.error(`Erro ao gravar vídeo: ${captureError.message}`);
-      } else {
-        toast.error('Erro desconhecido ao tentar capturar vídeo.');
-      }
+    if (!mediaFile.fullPath) {
+      console.error('Caminho do arquivo não encontrado');
       return null;
     }
 
-    // Verifica se result é um array de MediaFile
-    if (Array.isArray(result)) {
-      if (result.length > 0) {
-        const videoPath = result[0].fullPath;
-        const response = await fetch(videoPath);
-        const blob = await response.blob();
+    // Read file contents using Capacitor Filesystem
+    const fileResult = await Filesystem.readFile({
+      path: mediaFile.fullPath
+    } as ReadFileOptions);
 
-        const file = new File([blob], `captured-video.mp4`, { type: "video/mp4" });
-        return file;
-      }
-    }
+    // Ensure fileResult.data is a string
+    const base64Data = typeof fileResult.data === 'string' 
+      ? fileResult.data 
+      : JSON.stringify(fileResult.data);
 
-    return null;
-  } catch (error: unknown) {
-    console.error("Video Capture Error:", error);
-
-    if (typeof error === 'object' && error !== null && 'code' in error) {
-      const captureError = error as CaptureError;
-      
-      // Trate o erro corretamente
-      if (captureError.code && captureError.message) {
-        if (captureError.code === 3) {
-          toast.info('Gravação cancelada');
-        } else {
-          toast.error(`Erro ao gravar vídeo: ${captureError.message}`);
-        }
-      } else {
-        toast.error('Erro desconhecido ao tentar capturar vídeo.');
-      }
-    } else {
-      toast.error('Ocorreu um erro inesperado.');
-    }
-
+    // Convert base64 to blob
+    const blob = base64ToBlob(base64Data, mediaFile.type || 'video/mp4');
+    
+    return new File([blob], mediaFile.name || 'captured-video.mp4', { 
+      type: mediaFile.type || 'video/mp4' 
+    });
+  } catch (error) {
+    console.error('Erro ao converter MediaFile para File:', error);
     return null;
   }
-};
+}
+
+// Helper function to convert base64 to Blob with explicit string type
+function base64ToBlob(base64: string, type: string = 'application/octet-stream'): Blob {
+  // Remove data URL prefix if present
+  const base64Clean = base64.replace(/^data:image\/\w+;base64,/, '')
+                             .replace(/^data:video\/\w+;base64,/, '')
+                             .replace(/^data:application\/\w+;base64,/, '');
+
+  const byteCharacters = atob(base64Clean);
+  const byteNumbers = new Array(byteCharacters.length);
+  
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: type });
+}
+
+export async function openCameraVideo(): Promise<File | null> {
+  console.log("CLICK: Attempting to open camera for video");
+
+  try {
+    const options: CaptureVideoOptions = {
+      limit: 1, // Número de vídeos a capturar
+      duration: 60 // Duração máxima em segundos
+    };
+
+    const mediaFiles = await MediaCapture.captureVideo(options);
+
+    // Verifica se o retorno é um erro
+    if (Array.isArray(mediaFiles)) {
+      if (mediaFiles.length > 0) {
+        const video = mediaFiles[0];
+        console.log("Vídeo capturado:", video);
+        
+        // Convert MediaFile to File
+        const fileResult = await mediaFileToFile(video);
+        
+        if (!fileResult) {
+          toast.error('Erro ao processar vídeo capturado');
+          return null;
+        }
+        
+        return fileResult;
+      }
+      toast.info('Nenhum vídeo capturado');
+      return null;
+    } else {
+      // Se mediaFiles não for um array, isso significa que houve um erro
+      const error = mediaFiles as unknown as CaptureError;
+      return handleCaptureError(error);
+    }
+  } catch (error) {
+    console.error("Erro ao capturar vídeo:", error);
+    
+    // Check if error matches CaptureError interface
+    if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
+      return handleCaptureError(error as CaptureError);
+    }
+    
+    // Generic error handling
+    toast.error('Erro desconhecido ao capturar vídeo');
+    return null;
+  }
+}
