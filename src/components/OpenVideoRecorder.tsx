@@ -2,9 +2,6 @@ import { CaptureVideoOptions, MediaCapture } from "@awesome-cordova-plugins/medi
 import { Capacitor } from "@capacitor/core";
 import { toast } from "react-toastify";
 
-// Importando o plugin de permissões
-declare var cordova: any;
-
 export async function openVideoRecorder(): Promise<File | null> {
   console.log("🎥 Abertura para captura de vídeo...");
 
@@ -16,27 +13,9 @@ export async function openVideoRecorder(): Promise<File | null> {
     return null;
   }
 
-  // Verifica permissão para Android/iOS
+  // Captura de vídeo para plataformas móveis (iOS/Android)
   if (platform === 'ios' || platform === 'android') {
     try {
-      console.log("🔒 Solicitação de permissão de câmera...");
-      const permissionStatus = await new Promise<any>((resolve, reject) => {
-        cordova.plugins.permissions.requestPermission(cordova.plugins.permissions.CAMERA, (status: { hasPermission: any; }) => {
-          console.log("📝 Permissão de câmera status:", status);
-          if (status.hasPermission) {
-            resolve(true);
-          } else {
-            reject('Permissão de câmera negada.');
-          }
-        }, (err: any) => reject(err));
-      });
-
-      if (!permissionStatus) {
-        toast.error('Permissão de câmera negada.');
-        return null;
-      }
-
-      console.log("🎬 Iniciando captura de vídeo...");
       const options: CaptureVideoOptions = {
         limit: 1, // Apenas um vídeo
         duration: 15, // Duração máxima: 15 segundos
@@ -44,7 +23,6 @@ export async function openVideoRecorder(): Promise<File | null> {
       };
 
       const videoResult = await MediaCapture.captureVideo(options);
-      console.log("🎥 Resultado da captura de vídeo:", videoResult);
       if (Array.isArray(videoResult) && videoResult.length > 0) {
         const video = videoResult[0];
 
@@ -70,7 +48,7 @@ export async function openVideoRecorder(): Promise<File | null> {
       }
     } catch (error) {
       console.error('❌ Erro ao capturar vídeo:', error);
-      toast.error(`Erro ao capturar vídeo: ${error}`);
+      toast.error('Erro ao capturar vídeo.');
       return null;
     }
   }
