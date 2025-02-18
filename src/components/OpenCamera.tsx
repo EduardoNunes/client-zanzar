@@ -57,7 +57,8 @@ export async function openCamera(): Promise<File | null> {
       return file;
     }
   } catch (error) {
-    toast.info("Captura cancelada.");
+    console.error("❌ Erro na câmera:", error);
+    toast.error('Erro ao acessar a câmera.');
     return null;
   }
 

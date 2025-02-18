@@ -70,28 +70,23 @@ export async function openVideoRecorder(): Promise<File | null> {
 
       mediaRecorder.start();
 
-      // Exibe o vídeo para visualização do usuário (opcional)
       const videoElement = document.createElement('video');
       videoElement.srcObject = stream;
       videoElement.play();
       document.body.appendChild(videoElement);
 
-      // Promessa que para a gravação após 15 segundos
-      const stopRecording = new Promise<File | null>((resolve) => {
+      const stopRecording = new Promise<File | null>(() => {
         setTimeout(() => {
           mediaRecorder.stop();
-          resolve(null); // Apenas para indicar que a gravação foi parada
         }, 15000); // Grava por 15 segundos
       });
 
       await stopRecording;
 
-      // Criar arquivo de vídeo a partir dos chunks gravados
       const videoBlob = new Blob(chunks, { type: 'video/mp4' });
       const videoFile = new File([videoBlob], 'captured-video.mp4', { type: 'video/mp4' });
       console.log("✅ Vídeo capturado com sucesso:", videoFile);
 
-      // Parar o stream
       stream.getTracks().forEach((track) => track.stop());
       return videoFile;
     } catch (error) {
