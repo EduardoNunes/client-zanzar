@@ -1,10 +1,11 @@
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { formatDistanceToNow } from "date-fns";
 import Cookies from "js-cookie";
 import { CircleUserRound, Heart, LogIn, MessageCircle } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CommentModal from "../components/CommentsModal";
 import ImageViewer from "../components/ImageViewer";
+import VideoProgressBar from "../components/VideoProgressBar";
 import { getFeedReq, handleLikeReq } from "../requests/feedRequests";
 
 interface Post {
@@ -14,6 +15,7 @@ interface Post {
   createdAt: string | number | Date;
   id: string;
   mediaUrl: string;
+  mediaType?: 'image' | 'video';
   caption: string;
   created_at: string;
   post: string;
@@ -38,6 +40,54 @@ export default function Feed() {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const token = Cookies.get("access_token");
 
+  // Refs for Intersection Observer
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Cleanup function for observer
+  const cleanupObserver = useCallback(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+  }, []);
+
+  // Setup Intersection Observer
+  useEffect(() => {
+    // Create Intersection Observer
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const videoElement = entry.target as HTMLVideoElement;
+          
+          if (!entry.isIntersecting) {
+            // Video is not in view
+            videoElement.pause();
+            videoElement.muted = true;
+            videoElement.currentTime = 0;
+          } else {
+            // Video is in view
+            videoElement.play().catch(() => {
+              console.warn('Autoplay prevented');
+            });
+          }
+        });
+      },
+      {
+        threshold: 0.5, // Trigger when at least 50% of the video is visible
+      }
+    );
+
+    // Observe videos
+    videoRefs.current.forEach((videoEl) => {
+      if (videoEl) {
+        observerRef.current?.observe(videoEl);
+      }
+    });
+
+    // Cleanup
+    return cleanupObserver;
+  }, [posts, cleanupObserver]);
+
   useEffect(() => {
     fetchPosts();
   }, []);
@@ -53,8 +103,21 @@ export default function Feed() {
       setLoading(true);
       const data = await getFeedReq(profileId, 1, 3);
 
-      setPosts(data || []);
-      const likesMap = data.reduce(
+      // Determine media type for each post
+      const processedPosts = data.map((post: Post) => {
+        // You might want to adjust this logic based on how you store media type in the backend
+        const isVideo = post.mediaUrl.includes('/videos/') || 
+                        post.mediaUrl.includes('.mp4') || 
+                        post.mediaUrl.includes('video');
+        
+        return {
+          ...post,
+          mediaType: isVideo ? 'video' : 'image'
+        };
+      });
+
+      setPosts(processedPosts || []);
+      const likesMap = processedPosts.reduce(
         (acc: Record<string, boolean>, post: Post) => {
           acc[post.id] = post.likedByLoggedInUser || false;
           return acc;
@@ -83,7 +146,19 @@ export default function Feed() {
       setLoading(true);
       const newPosts = await getFeedReq(profileId, page + 1, 3);
 
-      const newLikesMap = newPosts.reduce(
+      // Determine media type for each post
+      const processedPosts = newPosts.map((post: Post) => {
+        const isVideo = post.mediaUrl.includes('/videos/') || 
+                        post.mediaUrl.includes('.mp4') || 
+                        post.mediaUrl.includes('video');
+        
+        return {
+          ...post,
+          mediaType: isVideo ? 'video' : 'image'
+        };
+      });
+
+      const newLikesMap = processedPosts.reduce(
         (acc: Record<string, boolean>, post: Post) => {
           acc[post.id] = post.likedByLoggedInUser || false;
           return acc;
@@ -91,13 +166,13 @@ export default function Feed() {
         {}
       );
 
-      if (newPosts.length > 0) {
+      if (processedPosts.length > 0) {
         setUserLikes((prevLikes) => ({
           ...prevLikes,
           ...newLikesMap,
         }));
 
-        setPosts((prevPosts) => [...prevPosts, ...newPosts]);
+        setPosts((prevPosts) => [...prevPosts, ...processedPosts]);
         setPage((prevPage) => prevPage + 1);
       } else {
         setHasMorePosts(false);
@@ -185,7 +260,7 @@ export default function Feed() {
   return (
     <>
       <div className="space-y-8">
-        {posts.map((post) => (
+        {posts.map((post, index) => (
           <div key={post.id} className="bg-white rounded-lg shadow">
             <div className="p-4 border-b">
               <div className="flex items-center space-x-3">
@@ -217,33 +292,53 @@ export default function Feed() {
             <div className="relative w-full aspect-square bg-gray-100">
               {post.mediaUrl ? (
                 <div className="relative w-full h-full">
-                  <img
-                    src={post.mediaUrl}
-                    alt={`Post by ${post.profile.username}`}
-                    onLoad={(e) => {
-                      const img = e.currentTarget;
-                      const spinner = img.nextElementSibling as HTMLDivElement;
-                      img.classList.remove('opacity-0');
-                      spinner.classList.add('hidden');
-                    }}
-                    onError={(e) => {
-                      const img = e.currentTarget;
-                      const spinner = img.nextElementSibling as HTMLDivElement;
-                      img.classList.add('opacity-0');
-                      spinner.classList.add('hidden');
-                    }}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover cursor-pointer opacity-0"
-                    onClick={() => setFullscreenImage(post.mediaUrl)}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
-                  </div>
+                  {post.mediaType === 'video' ? (
+                    <div className="relative w-full h-full">
+                      <video
+                        ref={(el) => {
+                          // Store video refs for Intersection Observer
+                          videoRefs.current[index] = el;
+                          
+                          if (el) {
+                            // Ensure video is completely muted initially
+                            el.muted = true;
+                            el.volume = 0;
+                            
+                            // Attempt to play, with error handling
+                            el.play().catch((error) => {
+                              console.warn('Autoplay was prevented', error);
+                            });
+                            
+                            // Store the video element for use with VideoProgressBar
+                            el.dataset.feedVideo = 'true';
+                          }
+                        }}
+                        src={post.mediaUrl}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                      <VideoProgressBar 
+                        videoElement={document.querySelector('video[data-feed-video="true"]') as HTMLVideoElement} 
+                        onFullscreen={() => setFullscreenImage(post.mediaUrl)}
+                      />
+                    </div>
+                  ) : (
+                    <img
+                      src={post.mediaUrl}
+                      alt={`Post by ${post.profile.username}`}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={() => setFullscreenImage(post.mediaUrl)}
+                    />
+                  )}
                 </div>
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">
-                  No image available
+                  No media available
                 </div>
               )}
             </div>
