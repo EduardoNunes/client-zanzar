@@ -307,6 +307,12 @@ export default function Feed() {
                             // Add unique identifier for each video
                             el.dataset.feedVideoIndex = String(index);
                             
+                            // Add onLoadedMetadata event listener
+                            el.addEventListener('loadedmetadata', () => {
+                              // Force a re-render or trigger visibility of controls
+                              el.dispatchEvent(new Event('videoLoaded'));
+                            });
+
                             // Attempt to play with error handling
                             el.play().catch((error) => {
                               console.warn('Autoplay was prevented', error);
