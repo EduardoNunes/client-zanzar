@@ -31,7 +31,7 @@ export default function CreatePost() {
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
     if (currentFile.size > MAX_FILE_SIZE) {
       toast.info("O arquivo de mídia não pode exceder 30MB.");
-      // Reset the input to allow reselecting
+
       event.target.value = '';
       return;
     }
@@ -47,17 +47,18 @@ export default function CreatePost() {
           setFile(currentFile);
         } catch (error) {
           console.error("Error loading image:", error);
-          toast.error("Erro ao carregar imagem. Tente novamente.");
-          // Reset the input to allow reselecting
+          toast.error(`Erro 1 ${error}`);
+          
           event.target.value = '';
           setFile(null);
           setPreview("");
           setFileType(null);
         }
       };
+
       reader.onerror = () => {
-        toast.error("Erro ao carregar imagem. Tente novamente.");
-        // Reset the input to allow reselecting
+        toast.error(`Erro 2 ${error}`);
+        
         event.target.value = '';
         setFile(null);
         setPreview("");
@@ -74,9 +75,9 @@ export default function CreatePost() {
           setPreview(reader.result as string);
           setFile(currentFile);
         } catch (error) {
-          console.error("Error loading video:", error);
+          toast.error(`Erro 1 ${error}`);
           toast.error("Erro ao carregar vídeo. Tente novamente.");
-          // Reset the input to allow reselecting
+
           event.target.value = '';
           setFile(null);
           setPreview("");
@@ -84,8 +85,9 @@ export default function CreatePost() {
         }
       };
       reader.onerror = () => {
+        toast.error(`Erro 2 ${error}`);
         toast.error("Erro ao carregar vídeo. Tente novamente.");
-        // Reset the input to allow reselecting
+
         event.target.value = '';
         setFile(null);
         setPreview("");
@@ -94,7 +96,6 @@ export default function CreatePost() {
       reader.readAsDataURL(currentFile);
     } else {
       toast.info("Formato de arquivo não suportado.");
-      // Reset the input to allow reselecting
       event.target.value = '';
     }
   };
@@ -232,10 +233,10 @@ export default function CreatePost() {
             <button
               type="button"
               onClick={() => handleOpenPhoto()}
-             disabled={!!preview}
-              className={`flex-1 y-2 px-4 rounded-lg flex items-center justify-center 
-                ${preview 
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+              disabled={!!preview}
+              className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center 
+                ${preview
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-green-500 text-white hover:bg-green-600'
                 }`}
             >
