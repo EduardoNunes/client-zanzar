@@ -28,21 +28,21 @@ export default function CreatePost() {
     setFile(null);
     setPreview("");
     setFileType(null);
-  
+
     const currentFile = event.target.files?.[0];
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
       return;
     }
-  
+
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
-  
+
     if (currentFile.size > MAX_FILE_SIZE) {
       toast.info("O arquivo de mídia não pode exceder 30MB.");
       event.target.value = '';
       return;
     }
-  
+
     try {
       // Determine file type
       if (currentFile.type.startsWith("image/")) {
@@ -54,21 +54,21 @@ export default function CreatePost() {
         event.target.value = '';
         return;
       }
-  toast.info(`FORMATO ${currentFile}`)
-  toast.info(`TYPE ${currentFile.type}`)
+
       // Create object URL for preview
       const objectUrl = URL.createObjectURL(currentFile);
-  toast.info(`TYPE ${objectUrl}`)
+
       // Validate the object URL
-      if (!objectUrl || objectUrl.startsWith("blob:") === false) {
+      if (!objectUrl || !objectUrl.startsWith("blob:")) {
         throw new Error("URL inválida gerada para o arquivo.");
       }
-  
-      setPreview(objectUrl);
-      setFile(currentFile);
-  
+
       // Log the generated URL for debugging
       console.log("Generated Object URL:", objectUrl);
+
+      // Set preview and file state
+      setPreview(objectUrl);
+      setFile(currentFile);
     } catch (error) {
       console.error("Erro ao processar o arquivo:", error);
       toast.error("Erro ao carregar o arquivo. Tente novamente.");
@@ -78,6 +78,15 @@ export default function CreatePost() {
       setFileType(null);
     }
   };
+
+  // Cleanup object URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
@@ -166,12 +175,20 @@ export default function CreatePost() {
                     controls
                     playsInline
                     className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error("Erro ao carregar vídeo:", e);
+                      toast.error("Erro ao carregar o vídeo. Verifique o formato ou a codificação.");
+                    }}
                   />
                 ) : (
                   <img
                     src={preview}
                     alt="Preview"
                     className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error("Erro ao carregar imagem:", e);
+                      toast.error("Erro ao carregar a imagem. Verifique o formato ou a codificação.");
+                    }}
                   />
                 )
               ) : (
