@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { Camera, Loader2, Upload } from "lucide-react";
+import { Camera, Loader2, Upload, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -16,7 +16,11 @@ export default function CreatePost() {
   const [error, setError] = useState("");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // Reset all media-related states
+    setFile(null);
     setPreview("");
+    setFileType(null);
+
     const currentFile = event.target.files?.[0];
 
     if (!currentFile) {
@@ -168,6 +172,19 @@ export default function CreatePost() {
                 className="hidden"
               />
 
+              {preview && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFile(null);
+                    setPreview("");
+                    setFileType(null);
+                  }}
+                  className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              )}
             </label>
           </div>
           <div className="flex space-x-4 mt-4">
