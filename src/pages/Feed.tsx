@@ -73,7 +73,7 @@ export default function Feed() {
         });
       },
       {
-        threshold: 0.5, // Trigger when at least 50% of the video is visible
+        threshold: 0.3, // Trigger when at least 30% of the video is visible
       }
     );
 
