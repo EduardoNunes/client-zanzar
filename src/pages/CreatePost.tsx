@@ -33,17 +33,14 @@ export default function CreatePost() {
       };
 
       reader.readAsDataURL(file);
-    } else if (file.type.startsWith("video/")) {      
+    } else if (file.type.startsWith("video/")) {
       const videoUrl = URL.createObjectURL(file);
-      toast.info(`URL: ${videoUrl}`);
       setPreview(videoUrl);
-
       setFileType('video');
     } else {
       toast.info("Formato de arquivo não suportado.");
     }
   };
-  toast.info(`PREVIEW: ${preview}`);
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
@@ -126,6 +123,7 @@ export default function CreatePost() {
               {preview ? (
                 fileType === "video" ? (
                   <video
+                    key={preview} // 🔥 Isso força a recriação do elemento
                     src={preview}
                     autoPlay
                     loop
