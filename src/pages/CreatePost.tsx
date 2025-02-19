@@ -27,7 +27,7 @@ export default function CreatePost() {
       return;
     }
 
-    const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB.
+    const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
     if (currentFile.size > MAX_FILE_SIZE) {
       toast.info("O arquivo de mídia não pode exceder 30MB.");
 
