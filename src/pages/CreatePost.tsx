@@ -16,7 +16,7 @@ export default function CreatePost() {
   const [error, setError] = useState("");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Reset all media-related states
+    // Reset states
     setFile(null);
     setPreview("");
     setFileType(null);
@@ -34,40 +34,50 @@ export default function CreatePost() {
       return;
     }
 
-    // Verifica se é uma imagem ou um vídeo
-    if (currentFile.type.startsWith("image/")) {
-      setFileType('image');
+    // Espera os estados serem resetados antes de prosseguir
+    setTimeout(() => {
+      // Verifica se é uma imagem ou um vídeo
+      if (currentFile.type.startsWith("image/")) {
+        setFileType("image");
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(currentFile);
-    } else if (currentFile.type.startsWith("video/")) {
-      setFileType('video');
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreview(reader.result as string);
+        };
+        reader.readAsDataURL(currentFile);
+      } else if (currentFile.type.startsWith("video/")) {
+        setFileType("video");
 
-      // Use FileReader for better mobile compatibility
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(currentFile);
-    } else {
-      toast.info("Formato de arquivo não suportado.");
-    }
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreview(reader.result as string);
+        };
+        reader.readAsDataURL(currentFile);
+      } else {
+        toast.info("Formato de arquivo não suportado.");
+      }
 
-    // Always set the file for upload
-    setFile(currentFile);
+      // Sempre define o arquivo para upload após o delay
+      setFile(currentFile);
+    }, 0);
   };
+
 
   const handleOpenPhoto = async () => {
-    const capturedFile = await openCamera();
-    if (capturedFile) {
-      setFile(capturedFile);
-      const objectUrl = URL.createObjectURL(capturedFile);
-      setPreview(objectUrl);
-    }
+    setFile(null);
+    setPreview("");
+    setFileType(null);
+
+    setTimeout(async () => {
+      const capturedFile = await openCamera();
+      if (capturedFile) {
+        setFile(capturedFile);
+        const objectUrl = URL.createObjectURL(capturedFile);
+        setPreview(objectUrl);
+      }
+    }, 0);
   };
+
 
   /*   const handleOpenVideo = async () => {
       const capturedFile = await openCamera();
@@ -191,7 +201,12 @@ export default function CreatePost() {
             <button
               type="button"
               onClick={() => handleOpenPhoto()}
-              className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center"
+              disabled={!!preview}
+              className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center 
+                ${preview
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-green-500 text-white hover:bg-green-600'
+                }`}
             >
               <Camera className="mr-2" /> Capturar Foto
             </button>
