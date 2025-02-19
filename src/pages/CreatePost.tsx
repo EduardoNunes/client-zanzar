@@ -134,7 +134,7 @@ export default function CreatePost() {
                     autoPlay
                     loop
                     className="absolute inset-0 w-full h-full object-cover"
-                    onLoadedData={() => console.log("Vídeo carregado com sucesso!")}
+                    onLoadedData={() => toast.success("Vídeo carregado com sucesso!")}
                   />
                 ) : (
                   <img
