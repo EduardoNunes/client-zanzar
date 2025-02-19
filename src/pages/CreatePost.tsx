@@ -42,7 +42,7 @@ export default function CreatePost() {
         if (videoElement) {
           videoElement.load();  // Força o carregamento do vídeo
         }
-      }, 200);  // Ajuste o tempo se necessário
+      }, 500);  // Ajuste o tempo se necessário
     } else {
       toast.info("Formato de arquivo não suportado.");
     }
