@@ -23,8 +23,6 @@ export default function CreatePost() {
       return;
     }
 
-    toast.info(`Tipo do arquivo: ${file.type}`);
-
     // Verifica se é uma imagem ou um vídeo
     if (file.type.startsWith("image/")) {
       setFileType('image');
@@ -37,14 +35,15 @@ export default function CreatePost() {
       reader.readAsDataURL(file);
     } else if (file.type.startsWith("video/")) {      
       const videoUrl = URL.createObjectURL(file);
+      toast.info(`URL: ${videoUrl}`);
       setPreview(videoUrl);
-      
+
       setFileType('video');
     } else {
       toast.info("Formato de arquivo não suportado.");
     }
   };
-
+  toast.info(`PREVIEW: ${preview}`);
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
