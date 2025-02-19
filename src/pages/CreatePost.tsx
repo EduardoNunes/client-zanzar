@@ -28,66 +28,27 @@ export default function CreatePost() {
 
     if (file.size > maxSizeBytes) {
       toast.info("Arquivo muito grande. Limite máximo: 30MB");
-      event.target.value = ''; // Reset input for Capacitor compatibility
+      event.target.files = null;
       return;
     }
 
     if (!allowedTypes.includes(file.type)) {
       toast.info("Tipo de arquivo não suportado");
-      event.target.value = ''; // Reset input for Capacitor compatibility
+      event.target.files = null;
       return;
     }
 
-    // Capacitor-friendly media validation
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const objectUrl = URL.createObjectURL(file);
-        
-        // Create an image or video element based on file type
-        if (file.type.startsWith('image/')) {
-          const img = new Image();
-          img.onload = () => {
-            setPreview(objectUrl);
-            setFileType('image');
-            setFile(file);
-            event.target.value = ''; // Reset input
-          };
-          img.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            toast.info("Erro ao carregar imagem. Tente novamente.");
-            event.target.value = ''; // Reset input
-          };
-          img.src = objectUrl;
-        } else if (file.type.startsWith('video/')) {
-          const video = document.createElement('video');
-          video.onloadedmetadata = () => {
-            setPreview(objectUrl);
-            setFileType('video');
-            setFile(file);
-            event.target.value = ''; // Reset input
-          };
-          video.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            toast.info("Erro ao carregar vídeo. Tente novamente.");
-            event.target.value = ''; // Reset input
-          };
-          video.src = objectUrl;
-        }
-      } catch (error) {
-        toast.info("Erro ao processar arquivo");
-        console.error(error);
-        event.target.value = ''; // Reset input for Capacitor compatibility
-      }
-    };
-
-    reader.onerror = () => {
-      toast.info("Erro ao ler arquivo");
-      event.target.value = ''; // Reset input for Capacitor compatibility
-    };
-
-    // Read the file to trigger validation
-    reader.readAsDataURL(file);
+    try {
+      const objectUrl = URL.createObjectURL(file);
+      setPreview(objectUrl);
+      setFileType(file.type.startsWith('image') ? 'image' : 'video');
+      setFile(file);
+      event.target.files = null;
+    } catch (error) {
+      event.target.files = null;
+      toast.info("Erro ao processar arquivo");
+      console.error(error);
+    }
   };
 
   const handleOpenPhoto = async () => {
