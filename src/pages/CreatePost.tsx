@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 import { Camera, Loader2, Upload, Trash2 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { openCamera } from "../components/OpenCamera";
@@ -15,84 +15,59 @@ export default function CreatePost() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // Reset all media-related states
     setFile(null);
     setPreview("");
     setFileType(null);
 
     const currentFile = event.target.files?.[0];
-
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
       return;
     }
 
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+
     if (currentFile.size > MAX_FILE_SIZE) {
       toast.info("O arquivo de mídia não pode exceder 30MB.");
-
       event.target.value = '';
       return;
     }
 
-    // Verifica se é uma imagem ou um vídeo
-    if (currentFile.type.startsWith("image/")) {
-      setFileType('image');
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        try {
-          setPreview(reader.result as string);
-          setFile(currentFile);
-        } catch (error) {
-          toast.error("Erro ao carregar imagem. Tente novamente.");
-
-          event.target.value = '';
-          setFile(null);
-          setPreview("");
-          setFileType(null);
-        }
-      };
-
-      reader.onerror = () => {
-        toast.error(`Erro 2 ${error}`);
-
+    try {
+      // Determine file type
+      if (currentFile.type.startsWith("image/")) {
+        setFileType('image');
         event.target.value = '';
-        setFile(null);
-        setPreview("");
-        setFileType(null);
-      };
-      reader.readAsDataURL(currentFile);
-    } else if (currentFile.type.startsWith("video/")) {
-      setFileType('video');
-
-      // Use FileReader for better mobile compatibility
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        try {
-          setPreview(reader.result as string);
-          setFile(currentFile);
-        } catch (error) {
-          toast.error("Erro ao carregar vídeo. Tente novamente.");
-
-          event.target.value = '';
-          setFile(null);
-          setPreview("");
-          setFileType(null);
-        }
-      };
-      reader.onerror = () => {
-        toast.error("Erro ao carregar vídeo. Tente novamente.");
-
+      } else if (currentFile.type === "video/mp4") {
+        setFileType('video');
         event.target.value = '';
-        setFile(null);
-        setPreview("");
-        setFileType(null);
-      };
-      reader.readAsDataURL(currentFile);
-    } else {
-      toast.info("Formato de arquivo não suportado.");
+      } else {
+        toast.info("Formato de arquivo não suportado.");
+        event.target.value = '';
+        return;
+      }
+
+      // Create object URL for preview
+      const objectUrl = URL.createObjectURL(currentFile);
+      setPreview(objectUrl);
+      setFile(currentFile);
+    } catch (error) {
+      console.error("Erro ao processar o arquivo:", error);
+      toast.error("Erro ao carregar o arquivo. Tente novamente.");
       event.target.value = '';
+      setFile(null);
+      setPreview("");
+      setFileType(null);
     }
   };
 
