@@ -11,7 +11,7 @@ export default function CreatePost() {
   const [caption, setCaption] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
-  const [fileType] = useState<'image' | 'video' | null>(null);
+  const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -28,21 +28,21 @@ export default function CreatePost() {
 
     // Verifica se é uma imagem ou um vídeo
     if (file.type.startsWith("image/")) {
+      setFileType('image');
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
       };
+
       reader.readAsDataURL(file);
     } else if (file.type.startsWith("video/")) {
-      if (file.type === "video/quicktime") {
-        toast.info("Formato .mov detectado. Pode não funcionar corretamente.");
-        toast.info("Vídeos no formato .mov podem não ser compatíveis.");
-      }
+      setFileType('video');
+
       const videoUrl = URL.createObjectURL(file);
       setPreview(videoUrl);
     } else {
       toast.info("Formato de arquivo não suportado.");
-      toast.info("Formato de arquivo inválido. Selecione uma imagem ou um vídeo.");
     }
   };
 
