@@ -44,7 +44,8 @@ export default function CreatePost() {
         try {
           setPreview(reader.result as string);
           setFile(currentFile);
-        } catch (error) {
+        } catch (error: any) {
+          toast.error(`Erro 3 ${error.message}`);
           toast.error("Erro ao carregar imagem. Tente novamente.");
 
           event.target.value = '';
@@ -72,7 +73,8 @@ export default function CreatePost() {
         try {
           setPreview(reader.result as string);
           setFile(currentFile);
-        } catch (error) {
+        } catch (error: any) {
+          toast.error(`Erro 3 ${error.message}`);
           toast.error("Erro ao carregar vídeo. Tente novamente.");
 
           event.target.value = '';
