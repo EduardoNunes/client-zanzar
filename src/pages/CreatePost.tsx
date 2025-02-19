@@ -34,30 +34,53 @@ export default function CreatePost() {
       return;
     }
 
-    // Verifica se é uma imagem ou um vídeo
+    // Use multiple methods to ensure media loading
+    const loadMedia = (file: File) => {
+      return new Promise<string>((resolve, reject) => {
+        // Method 1: FileReader (base64)
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+
+        // Method 2: Object URL (fallback)
+        const objectUrl = URL.createObjectURL(file);
+        setTimeout(() => {
+          resolve(objectUrl);
+        }, 100);
+      });
+    };
+
+    // Verify and set file type
     if (currentFile.type.startsWith("image/")) {
       setFileType('image');
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(currentFile);
+      
+      loadMedia(currentFile)
+        .then(previewUrl => {
+          setPreview(previewUrl);
+          setFile(currentFile);
+        })
+        .catch(error => {
+          console.error("Error loading image:", error);
+          toast.error("Erro ao carregar imagem. Tente novamente.");
+        });
     } else if (currentFile.type.startsWith("video/")) {
       setFileType('video');
-
-      // Use FileReader for better mobile compatibility
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(currentFile);
+      
+      loadMedia(currentFile)
+        .then(previewUrl => {
+          setPreview(previewUrl);
+          setFile(currentFile);
+        })
+        .catch(error => {
+          console.error("Error loading video:", error);
+          toast.error("Erro ao carregar vídeo. Tente novamente.");
+        });
     } else {
       toast.info("Formato de arquivo não suportado.");
     }
-
-    // Always set the file for upload
-    setFile(currentFile);
   };
 
   const handleOpenPhoto = async () => {
@@ -168,9 +191,7 @@ export default function CreatePost() {
               <input
                 type="file"
                 accept="image/png, image/jpg, image/jpeg, video/mp4"
-                onChange={preview ? () => {
-                  toast.info("Remova a mídia atual usando o ícone de lixeira antes de selecionar uma nova.");
-                } : handleFileChange}
+                onChange={handleFileChange}
                 className="hidden"
               />
 
@@ -195,8 +216,8 @@ export default function CreatePost() {
               onClick={() => handleOpenPhoto()}
               disabled={!!preview}
               className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center 
-                ${preview 
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                ${preview
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-green-500 text-white hover:bg-green-600'
                 }`}
             >
