@@ -33,16 +33,8 @@ export default function CreatePost() {
       reader.readAsDataURL(file);
     } else if (file.type.startsWith("video/")) {
       const videoUrl = URL.createObjectURL(file);
+      setPreview(videoUrl);
       setFileType('video');
-      setPreview(videoUrl);  // Define o preview do vídeo
-
-      // Vamos usar um useEffect para garantir que a URL do vídeo seja completamente carregada antes de mostrar
-      setTimeout(() => {
-        const videoElement = document.getElementById("video-preview") as HTMLVideoElement;
-        if (videoElement) {
-          videoElement.load();  // Força o carregamento do vídeo
-        }
-      }, 500);  // Ajuste o tempo se necessário
     } else {
       toast.info("Formato de arquivo não suportado.");
     }
@@ -134,8 +126,7 @@ export default function CreatePost() {
                     src={preview}
                     autoPlay
                     loop
-                    muted
-                    playsInline
+                    /* playsInline */
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
