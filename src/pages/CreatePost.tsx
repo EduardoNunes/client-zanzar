@@ -24,6 +24,9 @@ export default function CreatePost() {
     const currentFile = event.target.files?.[0];
 
     if (!currentFile) {
+      setFile(null);
+      setPreview("");
+      setFileType(null);
       toast.info("Nenhum arquivo selecionado.");
       return;
     }
@@ -59,7 +62,7 @@ export default function CreatePost() {
 
       // Sempre define o arquivo para upload após o delay
       setFile(currentFile);
-    }, 0);
+    }, 500);
   };
 
 
