@@ -58,7 +58,7 @@ export default function CreatePost() {
   toast.info(`TYPE ${currentFile.type}`)
       // Create object URL for preview
       const objectUrl = URL.createObjectURL(currentFile);
-  
+  toast.info(`TYPE ${objectUrl}`)
       // Validate the object URL
       if (!objectUrl || objectUrl.startsWith("blob:") === false) {
         throw new Error("URL inválida gerada para o arquivo.");
