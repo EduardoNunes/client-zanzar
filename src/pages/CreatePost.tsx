@@ -26,21 +26,28 @@ export default function CreatePost() {
     // Verifica se é uma imagem ou um vídeo
     if (file.type.startsWith("image/")) {
       setFileType('image');
-
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
       };
-
       reader.readAsDataURL(file);
     } else if (file.type.startsWith("video/")) {
       const videoUrl = URL.createObjectURL(file);
-      setPreview(videoUrl);
       setFileType('video');
+      setPreview(videoUrl);  // Define o preview do vídeo
+
+      // Vamos usar um useEffect para garantir que a URL do vídeo seja completamente carregada antes de mostrar
+      setTimeout(() => {
+        const videoElement = document.getElementById("video-preview") as HTMLVideoElement;
+        if (videoElement) {
+          videoElement.load();  // Força o carregamento do vídeo
+        }
+      }, 200);  // Ajuste o tempo se necessário
     } else {
       toast.info("Formato de arquivo não suportado.");
     }
   };
+
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
@@ -123,7 +130,7 @@ export default function CreatePost() {
               {preview ? (
                 fileType === "video" ? (
                   <video
-                    key={preview} // 🔥 Isso força a recriação do elemento
+                    id="video-preview"
                     src={preview}
                     autoPlay
                     loop
@@ -147,6 +154,7 @@ export default function CreatePost() {
                   <p className="text-xs text-gray-500">PNG, JPG ou MP4 (Máx. 30MB, Vídeo até 15s)</p>
                 </div>
               )}
+
               <input
                 type="file"
                 className="hidden"
