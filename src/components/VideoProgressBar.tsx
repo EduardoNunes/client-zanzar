@@ -96,7 +96,7 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
     if (!videoElement) return <VolumeX size={24} />;
 
     if (isVideoMuted) return <VolumeX size={24} />;
-    
+
     const volume = videoElement.volume;
     if (volume === 0) return <VolumeX size={24} />;
     if (volume < 0.5) return <Volume1 size={24} />;
@@ -113,12 +113,12 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
   if (!videoElement) return null;
 
   return (
-    <div 
+    <div
       className="absolute inset-0 z-10"
       onClick={toggleVideoPlayPause}
     >
       {isControlsVisible && isVideoPaused && (
-        <div 
+        <div
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
           onClick={toggleVideoPlayPause}
         >
@@ -127,22 +127,22 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
       )}
 
       <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-300">
-        <div 
+        <div
           ref={progressRef}
-          className="h-full bg-white transition-all duration-100 ease-linear" 
+          className="h-full bg-white transition-all duration-100 ease-linear"
           style={{ width: `${progress}%` }}
         />
       </div>
 
       <div className="absolute bottom-2 right-2 flex flex-col space-y-2">
-        <button 
+        <button
           onClick={toggleMute}
           className="bg-black/50 text-white p-2 rounded-full"
         >
           {getVolumeIcon()}
         </button>
         {onFullscreen && (
-          <button 
+          <button
             onClick={handleFullscreen}
             className="bg-black/50 text-white p-2 rounded-full"
           >

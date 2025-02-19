@@ -39,6 +39,8 @@ export default function Feed() {
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const token = Cookies.get("access_token");
+  const [videoRefsState, setVideoRefsState] = useState<{ [key: number]: HTMLVideoElement | null }>({});
+
 
   // Refs for Intersection Observer
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -58,7 +60,7 @@ export default function Feed() {
       (entries) => {
         entries.forEach((entry) => {
           const videoElement = entry.target as HTMLVideoElement;
-          
+
           if (!entry.isIntersecting) {
             // Video is not in view
             videoElement.pause();
@@ -106,10 +108,10 @@ export default function Feed() {
       // Determine media type for each post
       const processedPosts = data.map((post: Post) => {
         // You might want to adjust this logic based on how you store media type in the backend
-        const isVideo = post.mediaUrl.includes('/videos/') || 
-                        post.mediaUrl.includes('.mp4') || 
-                        post.mediaUrl.includes('video');
-        
+        const isVideo = post.mediaUrl.includes('/videos/') ||
+          post.mediaUrl.includes('.mp4') ||
+          post.mediaUrl.includes('video');
+
         return {
           ...post,
           mediaType: isVideo ? 'video' : 'image'
@@ -148,10 +150,10 @@ export default function Feed() {
 
       // Determine media type for each post
       const processedPosts = newPosts.map((post: Post) => {
-        const isVideo = post.mediaUrl.includes('/videos/') || 
-                        post.mediaUrl.includes('.mp4') || 
-                        post.mediaUrl.includes('video');
-        
+        const isVideo = post.mediaUrl.includes('/videos/') ||
+          post.mediaUrl.includes('.mp4') ||
+          post.mediaUrl.includes('video');
+
         return {
           ...post,
           mediaType: isVideo ? 'video' : 'image'
@@ -296,26 +298,19 @@ export default function Feed() {
                     <div className="relative w-full h-full">
                       <video
                         ref={(el) => {
-                          // Store video refs for Intersection Observer
                           videoRefs.current[index] = el;
-                          
+
                           if (el) {
-                            // Ensure video is completely muted initially
                             el.muted = true;
                             el.volume = 0;
-                            
-                            // Add unique identifier for each video
                             el.dataset.feedVideoIndex = String(index);
-                            
-                            // Add onLoadedMetadata event listener
+
                             el.addEventListener('loadedmetadata', () => {
-                              // Force a re-render or trigger visibility of controls
-                              el.dispatchEvent(new Event('videoLoaded'));
+                              setVideoRefsState((prev) => ({ ...prev, [index]: el })); // Atualiza o estado para re-renderizar o componente
                             });
 
-                            // Attempt to play with error handling
                             el.play().catch((error) => {
-                              console.warn('Autoplay was prevented', error);
+                              console.warn('Autoplay foi bloqueado', error);
                             });
                           }
                         }}
@@ -327,8 +322,8 @@ export default function Feed() {
                         playsInline
                         className="w-full h-full object-cover"
                       />
-                      <VideoProgressBar 
-                        videoElement={document.querySelector(`video[data-feed-video-index="${index}"]`) as HTMLVideoElement} 
+                      <VideoProgressBar
+                        videoElement={videoRefsState[index]}
                         onFullscreen={() => setFullscreenImage(post.mediaUrl)}
                       />
                     </div>
@@ -386,8 +381,8 @@ export default function Feed() {
       </div>
       <div
         className={`md:hidden transition-all duration-100 ease-in-out ${selectedPost
-            ? "max-h-screen opacity-100 visible"
-            : "max-h-0 opacity-0 invisible"
+          ? "max-h-screen opacity-100 visible"
+          : "max-h-0 opacity-0 invisible"
           }`}
       >
         {selectedPost && (
