@@ -17,29 +17,29 @@ export default function CreatePost() {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPreview("");
-    const file = event.target.files?.[0];
+    const currentFile = event.target.files?.[0];
 
-    if (!file) {
+    if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
       return;
     }
 
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
-    if (file.size > MAX_FILE_SIZE) {
+    if (currentFile.size > MAX_FILE_SIZE) {
       toast.info("O arquivo de mídia não pode exceder 30MB.");
       return;
     }
 
     // Verifica se é uma imagem ou um vídeo
-    if (file.type.startsWith("image/")) {
+    if (currentFile.type.startsWith("image/")) {
       setFileType('image');
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
       };
-      reader.readAsDataURL(file);
-    } else if (file.type.startsWith("video/")) {
-      const videoUrl = URL.createObjectURL(file);
+      reader.readAsDataURL(currentFile);
+    } else if (currentFile.type.startsWith("video/")) {
+      const videoUrl = URL.createObjectURL(currentFile);
       setPreview(videoUrl);
       setFileType('video');
     } else {
