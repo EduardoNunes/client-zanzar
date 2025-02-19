@@ -19,7 +19,13 @@ export default function CreatePost() {
     const file = event.target.files?.[0];
 
     if (!file) {
-      console.warn("Nenhum arquivo selecionado.");
+      toast.info("Nenhum arquivo selecionado.");
+      return;
+    }
+
+    const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+    if (file.size > MAX_FILE_SIZE) {
+      toast.info("O arquivo de mídia não pode exceder 30MB.");
       return;
     }
 
@@ -122,12 +128,13 @@ export default function CreatePost() {
               {preview ? (
                 fileType === "video" ? (
                   <video
+                    key={preview}
                     id="video-preview"
                     src={preview}
                     autoPlay
                     loop
-                    /* playsInline */
                     className="absolute inset-0 w-full h-full object-cover"
+                    onLoadedData={() => console.log("Vídeo carregado com sucesso!")}
                   />
                 ) : (
                   <img
