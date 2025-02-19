@@ -1,10 +1,10 @@
 import Cookies from "js-cookie";
-import { Loader2, Upload, Camera } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { Camera, Loader2, Upload } from "lucide-react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createPostWithMediaReq } from "../requests/postsRequests";
-import { openCamera } from "../components/OpenCamera"
 import { toast } from "react-toastify";
+import { openCamera } from "../components/OpenCamera";
+import { createPostWithMediaReq } from "../requests/postsRequests";
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -14,14 +14,6 @@ export default function CreatePost() {
   const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    return () => {
-      if (preview) {
-        URL.revokeObjectURL(preview);
-      }
-    };
-  }, [preview]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPreview("");
@@ -50,11 +42,18 @@ export default function CreatePost() {
     } else if (currentFile.type.startsWith("video/")) {
       setFileType('video');
 
-      const videoUrl = URL.createObjectURL(currentFile);
-      setPreview(videoUrl);
+      // Use FileReader for better mobile compatibility
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(currentFile);
     } else {
       toast.info("Formato de arquivo não suportado.");
     }
+
+    // Always set the file for upload
+    setFile(currentFile);
   };
 
   const handleOpenPhoto = async () => {
@@ -141,8 +140,8 @@ export default function CreatePost() {
                     key={preview}
                     id="video-preview"
                     src={preview}
-                    autoPlay
-                    loop
+                    controls
+                    playsInline
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
