@@ -28,46 +28,39 @@ export default function CreatePost() {
     setFile(null);
     setPreview("");
     setFileType(null);
-  
+
     const currentFile = event.target.files?.[0];
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
       return;
     }
-  
+
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
-  
+
     if (currentFile.size > MAX_FILE_SIZE) {
       toast.info("O arquivo de mídia não pode exceder 30MB.");
       event.target.value = '';
       return;
     }
-  
+
     try {
       // Determine file type
       if (currentFile.type.startsWith("image/")) {
         setFileType('image');
+        event.target.value = '';
       } else if (currentFile.type === "video/mp4") {
         setFileType('video');
+        event.target.value = '';
       } else {
         toast.info("Formato de arquivo não suportado.");
         event.target.value = '';
         return;
       }
-  
+
       // Create object URL for preview
       const objectUrl = URL.createObjectURL(currentFile);
-  
-      // Validate the object URL
-      if (!objectUrl || objectUrl.startsWith("blob:") === false) {
-        throw new Error("URL inválida gerada para o arquivo.");
-      }
-  
       setPreview(objectUrl);
       setFile(currentFile);
-  
-      // Log the generated URL for debugging
-      console.log("Generated Object URL:", objectUrl);
     } catch (error) {
       console.error("Erro ao processar o arquivo:", error);
       toast.error("Erro ao carregar o arquivo. Tente novamente.");
