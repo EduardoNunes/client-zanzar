@@ -44,7 +44,6 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
     const video = videoElement;
-
     if (!video) return;
 
     if (video.muted) {
