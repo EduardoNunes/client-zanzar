@@ -46,9 +46,8 @@ export default function CreatePost() {
           setPreview(reader.result as string);
           setFile(currentFile);
         } catch (error) {
-          console.error("Error loading image:", error);
-          toast.error(`Erro 1 ${error}`);
-          
+          toast.error("Erro ao carregar imagem. Tente novamente.");
+
           event.target.value = '';
           setFile(null);
           setPreview("");
@@ -58,7 +57,7 @@ export default function CreatePost() {
 
       reader.onerror = () => {
         toast.error(`Erro 2 ${error}`);
-        
+
         event.target.value = '';
         setFile(null);
         setPreview("");
@@ -75,7 +74,6 @@ export default function CreatePost() {
           setPreview(reader.result as string);
           setFile(currentFile);
         } catch (error) {
-          toast.error(`Erro 1 ${error}`);
           toast.error("Erro ao carregar vídeo. Tente novamente.");
 
           event.target.value = '';
@@ -85,7 +83,6 @@ export default function CreatePost() {
         }
       };
       reader.onerror = () => {
-        toast.error(`Erro 2 ${error}`);
         toast.error("Erro ao carregar vídeo. Tente novamente.");
 
         event.target.value = '';
