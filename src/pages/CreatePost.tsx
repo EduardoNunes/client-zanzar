@@ -39,59 +39,11 @@ export default function CreatePost() {
     }
 
     try {
-      // Enhanced media validation for different platforms
-      return new Promise((resolve, reject) => {
-        const objectUrl = URL.createObjectURL(file);
-        
-        if (file.type.startsWith('image/')) {
-          const img = new Image();
-          img.onload = () => {
-            // Validate image dimensions and size
-            if (img.width > 0 && img.height > 0) {
-              setPreview(objectUrl);
-              setFileType('image');
-              setFile(file);
-              event.target.files = null;
-              resolve(true);
-            } else {
-              URL.revokeObjectURL(objectUrl);
-              toast.info("Imagem inválida. Tente novamente.");
-              reject(new Error("Invalid image"));
-            }
-          };
-          img.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            toast.info("Erro ao carregar imagem. Tente novamente.");
-            reject(new Error("Image load error"));
-          };
-          img.src = objectUrl;
-        } else if (file.type.startsWith('video/')) {
-          const video = document.createElement('video');
-          video.onloadedmetadata = () => {
-            // Validate video duration and dimensions
-            if (video.duration > 0 && video.videoWidth > 0 && video.videoHeight > 0) {
-              setPreview(objectUrl);
-              setFileType('video');
-              setFile(file);
-              event.target.files = null;
-              resolve(true);
-            } else {
-              URL.revokeObjectURL(objectUrl);
-              toast.info("Vídeo inválido. Tente novamente.");
-              reject(new Error("Invalid video"));
-            }
-          };
-          video.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            toast.info("Erro ao carregar vídeo. Tente novamente.");
-            reject(new Error("Video load error"));
-          };
-          video.src = objectUrl;
-        }
-      }).catch((error) => {
-        console.error("Media validation error:", error);
-        event.target.files = null;
-      });
+      const objectUrl = URL.createObjectURL(file);
+      setPreview(objectUrl);
+      setFileType(file.type.startsWith('image') ? 'image' : 'video');
+      setFile(file);
+      event.target.files = null;
     } catch (error) {
       event.target.files = null;
       toast.info("Erro ao processar arquivo");
