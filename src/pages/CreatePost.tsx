@@ -23,7 +23,6 @@ export default function CreatePost() {
       return;
     }
 
-    toast.info(`Arquivo selecionado: ${file}`);
     toast.info(`Tipo do arquivo: ${file.type}`);
 
     // Verifica se é uma imagem ou um vídeo
@@ -36,11 +35,11 @@ export default function CreatePost() {
       };
 
       reader.readAsDataURL(file);
-    } else if (file.type.startsWith("video/")) {
-      setFileType('video');
-
+    } else if (file.type.startsWith("video/")) {      
       const videoUrl = URL.createObjectURL(file);
       setPreview(videoUrl);
+      
+      setFileType('video');
     } else {
       toast.info("Formato de arquivo não suportado.");
     }
