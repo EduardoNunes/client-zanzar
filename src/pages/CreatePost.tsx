@@ -16,61 +16,63 @@ export default function CreatePost() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    console.log("SELECTED", selectedFile)
+    console.log("SELECTED", selectedFile);
+
     if (selectedFile) {
-      // Validate file size (30MB = 30 * 1024 * 1024 bytes)
       const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
       if (selectedFile.size > MAX_FILE_SIZE) {
         setError("O arquivo de mídia não pode exceder 30MB.");
         return;
       }
-      
+
       setFile(selectedFile);
-      
-      // Check if the file is a video
+
       if (selectedFile.type.startsWith('video/')) {
         setFileType('video');
-        // For video files, create a video element preview
+
+        // Criar uma URL temporária
+        const objectUrl = URL.createObjectURL(selectedFile);
+        setPreview(objectUrl);
+
         const videoElement = document.createElement('video');
-        videoElement.src = URL.createObjectURL(selectedFile);
+        videoElement.src = objectUrl;
         videoElement.preload = 'metadata';
-        
+
         videoElement.onloadedmetadata = () => {
-          // Validate video duration (15 seconds)
           const MAX_VIDEO_DURATION = 15;
           if (videoElement.duration > MAX_VIDEO_DURATION) {
             setError("O vídeo não pode ter mais de 15 segundos.");
-            URL.revokeObjectURL(videoElement.src);
+            URL.revokeObjectURL(objectUrl);
             setFile(null);
             setPreview("");
             setFileType(null);
             return;
           }
-          
-          // Set preview as a video thumbnail or first frame
-          const canvas = document.createElement('canvas');
-          canvas.width = videoElement.videoWidth;
-          canvas.height = videoElement.videoHeight;
-          canvas.getContext('2d')?.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-          
-          // Improve video preview handling to create a better first frame preview
-          videoElement.currentTime = 1; // Set the current time to 1 second to get a better first frame
+
+          // Capturar um frame para o preview
+          videoElement.currentTime = 1;
           videoElement.onseeked = () => {
-            const previewUrl = canvas.toDataURL('image/jpeg');
-            setPreview(previewUrl);
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+
+            if (ctx) {
+              ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+              setPreview(canvas.toDataURL('image/jpeg'));
+            }
+
+            // Limpeza da URL do objeto
+            URL.revokeObjectURL(objectUrl);
           };
-          
-          // Clean up
-          URL.revokeObjectURL(videoElement.src);
         };
       } else {
         setFileType('image');
-        // For image files, use existing method
-        const objectUrl = URL.createObjectURL(selectedFile);
-        setPreview(objectUrl);
+        setPreview(URL.createObjectURL(selectedFile));
       }
     }
   };
+
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
@@ -81,14 +83,14 @@ export default function CreatePost() {
     }
   };
 
-/*   const handleOpenVideo = async () => {
-    const capturedFile = await openCamera();
-    if (capturedFile) {
-      setFile(capturedFile);
-      const objectUrl = URL.createObjectURL(capturedFile);
-      setPreview(objectUrl);
-    }
-  };   */
+  /*   const handleOpenVideo = async () => {
+      const capturedFile = await openCamera();
+      if (capturedFile) {
+        setFile(capturedFile);
+        const objectUrl = URL.createObjectURL(capturedFile);
+        setPreview(objectUrl);
+      }
+    };   */
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,10 +155,11 @@ export default function CreatePost() {
               {preview ? (
                 fileType === 'video' ? (
                   <video
-                    src={URL.createObjectURL(file as File)}
+                    src={preview} // Alterado para usar a URL de preview corretamente
                     autoPlay
                     loop
                     muted
+                    playsInline
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
@@ -170,13 +173,9 @@ export default function CreatePost() {
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-12 h-12 text-gray-400 mb-3" />
                   <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">
-                      Clique para fazer upload
-                    </span>
+                    <span className="font-semibold">Clique para fazer upload</span>
                   </p>
-                  <p className="text-xs text-gray-500">
-                    PNG, JPG ou MP4 (Máx. 30MB, Vídeo até 15s)
-                  </p>
+                  <p className="text-xs text-gray-500">PNG, JPG ou MP4 (Máx. 30MB, Vídeo até 15s)</p>
                 </div>
               )}
               <input
