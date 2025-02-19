@@ -30,17 +30,17 @@ export default function CreatePost() {
       // Se for vídeo, define o preview e permite reprodução
       if (selectedFile.name.endsWith(".mp4")) {
         setFileType("video");
-        setPreview(URL.createObjectURL(selectedFile));
+        const objectUrl = URL.createObjectURL(selectedFile);
+        setPreview(objectUrl);
       }
       // Se for imagem, define o preview normalmente
       else {
         setFileType("image");
-        setPreview(URL.createObjectURL(selectedFile));
+        const objectUrl = URL.createObjectURL(selectedFile);
+        setPreview(objectUrl);
       }
     }
   };
-
-
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
