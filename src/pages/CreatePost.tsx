@@ -16,7 +16,6 @@ export default function CreatePost() {
   const [error, setError] = useState("");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Reset all media-related states
     setFile(null);
     setPreview("");
     setFileType(null);
