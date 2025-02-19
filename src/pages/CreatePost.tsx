@@ -18,7 +18,7 @@ export default function CreatePost() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPreview("");
     const currentFile = event.target.files?.[0];
-
+toast.info(`${currentFile}`);
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
       return;
@@ -155,7 +155,6 @@ export default function CreatePost() {
 
               <input
                 type="file"
-                className="hidden"
                 accept="image/png, image/jpg, image/jpeg, video/mp4"
                 onChange={handleFileChange}
               />
