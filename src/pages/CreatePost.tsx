@@ -16,34 +16,82 @@ export default function CreatePost() {
   const [error, setError] = useState("");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    setFile(null);
+    setPreview("");
+    setFileType(null);
 
-    if (!file) {
-      toast.error("Nenhum arquivo selecionado");
+    const currentFile = event.target.files?.[0];
+
+    if (!currentFile) {
+      toast.info("Nenhum arquivo selecionado.");
       return;
     }
 
-    const maxSizeBytes = 30 * 1024 * 1024; // 30MB
-    const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'video/mp4'];
-
-    if (file.size > maxSizeBytes) {
-      toast.error("Arquivo muito grande. Limite máximo: 30MB");
+    const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+    if (currentFile.size > MAX_FILE_SIZE) {
+      toast.info("O arquivo de mídia não pode exceder 30MB.");
+      event.target.value = '';
       return;
     }
 
-    if (!allowedTypes.includes(file.type)) {
-      toast.error("Tipo de arquivo não suportado");
-      return;
-    }
+    // Verifica se é uma imagem ou um vídeo
+    if (currentFile.type.startsWith("image/") || currentFile.type.startsWith("video/")) {
+      // Set file type based on MIME type
+      const type = currentFile.type.startsWith("image/") ? 'image' : 'video';
+      setFileType(type);
 
-    try {
-      const objectUrl = URL.createObjectURL(file);
-      setPreview(objectUrl);
-      setFileType(file.type.startsWith('image') ? 'image' : 'video');
-      setFile(file);
-    } catch (error) {
-      toast.error("Erro ao processar arquivo");
-      console.error(error);
+      try {
+        // Create object URL for preview
+        const objectUrl = URL.createObjectURL(currentFile);
+        
+        // Validate media file
+        if (type === 'image') {
+          const img = new Image();
+          img.onload = () => {
+            setPreview(objectUrl);
+            setFile(currentFile);
+            // Free memory after setting preview
+            URL.revokeObjectURL(objectUrl);
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            toast.error("Erro ao carregar imagem. Tente novamente.");
+            event.target.value = '';
+            setFile(null);
+            setPreview("");
+            setFileType(null);
+          };
+          img.src = objectUrl;
+        } else {
+          // Video validation
+          const video = document.createElement('video');
+          video.onloadedmetadata = () => {
+            setPreview(objectUrl);
+            setFile(currentFile);
+            // Free memory after setting preview
+            URL.revokeObjectURL(objectUrl);
+          };
+          video.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            toast.error("Erro ao carregar vídeo. Tente novamente.");
+            event.target.value = '';
+            setFile(null);
+            setPreview("");
+            setFileType(null);
+          };
+          video.src = objectUrl;
+        }
+      } catch (error) {
+        console.error("Media preview error:", error);
+        toast.error("Erro ao carregar mídia. Tente novamente.");
+        event.target.value = '';
+        setFile(null);
+        setPreview("");
+        setFileType(null);
+      }
+    } else {
+      toast.info("Formato de arquivo não suportado.");
+      event.target.value = '';
     }
   };
 
