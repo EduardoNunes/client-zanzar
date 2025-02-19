@@ -40,7 +40,7 @@ export default function CreatePost() {
 
     // Capacitor-friendly media validation
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = (e) => {
       try {
         const objectUrl = URL.createObjectURL(file);
         
