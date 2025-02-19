@@ -54,8 +54,7 @@ export default function CreatePost() {
         event.target.value = '';
         return;
       }
-  toast.info(`FORMATO ${currentFile}`)
-  toast.info(`TYPE ${currentFile.type}`)
+  
       // Create object URL for preview
       const objectUrl = URL.createObjectURL(currentFile);
   
