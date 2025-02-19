@@ -16,6 +16,7 @@ export default function CreatePost() {
   const [error, setError] = useState("");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPreview("");
     const file = event.target.files?.[0];
 
     if (!file) {
@@ -134,7 +135,6 @@ export default function CreatePost() {
                     autoPlay
                     loop
                     className="absolute inset-0 w-full h-full object-cover"
-                    onLoadedData={() => toast.success("Vídeo carregado com sucesso!")}
                   />
                 ) : (
                   <img
