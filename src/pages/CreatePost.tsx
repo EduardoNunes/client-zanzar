@@ -27,67 +27,69 @@ export default function CreatePost() {
       return;
     }
 
-    const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+    const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB.
     if (currentFile.size > MAX_FILE_SIZE) {
       toast.info("O arquivo de mídia não pode exceder 30MB.");
+
       event.target.value = '';
       return;
     }
 
     // Verifica se é uma imagem ou um vídeo
-    if (currentFile.type.startsWith("image/") || currentFile.type.startsWith("video/")) {
-      // Set file type based on MIME type
-      setFileType(currentFile.type.startsWith("image/") ? 'image' : 'video');
+    if (currentFile.type.startsWith("image/")) {
+      setFileType('image');
 
-      try {
-        // Create object URL for preview
-        const objectUrl = URL.createObjectURL(currentFile);
-        
-        // Validate media file
-        if (currentFile.type.startsWith("image/")) {
-          const img = new Image();
-          img.onload = () => {
-            setPreview(objectUrl);
-            setFile(currentFile);
-            // Free memory after setting preview
-            URL.revokeObjectURL(objectUrl);
-          };
-          img.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            toast.error("Erro ao carregar imagem. Tente novamente.");
-            event.target.value = '';
-            setFile(null);
-            setPreview("");
-            setFileType(null);
-          };
-          img.src = objectUrl;
-        } else {
-          // Video validation
-          const video = document.createElement('video');
-          video.onloadedmetadata = () => {
-            setPreview(objectUrl);
-            setFile(currentFile);
-            // Free memory after setting preview
-            URL.revokeObjectURL(objectUrl);
-          };
-          video.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            toast.error("Erro ao carregar vídeo. Tente novamente.");
-            event.target.value = '';
-            setFile(null);
-            setPreview("");
-            setFileType(null);
-          };
-          video.src = objectUrl;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        try {
+          setPreview(reader.result as string);
+          setFile(currentFile);
+        } catch (error) {
+          toast.error("Erro ao carregar imagem. Tente novamente.");
+
+          event.target.value = '';
+          setFile(null);
+          setPreview("");
+          setFileType(null);
         }
-      } catch (error) {
-        console.error("Media preview error:", error);
-        toast.error("Erro ao carregar mídia. Tente novamente.");
+      };
+
+      reader.onerror = () => {
+        toast.error(`Erro 2 ${error}`);
+
         event.target.value = '';
         setFile(null);
         setPreview("");
         setFileType(null);
-      }
+      };
+      reader.readAsDataURL(currentFile);
+    } else if (currentFile.type.startsWith("video/")) {
+      setFileType('video');
+
+      // Use FileReader for better mobile compatibility
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        try {
+          setPreview(reader.result as string);
+          setFile(currentFile);
+        } catch (error) {
+          toast.error("Erro ao carregar vídeo. Tente novamente.");
+
+          event.target.value = '';
+          setFile(null);
+          setPreview("");
+          setFileType(null);
+        }
+      };
+      reader.onerror = () => {
+        toast.error("Erro ao carregar vídeo. Tente novamente.");
+
+        event.target.value = '';
+        setFile(null);
+        setPreview("");
+        setFileType(null);
+      };
+      reader.readAsDataURL(currentFile);
     } else {
       toast.info("Formato de arquivo não suportado.");
       event.target.value = '';
