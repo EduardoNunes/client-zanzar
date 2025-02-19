@@ -4,43 +4,48 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPostWithMediaReq } from "../requests/postsRequests";
 import { openCamera } from "../components/OpenCamera"
+import { toast } from "react-toastify";
 
 export default function CreatePost() {
   const navigate = useNavigate();
   const [caption, setCaption] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
-  const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
+  const [fileType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    console.log("SELECTED", selectedFile);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
 
-    if (selectedFile) {
-      const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
-      if (selectedFile.size > MAX_FILE_SIZE) {
-        setError("O arquivo de mídia não pode exceder 30MB.");
-        return;
-      }
+    if (!file) {
+      console.warn("Nenhum arquivo selecionado.");
+      return;
+    }
 
-      setFile(selectedFile);
+    toast.info(`Arquivo selecionado: ${file}`);
+    toast.info(`Tipo do arquivo: ${file.type}`);
 
-      // Se for vídeo, define o preview e permite reprodução
-      if (selectedFile.name.endsWith(".mp4")) {
-        setFileType("video");
-        const objectUrl = URL.createObjectURL(selectedFile);
-        setPreview(objectUrl);
+    // Verifica se é uma imagem ou um vídeo
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else if (file.type.startsWith("video/")) {
+      if (file.type === "video/quicktime") {
+        toast.info("Formato .mov detectado. Pode não funcionar corretamente.");
+        toast.info("Vídeos no formato .mov podem não ser compatíveis.");
       }
-      // Se for imagem, define o preview normalmente
-      else {
-        setFileType("image");
-        const objectUrl = URL.createObjectURL(selectedFile);
-        setPreview(objectUrl);
-      }
+      const videoUrl = URL.createObjectURL(file);
+      setPreview(videoUrl);
+    } else {
+      toast.info("Formato de arquivo não suportado.");
+      toast.info("Formato de arquivo inválido. Selecione uma imagem ou um vídeo.");
     }
   };
+
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
