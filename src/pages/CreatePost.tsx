@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 import { Loader2, Upload, Camera } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPostWithMediaReq } from "../requests/postsRequests";
 import { openCamera } from "../components/OpenCamera"
@@ -14,6 +14,14 @@ export default function CreatePost() {
   const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPreview("");
@@ -48,9 +56,6 @@ export default function CreatePost() {
       toast.info("Formato de arquivo não suportado.");
     }
   };
-
-  toast.info(`Preview ${preview}`);
-  toast.info(`File type: ${fileType}`);
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
@@ -161,7 +166,9 @@ export default function CreatePost() {
                 type="file"
                 accept="image/png, image/jpg, image/jpeg, video/mp4"
                 onChange={handleFileChange}
+                className="hidden"
               />
+
             </label>
           </div>
           <div className="flex space-x-4 mt-4">
