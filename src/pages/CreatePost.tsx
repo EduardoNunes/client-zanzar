@@ -18,7 +18,7 @@ export default function CreatePost() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPreview("");
     const currentFile = event.target.files?.[0];
-toast.info(`${currentFile}`);
+
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
       return;
@@ -47,6 +47,7 @@ toast.info(`${currentFile}`);
     }
   };
 
+  toast.info(`${preview}`);
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
