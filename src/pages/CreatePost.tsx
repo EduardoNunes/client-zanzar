@@ -24,11 +24,11 @@ export default function CreatePost() {
         setError("O arquivo de mídia não pode exceder 30MB.");
         return;
       }
-
+console.log("ARQUIVO", selectedFile)
       setFile(selectedFile);
 
       // Se for vídeo, define o preview e permite reprodução
-      if (selectedFile.type.startsWith("video/")) {
+      if (selectedFile.name.endsWith(".mp4")) {
         setFileType("video");
         const objectUrl = URL.createObjectURL(selectedFile);
         setPreview(objectUrl);
@@ -150,7 +150,7 @@ export default function CreatePost() {
               <input
                 type="file"
                 className="hidden"
-                accept="image/jpg, image/jpeg, video/mp4"
+                accept="image/png, image/jpg, image/jpeg, video/mp4"
                 onChange={handleFileChange}
               />
             </label>
