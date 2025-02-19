@@ -304,15 +304,16 @@ export default function Feed() {
                             el.muted = true;
                             el.volume = 0;
                             
-                            // Attempt to play, with error handling
+                            // Add unique identifier for each video
+                            el.dataset.feedVideoIndex = String(index);
+                            
+                            // Attempt to play with error handling
                             el.play().catch((error) => {
                               console.warn('Autoplay was prevented', error);
                             });
-                            
-                            // Store the video element for use with VideoProgressBar
-                            el.dataset.feedVideo = 'true';
                           }
                         }}
+                        data-feed-video-index={index}
                         src={post.mediaUrl}
                         autoPlay
                         muted
@@ -321,7 +322,7 @@ export default function Feed() {
                         className="w-full h-full object-cover"
                       />
                       <VideoProgressBar 
-                        videoElement={document.querySelector('video[data-feed-video="true"]') as HTMLVideoElement} 
+                        videoElement={document.querySelector(`video[data-feed-video-index="${index}"]`) as HTMLVideoElement} 
                         onFullscreen={() => setFullscreenImage(post.mediaUrl)}
                       />
                     </div>
