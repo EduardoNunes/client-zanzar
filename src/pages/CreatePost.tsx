@@ -27,51 +27,20 @@ export default function CreatePost() {
 
       setFile(selectedFile);
 
-      if (selectedFile.type.startsWith('video/')) {
-        setFileType('video');
-
-        // Criar uma URL temporária
+      // Se for vídeo, define o preview e permite reprodução
+      if (selectedFile.type.startsWith("video/")) {
+        setFileType("video");
         const objectUrl = URL.createObjectURL(selectedFile);
         setPreview(objectUrl);
-
-        const videoElement = document.createElement('video');
-        videoElement.src = objectUrl;
-        videoElement.preload = 'metadata';
-
-        videoElement.onloadedmetadata = () => {
-          const MAX_VIDEO_DURATION = 15;
-          if (videoElement.duration > MAX_VIDEO_DURATION) {
-            setError("O vídeo não pode ter mais de 15 segundos.");
-            URL.revokeObjectURL(objectUrl);
-            setFile(null);
-            setPreview("");
-            setFileType(null);
-            return;
-          }
-
-          // Capturar um frame para o preview
-          videoElement.currentTime = 1;
-          videoElement.onseeked = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            const ctx = canvas.getContext('2d');
-
-            if (ctx) {
-              ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-              setPreview(canvas.toDataURL('image/jpeg'));
-            }
-
-            // Limpeza da URL do objeto
-            URL.revokeObjectURL(objectUrl);
-          };
-        };
-      } else {
-        setFileType('image');
+      }
+      // Se for imagem, define o preview normalmente
+      else {
+        setFileType("image");
         setPreview(URL.createObjectURL(selectedFile));
       }
     }
   };
+
 
 
   const handleOpenPhoto = async () => {
@@ -153,9 +122,9 @@ export default function CreatePost() {
                 flex flex-col items-center justify-center relative overflow-hidden`}
             >
               {preview ? (
-                fileType === 'video' ? (
+                fileType === "video" ? (
                   <video
-                    src={preview} // Alterado para usar a URL de preview corretamente
+                    src={preview}
                     autoPlay
                     loop
                     muted
