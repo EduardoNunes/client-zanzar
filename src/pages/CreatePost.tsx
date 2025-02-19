@@ -31,55 +31,71 @@ export default function CreatePost() {
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
     if (currentFile.size > MAX_FILE_SIZE) {
       toast.info("O arquivo de mídia não pode exceder 30MB.");
+      // Reset the input to allow reselecting
+      event.target.value = '';
       return;
     }
 
-    // Use multiple methods to ensure media loading
-    const loadMedia = (file: File) => {
-      return new Promise<string>((resolve, reject) => {
-        // Method 1: FileReader (base64)
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve(reader.result as string);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-
-        // Method 2: Object URL (fallback)
-        const objectUrl = URL.createObjectURL(file);
-        setTimeout(() => {
-          resolve(objectUrl);
-        }, 100);
-      });
-    };
-
-    // Verify and set file type
+    // Verifica se é uma imagem ou um vídeo
     if (currentFile.type.startsWith("image/")) {
       setFileType('image');
-      
-      loadMedia(currentFile)
-        .then(previewUrl => {
-          setPreview(previewUrl);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        try {
+          setPreview(reader.result as string);
           setFile(currentFile);
-        })
-        .catch(error => {
+        } catch (error) {
           console.error("Error loading image:", error);
           toast.error("Erro ao carregar imagem. Tente novamente.");
-        });
+          // Reset the input to allow reselecting
+          event.target.value = '';
+          setFile(null);
+          setPreview("");
+          setFileType(null);
+        }
+      };
+      reader.onerror = () => {
+        toast.error("Erro ao carregar imagem. Tente novamente.");
+        // Reset the input to allow reselecting
+        event.target.value = '';
+        setFile(null);
+        setPreview("");
+        setFileType(null);
+      };
+      reader.readAsDataURL(currentFile);
     } else if (currentFile.type.startsWith("video/")) {
       setFileType('video');
-      
-      loadMedia(currentFile)
-        .then(previewUrl => {
-          setPreview(previewUrl);
+
+      // Use FileReader for better mobile compatibility
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        try {
+          setPreview(reader.result as string);
           setFile(currentFile);
-        })
-        .catch(error => {
+        } catch (error) {
           console.error("Error loading video:", error);
           toast.error("Erro ao carregar vídeo. Tente novamente.");
-        });
+          // Reset the input to allow reselecting
+          event.target.value = '';
+          setFile(null);
+          setPreview("");
+          setFileType(null);
+        }
+      };
+      reader.onerror = () => {
+        toast.error("Erro ao carregar vídeo. Tente novamente.");
+        // Reset the input to allow reselecting
+        event.target.value = '';
+        setFile(null);
+        setPreview("");
+        setFileType(null);
+      };
+      reader.readAsDataURL(currentFile);
     } else {
       toast.info("Formato de arquivo não suportado.");
+      // Reset the input to allow reselecting
+      event.target.value = '';
     }
   };
 
@@ -191,7 +207,9 @@ export default function CreatePost() {
               <input
                 type="file"
                 accept="image/png, image/jpg, image/jpeg, video/mp4"
-                onChange={handleFileChange}
+                onChange={preview ? () => {
+                  toast.info("Remova a mídia atual usando o ícone de lixeira antes de selecionar uma nova.");
+                } : handleFileChange}
                 className="hidden"
               />
 
@@ -214,10 +232,10 @@ export default function CreatePost() {
             <button
               type="button"
               onClick={() => handleOpenPhoto()}
-              disabled={!!preview}
-              className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center 
-                ${preview
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+             disabled={!!preview}
+              className={`flex-1 y-2 px-4 rounded-lg flex items-center justify-center 
+                ${preview 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                   : 'bg-green-500 text-white hover:bg-green-600'
                 }`}
             >
