@@ -29,23 +29,26 @@ export default function CreatePost() {
       return;
     }
 
-    setFile(currentFile);
 
-    const objectUrl = URL.createObjectURL(currentFile);
-    setPreview(objectUrl);
-    event.target.value = '';
+    if (currentFile.type.startsWith('image/')) {
+      setFile(currentFile);
 
-/*     if (currentFile.type.startsWith('image/')) {
-      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-      if (currentFile.size > MAX_FILE_SIZE) {
-        toast.info("O arquivo de imagem não pode exceder 10MB.");
-        event.target.value = '';
-        return;
-      }
+      const objectUrl = URL.createObjectURL(currentFile);
+      setPreview(objectUrl);
+      event.target.value = '';
+    }
 
-       setFileType("image");
-
-    } */
+    /*     if (currentFile.type.startsWith('image/')) {
+          const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+          if (currentFile.size > MAX_FILE_SIZE) {
+            toast.info("O arquivo de imagem não pode exceder 10MB.");
+            event.target.value = '';
+            return;
+          }
+    
+           setFileType("image");
+    
+        } */
 
     /*  if (currentFile.type.startsWith('video/')) {
        const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
