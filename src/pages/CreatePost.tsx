@@ -36,11 +36,13 @@ export default function CreatePost() {
 
     // Validação de tamanho
     if (isImage && currentFile.size > MAX_IMAGE_SIZE) {
+      toast.info(`Tamanho ${currentFile.size / 1024 / 1024}MB`);  
       toast.error("A imagem deve ter no máximo 5MB.");
       event.target.value = "";
       return;
     }
     if (isVideo && currentFile.size > MAX_VIDEO_SIZE) {
+      toast.info(`Tamanho ${currentFile.size / 1024 / 1024}MB`);
       toast.error("O vídeo deve ter no máximo 30MB.");
       event.target.value = "";
       return;
