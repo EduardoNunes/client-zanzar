@@ -14,6 +14,7 @@ export default function CreatePost() {
   const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
 
   const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
   const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB
@@ -25,12 +26,13 @@ export default function CreatePost() {
     setFileType(null);
 
     const currentFile = event.target.files?.[0];
-
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
       event.target.value = '';
       return;
     }
+
+    toast.info(`INFO: ${currentFile}`);
 
     if (currentFile.type.startsWith('image/')) {
       setFileType("image")
@@ -48,6 +50,21 @@ export default function CreatePost() {
       reader.onloadend = () => {
         setPreview(reader.result as string);
         setFile(currentFile);
+
+        // Criando um elemento de vídeo temporário para obter a duração
+        const videoElement = document.createElement('video');
+        videoElement.src = reader.result as string;  // Usando a URL do arquivo carregado
+
+        // Esperar o vídeo carregar para obter a duração
+        videoElement.onloadedmetadata = () => {
+          const duration = videoElement.duration; // Duração do vídeo em segundos
+          console.log(`Duração do vídeo: ${duration} segundos`);
+
+          // Você pode então fazer algo com a duração, como armazenar no estado:
+          setVideoDuration(duration); // Exemplo de como armazenar a duração, se necessário
+        };
+
+        toast.info(`DURAÇÂO ${videoDuration}`);
         event.target.value = '';
       };
 
@@ -55,7 +72,6 @@ export default function CreatePost() {
         toast.error("Erro ao carregar vídeo");
         event.target.value = '';
       };
-
       reader.readAsDataURL(currentFile);
     } else {
       toast.info("Formato de arquivo não suportado.");
@@ -82,23 +98,6 @@ export default function CreatePost() {
       }
     };   */
 
-  const getVideoDuration = (file: File): Promise<number> => {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement('video');
-      video.preload = 'metadata';
-
-      video.onloadedmetadata = () => {
-        resolve(video.duration);
-      };
-
-      video.onerror = () => {
-        reject(new Error('Error loading video metadata'));
-      };
-
-      video.src = URL.createObjectURL(file);
-    });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
@@ -122,16 +121,6 @@ export default function CreatePost() {
 
       if (!profileId) {
         navigate("/login");
-      }
-
-      // Check video duration for video files
-      if (fileType === 'video') {
-        const duration = await getVideoDuration(file);
-        if (duration > MAX_VIDEO_TIME) {
-          setError("O vídeo não pode exceder 15 segundos.");
-          setLoading(false);
-          return;
-        }
       }
 
       const fileExt = file.name.split(".").pop();
