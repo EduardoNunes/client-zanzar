@@ -1,10 +1,10 @@
-/* import Cookies from "js-cookie"; */
+import Cookies from "js-cookie";
 import { Camera as CameraIcon, Loader2, Trash2, Upload } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { openCamera } from "../components/OpenCamera";
-/* import { createPostWithMediaReq } from "../requests/postsRequests"; */
+import { createPostWithMediaReq } from "../requests/postsRequests";
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -31,8 +31,6 @@ export default function CreatePost() {
       event.target.value = '';
       return;
     }
-
-    toast.info(`INFO: ${currentFile}`);
 
     if (currentFile.type.startsWith('image/')) {
       setFileType("image")
@@ -111,11 +109,11 @@ export default function CreatePost() {
       setError("O tempo máximo para videos é de 15 segundos.");
       return;
     }
-toast.info(`DURAÇÂO: ${videoDuration} segundos`)
+
     setLoading(true);
     setError("");
 
-    /* try {
+    try {
       const profileId = Cookies.get("profile_id");
 
       if (!profileId) {
@@ -137,7 +135,7 @@ toast.info(`DURAÇÂO: ${videoDuration} segundos`)
       console.error("Error:", error);
     } finally {
       setLoading(false);
-    } */
+    }
   };
 
   return (
@@ -207,6 +205,7 @@ toast.info(`DURAÇÂO: ${videoDuration} segundos`)
                     setPreview("");
                     setFileType(null);
                     setError("");
+                    setLoading(false)
                   }}
                   className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
                 >
