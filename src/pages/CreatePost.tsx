@@ -60,12 +60,12 @@ export default function CreatePost() {
       toast.info("Formato de arquivo não suportado.");
       event.target.value = '';
     }
+    setError("");
   };
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
     if (capturedFile) {
-      toast.info(`${capturedFile.type} selecionado.`);
       setFile(capturedFile);
       const objectUrl = URL.createObjectURL(capturedFile);
       setPreview(objectUrl);
@@ -190,6 +190,7 @@ export default function CreatePost() {
                     setFile(null);
                     setPreview("");
                     setFileType(null);
+                    setError("");
                   }}
                   className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
                 >
