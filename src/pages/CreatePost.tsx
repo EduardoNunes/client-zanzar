@@ -15,43 +15,16 @@ export default function CreatePost() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleCheckFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFile(null);
+    setPreview("");
+    setFileType(null);
+
     const currentFile = event.target.files?.[0];
 
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
       event.target.value = '';
-      return;
-    }
-
-    if (currentFile.type.startsWith('image/')) {
-      if (currentFile.size > 10485760) {
-        toast.info("A imagem ultrapassa o limite de 10 MB.");
-        event.target.value = '';
-        return;
-      }
-    } else if (currentFile.type.startsWith('video/')) {
-      if (currentFile.size > 31457280) {
-        toast.info("O vídeo ultrapassa o limite de 30 MB.");
-        event.target.value = '';
-        return;
-      }
-    } else {
-      toast.info("Tipo de arquivo inválido.");
-      event.target.value = '';
-      return;
-    }
-
-    handleFileChange(currentFile);
-  }
-
-  const handleFileChange = (currentFile: File | null) => {
-    setFile(null);
-    setPreview("");
-    setFileType(null);
-
-    if (!currentFile) {
-      toast.info("Nenhum arquivo selecionado.");
       return;
     }
 
@@ -62,6 +35,7 @@ export default function CreatePost() {
       setPreview(objectUrl);
 
       setFile(currentFile);
+      event.target.value = '';
 
     } else if (currentFile.type.startsWith('video/')) {
       setFileType("video")
@@ -72,16 +46,19 @@ export default function CreatePost() {
       reader.onloadend = () => {
         setPreview(reader.result as string);
         setFile(currentFile);
+        event.target.value = '';
       };
 
       reader.onerror = () => {
         toast.error("Erro ao carregar vídeo");
+        event.target.value = '';
       };
 
       // Read the file as a data URL for better mobile support
       reader.readAsDataURL(currentFile);
     } else {
       toast.info("Formato de arquivo não suportado.");
+      event.target.value = '';
     }
   };
 
@@ -200,7 +177,7 @@ export default function CreatePost() {
               <input
                 type="file"
                 accept="image/png, image/jpg, image/jpeg, video/mp4"
-                onChange={handleCheckFile}
+                onChange={handleFileChange}
                 className="hidden"
               />
 
