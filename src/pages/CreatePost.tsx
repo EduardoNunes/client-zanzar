@@ -15,6 +15,9 @@ export default function CreatePost() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+  const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFile(null);
     setPreview("");
@@ -24,50 +27,48 @@ export default function CreatePost() {
 
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
-      event.target.value = '';
+      event.target.value = "";
       return;
     }
 
-    if (currentFile.type.startsWith('image/')) {
-      setFileType("image")
+    const isImage = currentFile.type.startsWith("image/");
+    const isVideo = currentFile.type.startsWith("video/");
 
+    // Validação de tamanho
+    if (isImage && currentFile.size > MAX_IMAGE_SIZE) {
+      toast.error("A imagem deve ter no máximo 5MB.");
+      event.target.value = "";
+      return;
+    }
+    if (isVideo && currentFile.size > MAX_VIDEO_SIZE) {
+      toast.error("O vídeo deve ter no máximo 30MB.");
+      event.target.value = "";
+      return;
+    }
+
+    if (isImage) {
+      setFileType("image");
       const objectUrl = URL.createObjectURL(currentFile);
       setPreview(objectUrl);
-
       setFile(currentFile);
-      event.target.value = '';
-
-    } else if (currentFile.type.startsWith('video/')) {
-      setFileType("video")
-
-      // Create a FileReader to ensure mobile compatibility
+    } else if (isVideo) {
+      setFileType("video");
       const reader = new FileReader();
-
       reader.onloadend = () => {
         setPreview(reader.result as string);
         setFile(currentFile);
-        event.target.value = '';
       };
-
       reader.onerror = () => {
         toast.error("Erro ao carregar vídeo");
-        event.target.value = '';
       };
-
-      // Read the file as a data URL for better mobile support
       reader.readAsDataURL(currentFile);
     } else {
       toast.info("Formato de arquivo não suportado.");
-      event.target.value = '';
     }
+
+    event.target.value = "";
   };
 
-  /*   
-     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-     if (currentFile.size > MAX_FILE_SIZE) {
-     toast.info("O arquivo de imagem não pode exceder 10MB.");
-   }
- */
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
