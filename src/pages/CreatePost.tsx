@@ -16,6 +16,7 @@ export default function CreatePost() {
   const [error, setError] = useState("");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // Reset previous state
     setFile(null);
     setPreview("");
     setFileType(null);
@@ -30,65 +31,48 @@ export default function CreatePost() {
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
     if (currentFile.size > MAX_FILE_SIZE) {
       toast.info("O arquivo de mídia não pode exceder 30MB.");
-
       event.target.value = '';
       return;
     }
 
-    // Verifica se é uma imagem ou um vídeo
-    if (currentFile.type.startsWith("image/")) {
-      setFileType('image');
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        try {
-          setPreview(reader.result as string);
-          setFile(currentFile);
-        } catch (error) {
-          toast.error("Erro ao carregar imagem. Tente novamente.");
-
-          event.target.value = '';
-          setFile(null);
-          setPreview("");
-          setFileType(null);
-        }
-      };
-
-      reader.onerror = () => {
-        toast.error(`Erro 2 ${error}`);
-
+    // Use FileReader to read file into memory
+    const reader = new FileReader();
+    
+    reader.onloadend = () => {
+      try {
+        // Determine file type
+        const fileType = currentFile.type.startsWith('image/') ? 'image' : 'video';
+        
+        // Set state with read file
+        setFileType(fileType);
+        setFile(currentFile);
+        
+        // Use the result from FileReader as preview
+        setPreview(reader.result as string);
+      } catch (error) {
+        toast.error("Erro ao processar arquivo.");
+        console.error(error);
+        
+        // Reset all states on error
         event.target.value = '';
         setFile(null);
         setPreview("");
         setFileType(null);
-      };
-      reader.readAsDataURL(currentFile);
-    } else if (currentFile.type.startsWith("video/")) {
-      setFileType('video');
+      }
+    };
 
-      // Use FileReader for better mobile compatibility
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        try {
-          setPreview(reader.result as string);
-          setFile(currentFile);
-        } catch (error) {
-          toast.error("Erro ao carregar vídeo. Tente novamente.");
+    reader.onerror = () => {
+      toast.error("Erro ao ler arquivo.");
+      
+      // Reset all states on error
+      event.target.value = '';
+      setFile(null);
+      setPreview("");
+      setFileType(null);
+    };
 
-          event.target.value = '';
-          setFile(null);
-          setPreview("");
-          setFileType(null);
-        }
-      };
-      reader.onerror = () => {
-        toast.error("Erro ao carregar vídeo. Tente novamente.");
-
-        event.target.value = '';
-        setFile(null);
-        setPreview("");
-        setFileType(null);
-      };
+    // Read the file as Data URL
+    if (currentFile.type.startsWith('image/') || currentFile.type.startsWith('video/')) {
       reader.readAsDataURL(currentFile);
     } else {
       toast.info("Formato de arquivo não suportado.");
@@ -155,8 +139,8 @@ export default function CreatePost() {
 
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-          {error}
-        </div>
+        {error}
+      </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -182,6 +166,7 @@ export default function CreatePost() {
                     src={preview}
                     controls
                     playsInline
+                    autoPlay
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
