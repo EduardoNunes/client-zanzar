@@ -11,7 +11,7 @@ export default function CreatePost() {
   const [caption, setCaption] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
-  /*  const [, setFileType] = useState<'image' | 'video' | null>(null); */
+  const [, setFileType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -19,7 +19,7 @@ export default function CreatePost() {
     // Reset previous state
     setFile(null);
     setPreview("");
-    /* setFileType(null); */
+    setFileType(null);
 
     const currentFile = event.target.files?.[0];
 
@@ -32,6 +32,7 @@ export default function CreatePost() {
 
     if (currentFile.type.startsWith('image/')) {
       setFile(currentFile);
+      setFileType("image");
 
       const objectUrl = URL.createObjectURL(currentFile);
       setPreview(objectUrl);
@@ -46,7 +47,7 @@ export default function CreatePost() {
             return;
           }
     
-           setFileType("image");
+           
     
         } */
 
@@ -185,7 +186,7 @@ export default function CreatePost() {
                   onClick={() => {
                     setFile(null);
                     setPreview("");
-                    /*  setFileType(null); */
+                    setFileType(null);
                   }}
                   className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
                 >
