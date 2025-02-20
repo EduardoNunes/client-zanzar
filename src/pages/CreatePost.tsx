@@ -22,6 +22,10 @@ export default function CreatePost() {
 
     const currentFile = event.target.files?.[0];
 
+    if (currentFile && currentFile.size > 10485760) {
+      toast.info("O arquivo de imagem não pode exceder 10MB.");
+    }
+
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
       event.target.value = '';
@@ -29,6 +33,11 @@ export default function CreatePost() {
     }
 
     if (currentFile.type.startsWith('image/')) {
+      if (currentFile && currentFile.size > 10485760) {
+        toast.info("O arquivo de imagem não pode exceder 10MB.");
+        return;
+      }
+
       setFileType("image")
 
       const objectUrl = URL.createObjectURL(currentFile);
@@ -38,6 +47,10 @@ export default function CreatePost() {
       event.target.value = '';
 
     } else if (currentFile.type.startsWith('video/')) {
+      if (currentFile && currentFile.size > 31457280) {
+        toast.info("O arquivo de video não pode exceder 30MB.");
+        return;
+      }
       setFileType("video")
 
       // Create a FileReader to ensure mobile compatibility
@@ -62,12 +75,12 @@ export default function CreatePost() {
     }
   };
 
-  /*   if (currentFile.type.startsWith('image/')) {
-      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-      if (currentFile.size > MAX_FILE_SIZE) {
-        toast.info("O arquivo de imagem não pode exceder 10MB.");
-      }
-    } */
+  /*   
+     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+     if (currentFile.size > MAX_FILE_SIZE) {
+     toast.info("O arquivo de imagem não pode exceder 10MB.");
+   }
+ */
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
