@@ -11,7 +11,7 @@ export default function CreatePost() {
   const [caption, setCaption] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
- /*  const [, setFileType] = useState<'image' | 'video' | null>(null); */
+  /*  const [, setFileType] = useState<'image' | 'video' | null>(null); */
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,7 +29,13 @@ export default function CreatePost() {
       return;
     }
 
-    if (currentFile.type.startsWith('image/')) {
+    setFile(currentFile);
+
+    const objectUrl = URL.createObjectURL(currentFile);
+    setPreview(objectUrl);
+    event.target.value = '';
+
+/*     if (currentFile.type.startsWith('image/')) {
       const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
       if (currentFile.size > MAX_FILE_SIZE) {
         toast.info("O arquivo de imagem não pode exceder 10MB.");
@@ -37,29 +43,25 @@ export default function CreatePost() {
         return;
       }
 
-      /* setFileType("image"); */
-      setFile(currentFile);
+       setFileType("image");
 
-      const objectUrl = URL.createObjectURL(currentFile);
-      setPreview(objectUrl);
-      event.target.value = '';
-    }
-
-   /*  if (currentFile.type.startsWith('video/')) {
-      const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
-      if (currentFile.size > MAX_FILE_SIZE) {
-        toast.info("O arquivo de vídeo não pode exceder 30MB.");
-        event.target.value = '';
-        return;
-      }
-
-      setFileType("video");
-      setFile(currentFile);
-
-      const objectUrl = URL.createObjectURL(currentFile);
-      setPreview(objectUrl);
-      event.target.value = '';
     } */
+
+    /*  if (currentFile.type.startsWith('video/')) {
+       const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+       if (currentFile.size > MAX_FILE_SIZE) {
+         toast.info("O arquivo de vídeo não pode exceder 30MB.");
+         event.target.value = '';
+         return;
+       }
+ 
+       setFileType("video");
+       setFile(currentFile);
+ 
+       const objectUrl = URL.createObjectURL(currentFile);
+       setPreview(objectUrl);
+       event.target.value = '';
+     } */
   };
 
   const handleOpenPhoto = async () => {
@@ -158,14 +160,14 @@ export default function CreatePost() {
                   />
                 )
                /* ) */ : (
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload className="w-12 h-12 text-gray-400 mb-3" />
-                  <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">Clique para fazer upload</span>
-                  </p>
-                  <p className="text-xs text-gray-500">PNG, JPG ou MP4 (Máx. 30MB, Vídeo até 15s)</p>
-                </div>
-              )}
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload className="w-12 h-12 text-gray-400 mb-3" />
+                    <p className="mb-2 text-sm text-gray-500">
+                      <span className="font-semibold">Clique para fazer upload</span>
+                    </p>
+                    <p className="text-xs text-gray-500">PNG, JPG ou MP4 (Máx. 30MB, Vídeo até 15s)</p>
+                  </div>
+                )}
 
               <input
                 type="file"
@@ -180,7 +182,7 @@ export default function CreatePost() {
                   onClick={() => {
                     setFile(null);
                     setPreview("");
-                   /*  setFileType(null); */
+                    /*  setFileType(null); */
                   }}
                   className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
                 >
