@@ -18,7 +18,6 @@ export default function CreatePost() {
 
   const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
   const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB
-  const MAX_VIDEO_TIME = 15; // 15 segundos
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFile(null);
