@@ -39,22 +39,35 @@ export default function CreatePost() {
 
     } else if (currentFile.type.startsWith('video/')) {
       setFileType("video")
-      const objectUrl = URL.createObjectURL(currentFile);
-      setPreview(objectUrl);
-      setFile(currentFile);
-      event.target.value = '';
+
+      // Create a FileReader to ensure mobile compatibility
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+        setFile(currentFile);
+        event.target.value = '';
+      };
+
+      reader.onerror = () => {
+        toast.error("Erro ao carregar vídeo");
+        event.target.value = '';
+      };
+
+      // Read the file as a data URL for better mobile support
+      reader.readAsDataURL(currentFile);
     } else {
       toast.info("Formato de arquivo não suportado.");
       event.target.value = '';
     }
   };
 
-/*   if (currentFile.type.startsWith('image/')) {
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    if (currentFile.size > MAX_FILE_SIZE) {
-      toast.info("O arquivo de imagem não pode exceder 10MB.");
-    }
-  } */
+  /*   if (currentFile.type.startsWith('image/')) {
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+      if (currentFile.size > MAX_FILE_SIZE) {
+        toast.info("O arquivo de imagem não pode exceder 10MB.");
+      }
+    } */
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
