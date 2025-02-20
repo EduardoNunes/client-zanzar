@@ -50,7 +50,7 @@ export default function CreatePost() {
         // Use the result from FileReader as preview
         setPreview(reader.result as string);
       } catch (error) {
-        toast.error("Erro ao processar arquivo.");
+        toast.info("Erro ao processar arquivo.");
         console.error(error);
         
         // Reset all states on error
@@ -62,7 +62,7 @@ export default function CreatePost() {
     };
 
     reader.onerror = () => {
-      toast.error("Erro ao ler arquivo.");
+      toast.info("Erro ao ler arquivo.");
       
       // Reset all states on error
       event.target.value = '';
@@ -189,9 +189,7 @@ export default function CreatePost() {
               <input
                 type="file"
                 accept="image/png, image/jpg, image/jpeg, video/mp4"
-                onChange={preview ? () => {
-                  toast.info("Remova a mídia atual usando o ícone de lixeira antes de selecionar uma nova.");
-                } : handleFileChange}
+                onChange={handleFileChange}
                 className="hidden"
               />
 
