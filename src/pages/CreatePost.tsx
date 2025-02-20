@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { Camera, Loader2, Upload, Trash2 } from "lucide-react";
+import { Camera, Loader2, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -11,7 +11,7 @@ export default function CreatePost() {
   const [caption, setCaption] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
-  const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
+  const [, setFileType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
