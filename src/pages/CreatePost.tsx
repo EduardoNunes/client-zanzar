@@ -17,6 +17,7 @@ export default function CreatePost() {
 
   const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
   const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB
+  const MAX_VIDEO_TIME = 15; // 15 segundos
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFile(null);
@@ -81,6 +82,23 @@ export default function CreatePost() {
       }
     };   */
 
+  const getVideoDuration = (file: File): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+
+      video.onloadedmetadata = () => {
+        resolve(video.duration);
+      };
+
+      video.onerror = () => {
+        reject(new Error('Error loading video metadata'));
+      };
+
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
@@ -92,7 +110,7 @@ export default function CreatePost() {
       setError("O tamanho máximo para imagens é de 10MB.");
       return;
     } else if (fileType === 'video' && file.size > MAX_VIDEO_SIZE) {
-      setError("O tamanho máximo para vídeos é de 30MB.");
+      setError("O tamanho máximo para videos é de 30MB.");
       return;
     }
 
@@ -104,6 +122,16 @@ export default function CreatePost() {
 
       if (!profileId) {
         navigate("/login");
+      }
+
+      // Check video duration for video files
+      if (fileType === 'video') {
+        const duration = await getVideoDuration(file);
+        if (duration > MAX_VIDEO_TIME) {
+          setError("O vídeo não pode exceder 15 segundos.");
+          setLoading(false);
+          return;
+        }
       }
 
       const fileExt = file.name.split(".").pop();
