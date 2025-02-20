@@ -6,9 +6,6 @@ import { toast } from "react-toastify";
 import { openCamera } from "../components/OpenCamera";
 import { createPostWithMediaReq } from "../requests/postsRequests";
 
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
-
 export default function CreatePost() {
   const navigate = useNavigate();
   const [caption, setCaption] = useState("");
@@ -17,6 +14,9 @@ export default function CreatePost() {
   const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+  const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFile(null);
@@ -40,13 +40,6 @@ export default function CreatePost() {
       setFile(currentFile);
       event.target.value = '';
 
-      if (currentFile.size > MAX_IMAGE_SIZE) {
-        toast.error("Imagem muito grande. Tamanho máximo: 10MB.");
-        event.target.value = '';
-        setFile(null);
-        setPreview("");
-        setFileType(null);
-      }
     } else if (currentFile.type.startsWith('video/')) {
       setFileType("video")
 
@@ -63,24 +56,16 @@ export default function CreatePost() {
       };
 
       reader.readAsDataURL(currentFile);
-
-      if (currentFile.size > MAX_VIDEO_SIZE) {
-        toast.error("Vídeo muito grande. Tamanho máximo: 50MB.");
-        event.target.value = '';
-        setFile(null);
-        setPreview("");
-        setFileType(null);
-      }
     } else {
       toast.info("Formato de arquivo não suportado.");
       event.target.value = '';
     }
-
   };
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
     if (capturedFile) {
+      toast.info(`${capturedFile.type} selecionado.`);
       setFile(capturedFile);
       const objectUrl = URL.createObjectURL(capturedFile);
       setPreview(objectUrl);
@@ -99,7 +84,15 @@ export default function CreatePost() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      setError("Por favor, selecione uma imagem.");
+      setError("Por favor, selecione uma mídia.");
+      return;
+    }
+
+    if (fileType === 'image' && file.size > MAX_IMAGE_SIZE) {
+      setError("O tamanho máximo para imagens é de 10MB.");
+      return;
+    } else if (fileType === 'video' && file.size > MAX_VIDEO_SIZE) {
+      setError("O tamanho máximo para vídeos é de 30MB.");
       return;
     }
 
