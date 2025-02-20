@@ -22,10 +22,6 @@ export default function CreatePost() {
 
     const currentFile = event.target.files?.[0];
 
-    if (currentFile && currentFile.size > 10485760) {
-      toast.info("O arquivo de imagem não pode exceder 10MB.");
-    }
-
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
       event.target.value = '';
@@ -33,12 +29,6 @@ export default function CreatePost() {
     }
 
     if (currentFile.type.startsWith('image/')) {
-      const fileSize = currentFile.size;
-      if (fileSize > 10485760) {
-        toast.info("O arquivo de imagem não pode exceder 10MB.");
-        return;
-      }
-
       setFileType("image")
 
       const objectUrl = URL.createObjectURL(currentFile);
@@ -48,11 +38,6 @@ export default function CreatePost() {
       event.target.value = '';
 
     } else if (currentFile.type.startsWith('video/')) {
-      const fileSize = currentFile.size;
-      if (fileSize > 31457280) {
-        toast.info("O arquivo de video não pode exceder 30MB.");
-        return;
-      }
       setFileType("video")
 
       // Create a FileReader to ensure mobile compatibility
