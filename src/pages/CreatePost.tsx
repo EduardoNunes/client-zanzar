@@ -18,6 +18,7 @@ export default function CreatePost() {
 
   const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
   const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB
+  const MAX_VIDEO_TIME = 15; // 15 segundos
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFile(null);
@@ -50,20 +51,16 @@ export default function CreatePost() {
         setPreview(reader.result as string);
         setFile(currentFile);
 
-        // Criando um elemento de vídeo temporário para obter a duração
         const videoElement = document.createElement('video');
-        videoElement.src = reader.result as string;  // Usando a URL do arquivo carregado
+        videoElement.src = reader.result as string;
 
-        // Esperar o vídeo carregar para obter a duração
         videoElement.onloadedmetadata = () => {
-          const duration = videoElement.duration; // Duração do vídeo em segundos
+          const duration = videoElement.duration;
           console.log(`Duração do vídeo: ${duration} segundos`);
 
-          // Você pode então fazer algo com a duração, como armazenar no estado:
-          setVideoDuration(duration); // Exemplo de como armazenar a duração, se necessário
+          setVideoDuration(duration);
         };
 
-        toast.info(`DURAÇÂO ${videoDuration}`);
         event.target.value = '';
       };
 
@@ -110,12 +107,15 @@ export default function CreatePost() {
     } else if (fileType === 'video' && file.size > MAX_VIDEO_SIZE) {
       setError("O tamanho máximo para videos é de 30MB.");
       return;
+    } else if (videoDuration && videoDuration > MAX_VIDEO_TIME) {
+      setError("O tempo máximo para videos é de 15 segundos.");
+      return;
     }
-
+toast.info(`DURAÇÂO: ${videoDuration} segundos`)
     setLoading(true);
     setError("");
 
-    try {
+    /* try {
       const profileId = Cookies.get("profile_id");
 
       if (!profileId) {
@@ -137,7 +137,7 @@ export default function CreatePost() {
       console.error("Error:", error);
     } finally {
       setLoading(false);
-    }
+    } */
   };
 
   return (
