@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { Camera, Loader2, Trash2 } from "lucide-react";
+import { Camera, Loader2, Trash2, Upload } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -11,7 +11,7 @@ export default function CreatePost() {
   const [caption, setCaption] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
-  const [, setFileType] = useState<'image' | 'video' | null>(null);
+ /*  const [, setFileType] = useState<'image' | 'video' | null>(null); */
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -19,7 +19,7 @@ export default function CreatePost() {
     // Reset previous state
     setFile(null);
     setPreview("");
-    setFileType(null);
+    /* setFileType(null); */
 
     const currentFile = event.target.files?.[0];
 
@@ -37,7 +37,7 @@ export default function CreatePost() {
         return;
       }
 
-      setFileType("image");
+      /* setFileType("image"); */
       setFile(currentFile);
 
       const objectUrl = URL.createObjectURL(currentFile);
@@ -117,7 +117,7 @@ export default function CreatePost() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Criar Nova Postagem</h1>
+      <h1 className="text-2xl font-bold mb-6">Criar Nova Postagem1</h1>
 
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
@@ -140,7 +140,7 @@ export default function CreatePost() {
                 transition-colors duration-200 ease-in-out
                 flex flex-col items-center justify-center relative overflow-hidden`}
             >
-              {preview && /* (
+              {preview ? /* (
                 fileType === "video" ? (
                   <video
                     key={preview}
@@ -157,7 +157,7 @@ export default function CreatePost() {
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 )
-              /* ) : (
+               /* ) */ : (
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-12 h-12 text-gray-400 mb-3" />
                   <p className="mb-2 text-sm text-gray-500">
@@ -165,7 +165,7 @@ export default function CreatePost() {
                   </p>
                   <p className="text-xs text-gray-500">PNG, JPG ou MP4 (Máx. 30MB, Vídeo até 15s)</p>
                 </div>
-              ) */}
+              )}
 
               <input
                 type="file"
@@ -180,7 +180,7 @@ export default function CreatePost() {
                   onClick={() => {
                     setFile(null);
                     setPreview("");
-                    setFileType(null);
+                   /*  setFileType(null); */
                   }}
                   className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
                 >
