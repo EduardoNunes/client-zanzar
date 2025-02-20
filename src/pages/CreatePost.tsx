@@ -25,57 +25,39 @@ export default function CreatePost() {
 
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
-      return;
-    }
-
-    const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
-    if (currentFile.size > MAX_FILE_SIZE) {
-      toast.info("O arquivo de mídia não pode exceder 30MB.");
       event.target.value = '';
       return;
     }
 
-    // Use FileReader to read file into memory
-    const reader = new FileReader();
-    
-    reader.onloadend = () => {
-      try {
-        // Determine file type
-        const fileType = currentFile.type.startsWith('image/') ? 'image' : 'video';
-        
-        // Set state with read file
-        setFileType(fileType);
-        setFile(currentFile);
-        
-        // Use the result from FileReader as preview
-        setPreview(reader.result as string);
-      } catch (error) {
-        toast.info("Erro ao processar arquivo.");
-        console.error(error);
-        
-        // Reset all states on error
+    if (currentFile.type.startsWith('image/')) {
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+      if (currentFile.size > MAX_FILE_SIZE) {
+        toast.info("O arquivo de imagem não pode exceder 10MB.");
         event.target.value = '';
-        setFile(null);
-        setPreview("");
-        setFileType(null);
+        return;
       }
-    };
 
-    reader.onerror = () => {
-      toast.info("Erro ao ler arquivo.");
-      
-      // Reset all states on error
+      setFileType("image");
+      setFile(currentFile);
+
+      const objectUrl = URL.createObjectURL(currentFile);
+      setPreview(objectUrl);
       event.target.value = '';
-      setFile(null);
-      setPreview("");
-      setFileType(null);
-    };
+    }
 
-    // Read the file as Data URL
-    if (currentFile.type.startsWith('image/') || currentFile.type.startsWith('video/')) {
-      reader.readAsDataURL(currentFile);
-    } else {
-      toast.info("Formato de arquivo não suportado.");
+    if (currentFile.type.startsWith('video/')) {
+      const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+      if (currentFile.size > MAX_FILE_SIZE) {
+        toast.info("O arquivo de vídeo não pode exceder 30MB.");
+        event.target.value = '';
+        return;
+      }
+
+      setFileType("video");
+      setFile(currentFile);
+
+      const objectUrl = URL.createObjectURL(currentFile);
+      setPreview(objectUrl);
       event.target.value = '';
     }
   };
@@ -139,8 +121,8 @@ export default function CreatePost() {
 
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-        {error}
-      </div>
+          {error}
+        </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -162,7 +144,6 @@ export default function CreatePost() {
                 fileType === "video" ? (
                   <video
                     key={preview}
-                    id="video-preview"
                     src={preview}
                     controls
                     playsInline
