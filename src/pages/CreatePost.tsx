@@ -6,6 +6,9 @@ import { toast } from "react-toastify";
 import { openCamera } from "../components/OpenCamera";
 import { createPostWithMediaReq } from "../requests/postsRequests";
 
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+
 export default function CreatePost() {
   const navigate = useNavigate();
   const [caption, setCaption] = useState("");
@@ -14,9 +17,6 @@ export default function CreatePost() {
   const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-  const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFile(null);
@@ -27,50 +27,56 @@ export default function CreatePost() {
 
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
-      event.target.value = "";
+      event.target.value = '';
       return;
     }
 
-    const isImage = currentFile.type.startsWith("image/");
-    const isVideo = currentFile.type.startsWith("video/");
+    if (currentFile.type.startsWith('image/')) {
+      setFileType("image")
 
-    // Validação de tamanho
-    if (isImage && currentFile.size > MAX_IMAGE_SIZE) {
-      toast.info(`Tamanho ${currentFile.size / 1024 / 1024}MB`);  
-      toast.error("A imagem deve ter no máximo 5MB.");
-      event.target.value = "";
-      return;
-    }
-    if (isVideo && currentFile.size > MAX_VIDEO_SIZE) {
-      toast.info(`Tamanho ${currentFile.size / 1024 / 1024}MB`);
-      toast.error("O vídeo deve ter no máximo 30MB.");
-      event.target.value = "";
-      return;
-    }
-
-    if (isImage) {
-      setFileType("image");
       const objectUrl = URL.createObjectURL(currentFile);
       setPreview(objectUrl);
+
       setFile(currentFile);
-    } else if (isVideo) {
-      setFileType("video");
+      event.target.value = '';
+
+      if (currentFile.size > MAX_IMAGE_SIZE) {
+        toast.error("Imagem muito grande. Tamanho máximo: 10MB.");
+        event.target.value = '';
+        setFile(null);
+        setPreview("");
+        setFileType(null);
+      }
+    } else if (currentFile.type.startsWith('video/')) {
+      setFileType("video")
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
         setFile(currentFile);
+        event.target.value = '';
       };
+
       reader.onerror = () => {
         toast.error("Erro ao carregar vídeo");
+        event.target.value = '';
       };
+
       reader.readAsDataURL(currentFile);
+
+      if (currentFile.size > MAX_VIDEO_SIZE) {
+        toast.error("Vídeo muito grande. Tamanho máximo: 50MB.");
+        event.target.value = '';
+        setFile(null);
+        setPreview("");
+        setFileType(null);
+      }
     } else {
       toast.info("Formato de arquivo não suportado.");
+      event.target.value = '';
     }
 
-    event.target.value = "";
   };
-
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
