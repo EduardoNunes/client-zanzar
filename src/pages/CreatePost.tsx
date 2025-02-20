@@ -33,7 +33,8 @@ export default function CreatePost() {
     }
 
     if (currentFile.type.startsWith('image/')) {
-      if (currentFile && currentFile.size > 10485760) {
+      const fileSize = currentFile.size;
+      if (fileSize > 10485760) {
         toast.info("O arquivo de imagem não pode exceder 10MB.");
         return;
       }
@@ -47,7 +48,8 @@ export default function CreatePost() {
       event.target.value = '';
 
     } else if (currentFile.type.startsWith('video/')) {
-      if (currentFile && currentFile.size > 31457280) {
+      const fileSize = currentFile.size;
+      if (fileSize > 31457280) {
         toast.info("O arquivo de video não pode exceder 30MB.");
         return;
       }
