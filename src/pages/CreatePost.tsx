@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { Camera, Loader2, Trash2, Upload } from "lucide-react";
+import { Camera as CameraIcon, Loader2, Trash2, Upload } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -28,23 +28,33 @@ export default function CreatePost() {
       return;
     }
 
-    currentFile.type.startsWith('image/') ? setFileType("image") : setFileType("video");
+    if (currentFile.type.startsWith('image/')) {
+      setFileType("image")
 
-    const objectUrl = URL.createObjectURL(currentFile);
-    setPreview(objectUrl);
-    setFile(currentFile);
-    event.target.value = '';
+      const objectUrl = URL.createObjectURL(currentFile);
+      setPreview(objectUrl);
 
+      setFile(currentFile);
+      event.target.value = '';
 
-    /*     if (currentFile.type.startsWith('image/')) {
-          const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-          if (currentFile.size > MAX_FILE_SIZE) {
-            toast.info("O arquivo de imagem não pode exceder 10MB.");
-            event.target.value = '';
-            return;
-          }    
-        } */
+    } else if (currentFile.type.startsWith('video/')) {
+      setFileType("video")
+      const objectUrl = URL.createObjectURL(currentFile);
+      setPreview(objectUrl);
+      setFile(currentFile);
+      event.target.value = '';
+    } else {
+      toast.info("Formato de arquivo não suportado.");
+      event.target.value = '';
+    }
   };
+
+/*   if (currentFile.type.startsWith('image/')) {
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    if (currentFile.size > MAX_FILE_SIZE) {
+      toast.info("O arquivo de imagem não pode exceder 10MB.");
+    }
+  } */
 
   const handleOpenPhoto = async () => {
     const capturedFile = await openCamera();
@@ -184,14 +194,14 @@ export default function CreatePost() {
                   : 'bg-green-500 text-white hover:bg-green-600'
                 }`}
             >
-              <Camera className="mr-2" /> Capturar Foto
+              <CameraIcon className="mr-2" /> Capturar Foto
             </button>
             {/* <button
               type="button"
               onClick={() => handleOpenVideo()}
               className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 flex items-center justify-center"
             >
-              <Camera className="mr-2" /> Gravar Vídeo
+              <CameraIcon className="mr-2" /> Gravar Vídeo
             </button> */}
           </div>
         </div>
