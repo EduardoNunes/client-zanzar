@@ -59,7 +59,7 @@ export default function InvitesPage() {
       <h1 className="text-2xl font-bold mb-4">Gerenciar Convites</h1>
 
       <p className="mb-4 text-gray-600">
-        Você possui <strong>{invitesAvaliable}</strong> convites.
+        Você possui <strong>{invitesAvaliable}</strong>{invitesAvaliable <= 1 ? " convite" : " convites"}.
       </p>
 
       <div className="flex flex-col gap-6 mb-6">
