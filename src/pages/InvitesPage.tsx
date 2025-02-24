@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getInvitesReq, sendInvitesReq } from "../requests/invitesRequests";
+import Cookies from "js-cookie";
 
 interface Invite {
   id: string;
@@ -13,6 +14,7 @@ export default function InvitesPage() {
   const [email, setEmail] = useState("");
   const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(false);
+  const [invitesAvaliable, setInvitesAvaliable] = useState(0);
 
   useEffect(() => {
     fetchInvites();
@@ -21,8 +23,9 @@ export default function InvitesPage() {
   const fetchInvites = async () => {
     setLoading(true)
     getInvitesReq().then((res) => {
-      console.log("INVITES", res)
-      setInvites(res);
+      console.log("RES", res)
+      setInvitesAvaliable(res.invitesAvaliable)
+      setInvites(res.invites);
     }).finally(() => {
       setLoading(false)
     })
@@ -36,11 +39,19 @@ export default function InvitesPage() {
       return
     };
 
-    sendInvitesReq(email).then(() => {
-      fetchInvites();
-    }).finally(() => {
-      setLoading(false)
-    })
+    sendInvitesReq(email)
+      .then(() => {
+        fetchInvites();
+        const currentInvites = parseInt(Cookies.get('invites') || '0', 10);
+
+        if (currentInvites > 0) {
+          Cookies.set('invites', String(currentInvites - 1));
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+        setEmail("");
+      });
   };
 
   return (
@@ -48,7 +59,7 @@ export default function InvitesPage() {
       <h1 className="text-2xl font-bold mb-4">Gerenciar Convites</h1>
 
       <p className="mb-4 text-gray-600">
-        Você pode enviar mais <strong>LIMITE</strong> convites.
+        Você possui <strong>{invitesAvaliable}</strong> convites.
       </p>
 
       <div className="flex flex-col gap-6 mb-6">

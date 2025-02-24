@@ -15,8 +15,9 @@ import {
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import AdModal from "./AdModal";
-import { NotificationIndicator } from "./NotificationIndicator";
-import { MessageIndicator } from "./MessageIndicator";
+import { NotificationIndicator } from "../indicators/NotificationIndicator";
+import { MessageIndicator } from "../indicators/MessageIndicator";
+import { InvitesIndicator } from "../indicators/InvitesIndicator";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -163,6 +164,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <div>
                 <NotificationIndicator isMenuOpen={isMenuOpen} />
                 <MessageIndicator isMenuOpen={isMenuOpen} />
+                <InvitesIndicator isMenuOpen={isMenuOpen} />
               </div>
             </button>
           </div>
@@ -210,6 +212,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   }}>
                     {item.label === "Notifications" ? <NotificationIndicator isMenuOpen={isMenuOpen} /> : null}
                     {item.label === "Messages" ? <MessageIndicator isMenuOpen={isMenuOpen} /> : null}
+                    {item.label === "Invites" ? <InvitesIndicator isMenuOpen={isMenuOpen} /> : null}
                   </div>
                   <span className="text-xs">{item.label}</span>
                 </button>

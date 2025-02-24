@@ -28,6 +28,7 @@ export default function Login() {
       Cookies.set("user_name", data.userName, { path: '/' });
       Cookies.set("unread_notifications", data.unreadNotificationsCount, { path: '/' });
       Cookies.set('unread_chat_messages', data.unreadChatMessages, { path: '/' });
+      Cookies.set('invites', data.invites, { path: '/' });
 
       // Show success toast
       toast.success("Autenticado com sucesso!");
