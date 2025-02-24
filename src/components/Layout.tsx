@@ -6,7 +6,7 @@ import {
   PlusSquare,
   User,
   MessageSquare,
-  ShoppingBag,
+  /* ShoppingBag, */
   Shield,
   LogIn,
   StickyNote,
@@ -77,12 +77,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           path: "/messages",
           onClick: () => navigate("/messages"),
         },
-        {
+/*         {
           icon: <ShoppingBag className="w-8 h-8" />,
           label: "Store",
           path: "/store",
           onClick: () => navigate("/store"),
-        },
+        }, */
         {
           icon: <Send className="w-8 h-8" />,
           label: "Invites",
