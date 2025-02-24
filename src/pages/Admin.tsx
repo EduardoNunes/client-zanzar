@@ -103,6 +103,14 @@ export default function Admin() {
       path: '/admin/ads',
       stat: stats.totalAds,
       statLabel: 'Total Ads'
+    },
+    {
+      title: 'Invites Management',
+      description: 'Manage invite management',
+      icon: <Bell className="w-8 h-8 text-indigo-600" />,
+      path: '/admin/invites-management',
+      stat: "",
+      statLabel: 'Total Invites'
     }
   ];
 

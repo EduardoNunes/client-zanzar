@@ -5,6 +5,7 @@ import MessagesManagement from '../pages/admin/MessagesManagement';
 import UsersManagement from '../pages/admin/UsersManagement';
 import RecentActivityManagement from '../pages/admin/RecentActivityManagement';
 import { AdvertisementsManagementPage } from '../pages/admin/AdvertisementsManagementPage';
+import InvitesManagement from '../pages/admin/InvitesManagement';
 
 
 export default function AdminRoutes() {
@@ -16,6 +17,7 @@ export default function AdminRoutes() {
       <Route path="posts" element={<PostsManagement />} />
       <Route path="messages" element={<MessagesManagement />} />
       <Route path="ads" element={<AdvertisementsManagementPage />} />
+      <Route path="invites-management" element={<InvitesManagement />} />
     </Routes>
   );
 }
