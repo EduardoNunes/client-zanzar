@@ -16,7 +16,7 @@ export const getInvitesReq = async () => {
         Authorization: `Bearer ${token}`,
       },
     })
-console.log("RESPONSE", response.data)
+
     return response.data;
   } catch (error: any) {
     const errorMessage =
