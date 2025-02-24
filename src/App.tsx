@@ -12,6 +12,7 @@ import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import AdminRoutes from "./routes/AdminRoutes";
+import InvitesPage from "./pages/InvitesPage";
 
 export default function App() {
   const [isTokenLoaded, setIsTokenLoaded] = useState(false);
@@ -111,6 +112,16 @@ export default function App() {
               <ProtectedRoute>
                 <Layout>
                   <AdminRoutes />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invites"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <InvitesPage />
                 </Layout>
               </ProtectedRoute>
             }

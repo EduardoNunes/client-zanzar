@@ -10,6 +10,7 @@ import {
   Shield,
   LogIn,
   StickyNote,
+  Send,
 } from "lucide-react";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
@@ -80,6 +81,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           label: "Store",
           path: "/store",
           onClick: () => navigate("/store"),
+        },
+        {
+          icon: <Send className="w-8 h-8" />,
+          label: "Invites",
+          path: "/invites",
+          onClick: () => navigate("/invites"),
         },
         ...(isAdmin
           ? [
