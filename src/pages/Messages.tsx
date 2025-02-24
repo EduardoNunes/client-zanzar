@@ -8,7 +8,7 @@ import {
   getFollowedUsersReq,
   getUserChatsReq,
 } from "../requests/chatRequests";
-import { MessageIndicator } from "../components/MessageIndicator";
+import { MessageIndicator } from "../indicators/MessageIndicator";
 
 interface FollowedUser {
   avatarUrl: any;
