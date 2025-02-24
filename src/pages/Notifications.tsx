@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
-import api from "../server/axios";
-import SinglePostModal from "../components/SinglePostModal";
 import { CircleAlert, CircleCheckBig } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { io, Socket } from "socket.io-client";
+import SinglePostModal from "../components/SinglePostModal";
+import api from "../server/axios";
 import { SOCKET_URL } from "../server/socket";
 
 const NotificationsPage = () => {
@@ -73,7 +73,7 @@ const NotificationsPage = () => {
     const updatedNotifications = notifications.map((n) =>
       n.id === notification.id ? { ...n, isRead: true } : n
     );
-    
+
     setNotifications(updatedNotifications);
 
     // Update unread notifications count
