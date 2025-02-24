@@ -57,7 +57,7 @@ export default function Login() {
           <LogIn className="w-12 h-12 text-indigo-600" />
         </div>
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          Login2
+          Login
         </h2>
         {errors.length > 0 && (
           <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">

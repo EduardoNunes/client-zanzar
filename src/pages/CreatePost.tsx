@@ -140,7 +140,7 @@ export default function CreatePost() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Criar Nova Postagem1</h1>
+      <h1 className="text-2xl font-bold mb-6">Criar Nova Postagem</h1>
 
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
