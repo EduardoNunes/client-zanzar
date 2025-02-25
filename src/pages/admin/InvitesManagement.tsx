@@ -35,7 +35,7 @@ export default function InvitesManagement() {
   // Conceder convites a um usuário específico
   const grantInvite = async () => {
     setLoading(true);
-    grantInviteReq(username, inviteCount).then((res) => {
+    grantInviteReq(username.toLowerCase(), inviteCount).then((res) => {
       toast.success(res.message);
       setUserName("");
       setInviteCount(1);

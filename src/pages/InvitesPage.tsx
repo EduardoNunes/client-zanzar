@@ -39,7 +39,7 @@ export default function InvitesPage() {
       return
     };
 
-    sendInvitesReq(email)
+    sendInvitesReq(email.toLowerCase())
       .then(() => {
         fetchInvites();
         const currentInvites = parseInt(Cookies.get('invites') || '0', 10);
