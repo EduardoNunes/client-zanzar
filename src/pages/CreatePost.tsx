@@ -1,10 +1,10 @@
 import Cookies from "js-cookie";
 import { Camera as CameraIcon, Loader2, Trash2, Upload } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { openCamera } from "../components/OpenCamera";
-import { createPostWithMediaReq } from "../requests/postsRequests";
+import { createPostWithMediaReq, loadCategoriesReq, createCategoryReq } from "../requests/postsRequests";
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -15,10 +15,24 @@ export default function CreatePost() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
+  const [newCategory, setNewCategory] = useState("");
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
   const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB
   const MAX_VIDEO_TIME = 15; // 15 segundos
+
+  useEffect(() => {
+    fetchCategories();
+  }, [])
+
+  const fetchCategories = async () => {
+    const profileId = Cookies.get("profile_id");
+    profileId && loadCategoriesReq(profileId).then((res) => {
+      setCategories(res);
+    });
+  }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFile(null);
@@ -92,21 +106,39 @@ export default function CreatePost() {
       }
     };   */
 
+  const handleCreateCategory = async (newCategory: string) => {
+    if (!newCategory) {
+      toast.info("Por favor, insira uma nova categoria.");
+      return;
+    }
+    const profileId = Cookies.get("profile_id");
+    profileId && createCategoryReq(newCategory, profileId).then(() => {
+      fetchCategories();
+      toast.success("Categoria criada com sucesso!");
+      setNewCategory("");
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      setError("Por favor, selecione uma mídia.");
+      toast.info("Por favor, selecione uma mídia.");
+      return;
+    }
+
+    if (!selectedCategory) {
+      toast.info("Por favor, selecione uma categoria.");
       return;
     }
 
     if (fileType === 'image' && file.size > MAX_IMAGE_SIZE) {
-      setError("O tamanho máximo para imagens é de 10MB.");
+      toast.info("O tamanho máximo para imagens é de 10MB.");
       return;
     } else if (fileType === 'video' && file.size > MAX_VIDEO_SIZE) {
-      setError("O tamanho máximo para videos é de 30MB.");
+      toast.info("O tamanho máximo para videos é de 30MB.");
       return;
     } else if (videoDuration && videoDuration > MAX_VIDEO_TIME) {
-      setError("O tempo máximo para videos é de 15 segundos.");
+      toast.info("O tempo máximo para videos é de 15 segundos.");
       return;
     }
 
@@ -125,7 +157,7 @@ export default function CreatePost() {
       const filePath = `${profileId}/${fileName}`;
 
       profileId &&
-        (await createPostWithMediaReq(profileId, file, caption, filePath).then(
+        (await createPostWithMediaReq(profileId, file, caption, filePath, selectedCategory).then(
           () => {
             navigate("/");
           }
@@ -236,7 +268,6 @@ export default function CreatePost() {
             </button> */}
           </div>
         </div>
-
         <div>
           <label className="block text-gray-700 text-sm font-semibold mb-2">
             Legenda
@@ -247,6 +278,48 @@ export default function CreatePost() {
             placeholder="Escreva uma legenda para sua postagem..."
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent min-h-[100px]"
           />
+        </div>
+        <div>
+          <label className="block text-gray-700 text-sm font-semibold mb-2">
+            Selecionar categoria
+          </label>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-full px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent h-[40px]"
+          >
+            <option value="" disabled className="text-gray-700 text-sm font-semibold">
+              Selecione uma categoria
+            </option>
+            {categories.length > 0 ? (
+              categories.map((category) => (
+                <option key={category.id} value={category.id} className="text-gray-700 text-sm font-semibold hover:bg-gray-50">
+                  {category.categories}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled className="text-gray-700 text-sm font-semibold">
+                Nenhuma categoria encontrada
+              </option>
+            )}
+          </select>
+        </div>
+        <div className="flex flex-col">
+          <label className="block text-gray-700 text-sm font-semibold mb-2">
+            Criar categoria
+          </label>
+          <input
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="Nova categoria"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent h-[40px]"
+          />
+          <button
+            type="button"
+            onClick={() => handleCreateCategory(newCategory)}
+            className="flex-1 w-1/2 bg-indigo-600 mt-4 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            Criar
+          </button>
         </div>
 
         <div className="flex gap-4">

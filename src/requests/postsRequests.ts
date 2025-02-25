@@ -6,7 +6,8 @@ export const createPostWithMediaReq = async (
   profileId: string,
   file: File,
   caption: string,
-  filePath: string
+  filePath: string,
+  selectedCategory: string
 ) => {
   const token = Cookies.get("access_token");
 
@@ -29,6 +30,7 @@ export const createPostWithMediaReq = async (
     formData.append("filePath", filePath);
     formData.append("profileId", profileId);
     formData.append("caption", caption);
+    formData.append("selectedCategory", selectedCategory);
 
     const response = await api.post("/posts/upload-and-create", formData, {
       headers: {
@@ -48,3 +50,56 @@ export const createPostWithMediaReq = async (
     throw new Error(errorMessage);
   }
 };
+
+export const loadCategoriesReq = async (profileId: string) => {
+  const token = Cookies.get("access_token");
+
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.get("/posts/load-categories", {
+      params: { profileId },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      "Erro ao criar a postagem. Tente novamente.";
+
+    console.error("Error:", error);
+    throw new Error(errorMessage);
+  }
+}
+
+export const createCategoryReq = async (newCategory: string, profileId: string) => {
+  const token = Cookies.get("access_token");
+
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.post("/posts/category", { newCategory, profileId }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      "Erro ao criar a postagem. Tente novamente.";
+
+    console.error("Error:", error);
+    throw new Error(errorMessage);
+  }
+}
