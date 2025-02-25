@@ -1,10 +1,11 @@
-import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { useState } from "react";
-import CommentModal from "./CommentsModal";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
-import ImageViewer from "./ImageViewer";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { handleLikeReq } from "../requests/feedRequests";
+import { getPostsReq } from "../requests/profileRequests";
+import CommentModal from "./CommentsModal";
+import ImageViewer from "./ImageViewer";
 
 interface Post {
   likedByLoggedInUser: boolean;
@@ -19,23 +20,95 @@ interface Post {
 }
 
 interface PostsGridProfileProps {
-  userLikes: { [key: string]: boolean };
-  setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
-  setUserLikes: React.Dispatch<
-    React.SetStateAction<{ [key: string]: boolean }>
-  >;
-  posts: Post[];
+  username: string | undefined;
 }
 
 export default function PostsGridProfile({
-  userLikes,
-  setPosts,
-  setUserLikes,
-  posts,
+  username,
 }: PostsGridProfileProps) {
   const navigate = useNavigate();
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
+  let scrollTriggered = false;
+
+  useEffect(() => {
+    fetchPosts();
+  }, [])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      //if foi adicionado evitando segunda req de postagens, pois ao carregar a página vindo de uma página com o scroll rolado p baixo a página automaticamente carrega com o scroll em baixo resultando na chamada indesejada da função loadMorePosts
+      if (!scrollTriggered) {
+        scrollTriggered = true;
+        return;
+      }
+
+      if (
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.scrollHeight - 10
+      ) {
+        loadMorePosts();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loadingMore]);
+
+  const fetchPosts = async () => {
+    try {
+      const initialPosts = username && (await getPostsReq(username, 1, 2));
+
+      console.log("POSTS", initialPosts)
+
+      if (initialPosts) {
+        setPosts(initialPosts || []);
+        const likesMap = initialPosts.reduce(
+          (acc: Record<string, boolean>, post: Post) => {
+            acc[post.id] = post.likedByLoggedInUser || false;
+            return acc;
+          },
+          {}
+        );
+        setUserLikes(likesMap);
+      }
+
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  }
+
+  const loadMorePosts = async () => {
+    if (loadingMore) return;
+
+    setLoadingMore(true);
+    try {
+      const newPosts = username && (await getPostsReq(username, page + 1, 2));
+      if (newPosts && newPosts.length > 0) {
+        const newLikesMap = newPosts.reduce(
+          (acc: Record<string, boolean>, post: Post) => {
+            acc[post.id] = post.likedByLoggedInUser || false;
+            return acc;
+          },
+          {}
+        );
+
+        setPosts((prevPosts) => [...prevPosts, ...newPosts]);
+        setUserLikes((prevLikes) => ({ ...prevLikes, ...newLikesMap }));
+        setPage((prevPage) => prevPage + 1);
+      } else {
+        setLoadingMore(false);
+      }
+    } catch (error) {
+      console.error("Error loading more posts:", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const handleLike = async (
     e: React.MouseEvent<HTMLButtonElement>,
@@ -124,8 +197,8 @@ export default function PostsGridProfile({
         ))}
         <div
           className={`md:hidden transition-all duration-100 ease-in-out ${selectedPost
-              ? "max-h-screen opacity-100 visible"
-              : "max-h-0 opacity-0 invisible"
+            ? "max-h-screen opacity-100 visible"
+            : "max-h-0 opacity-0 invisible"
             }`}
         >
           {selectedPost && (
@@ -148,6 +221,18 @@ export default function PostsGridProfile({
           imageUrl={fullscreenImage}
           onClose={() => setFullscreenImage(null)}
         />
+      )}
+
+      {loadingMore && (
+        <div className="flex justify-center items-center py-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+        </div>
+      )}
+
+      {!loadingMore && posts.length > 0 && (
+        <div className="text-center text-gray-500 py-4">
+          No more posts to load.
+        </div>
       )}
     </div>
   );
