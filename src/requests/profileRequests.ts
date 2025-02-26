@@ -25,11 +25,7 @@ export const getProfileReq = async (username: string) => {
   }
 };
 
-export const getPostsReq = async (
-  username: string,
-  page: number,
-  limit: number
-) => {
+export const getPostsReq = async (username: string, page: number) => {
   const token = Cookies.get("access_token");
   const profileId = Cookies.get("profile_id");
 
@@ -44,7 +40,6 @@ export const getPostsReq = async (
       },
       params: {
         page: page,
-        limit: limit,
         profileId: profileId,
       },
     });
@@ -113,6 +108,38 @@ export const followProfileReq = async (
     const errorMessage =
       error.response?.data?.message || "Erro ao seguir perfil.";
     toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+export const getPostsByCategoryReq = async (
+  categoryId: string,
+  profileId: string,
+  page: number
+) => {
+  const token = Cookies.get("access_token");
+
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.get(`/profile/posts-by-category`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        page: page,
+        profileId: profileId,
+        categoryId,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Erro ao encontrar usuários.";
     throw new Error(errorMessage);
   }
 };
