@@ -6,6 +6,7 @@ import {
 } from "../requests/profileRequests";
 import CommentModal from "./CommentsModal";
 import ImageViewer from "./ImageViewer";
+import { FileImage } from "lucide-react";
 
 interface Post {
   category: { categories: string; id: string };
@@ -40,7 +41,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
   ); // Track pages for each category
   const [categoryLoading, setCategoryLoading] = useState<
     Record<string, boolean>
-  >({}); //prevent duplicate request
+  >({}); //Prevê requisição duplicada
 
   let scrollTriggered = false;
 
@@ -175,12 +176,13 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
   };
 
   const renderPost = (post: Post) => {
+    console.log("POST", post)
     return (
       <div
         key={post.id}
-        className="rounded-lg overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity cursor-zoom-in relative w-48 shrink-0"
+        className="overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity cursor-zoom-in relative w-1/3 shrink-0"
       >
-        <div className="relative w-full aspect-square">
+        <div className="relative w-full aspect-[9/14]">
           <img
             src={post.mediaUrl || ""}
             alt={post.caption}
@@ -207,21 +209,44 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
     );
   };
 
-  return (
-    <div>
-      {Object.entries(postsByCategory).map(([category, posts]) => (
-        <div key={category} className="mb-8">
-          <h2 className="text-xl font-bold mb-4">{category}</h2>
-          <div
-            className="flex overflow-x-auto space-x-4 p-4"
-            onScroll={(e) =>
-              handleCategoryScroll(category, posts[0].category.id, e)
-            }
-          >
-            {posts.map((post) => renderPost(post))}
+  const renderPlaceholder = (category: string, index: number) => {
+    return (
+      <div
+        key={`placeholder-${category}-${index}`}
+        className="overflow-hidden bg-gray-200 relative w-1/3 shrink-0"
+      >
+        <div className="relative w-full aspect-[9/14] flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-2 opacity-30 text-gray-500 text-center">
+            <FileImage size={36} />
+            Adicionar midia
           </div>
         </div>
-      ))}
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      {Object.entries(postsByCategory).map(([category, posts]) => {
+        const placeholders = Array.from(
+          { length: Math.max(0, 3 - posts.length) },
+          (_, i) => renderPlaceholder(category, i)
+        );
+        return (
+          <div key={category} className="mb-2">
+            <h2 className="text-xl font-bold mb-1">{category}</h2>
+            <div
+              className="flex overflow-x-auto space-x-[2px]"
+              onScroll={(e) =>
+                handleCategoryScroll(category, posts[0]?.category.id, e)
+              }
+            >
+              {posts.map((post) => renderPost(post))}
+              {placeholders}
+            </div>
+          </div>
+        );
+      })}
 
       {allPosts.length === 0 && (
         <div className="text-center py-12 text-gray-500">
