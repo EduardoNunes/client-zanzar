@@ -56,7 +56,6 @@ export default function Profile() {
       const isCurrentUserProfile = profileId === profileData.profileId;
       setIsCurrentUser(isCurrentUserProfile);
 
-
       setFollowStats({
         followers: profileData.followersCount || 0,
         following: profileData.followingCount || 0,
@@ -111,9 +110,7 @@ export default function Profile() {
           setIsFollowing={setIsFollowing}
           setFollowStats={setFollowStats}
         />
-        <PostsGridProfile
-          username={username}
-        />
+        <PostsGridProfile username={username} />
       </div>
     </>
   );
