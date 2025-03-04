@@ -5,6 +5,7 @@ import LikeButton from "./LikeButton";
 
 interface ImageViewerProps {
   post: any;
+  imageUrl?: string;
   onClose: () => void;
   selectedPost: any;
   setSelectedPost: (post: any) => void;

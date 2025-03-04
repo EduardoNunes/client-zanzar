@@ -1,6 +1,12 @@
 import { formatDistanceToNow } from "date-fns";
 import Cookies from "js-cookie";
-import { CircleUserRound, Heart, LogIn, MessageCircle, Loader2 } from "lucide-react";
+import {
+  CircleUserRound,
+  Heart,
+  LogIn,
+  MessageCircle,
+  Loader2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleLikeReq } from "../requests/feedRequests";
@@ -20,7 +26,7 @@ export default function SinglePostModal({
   const navigate = useNavigate();
   const [post, setPost] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState<Record<string, boolean>>({});
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<any | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
@@ -40,7 +46,7 @@ export default function SinglePostModal({
       setLoading(true);
       const data = await getSinglePostReq(postId, profileId);
       setPost(data);
-      setIsLiked(data.likedByLoggedInUser || false);
+      setIsLiked({ [postId]: data.likedByLoggedInUser || false });
     } catch (error) {
       console.error("Error fetching post:", error);
     } finally {
@@ -56,7 +62,7 @@ export default function SinglePostModal({
       return;
     }
 
-    setIsLiked((prev) => !prev);
+    setIsLiked((prev) => ({ ...prev, [post.id]: !prev[post.id] }));
     setPost((prevPost: any) => ({
       ...prevPost,
       likeCount: isLiked ? prevPost.likeCount - 1 : prevPost.likeCount + 1,
@@ -202,6 +208,12 @@ export default function SinglePostModal({
         <ImageViewer
           imageUrl={fullscreenImage}
           onClose={() => setFullscreenImage(null)}
+          post={post}
+          selectedPost={selectedPost}
+          setSelectedPost={setSelectedPost}
+          userLikes={isLiked}
+          setUserLikes={setIsLiked}
+          updatePostInFeed={(updatedPost) => setPost(updatedPost)}
         />
       )}
     </div>
