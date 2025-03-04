@@ -1,15 +1,31 @@
+import { MessageCircle } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import CommentModal from "./CommentsModal";
+import LikeButton from "./LikeButton";
 
 interface ImageViewerProps {
-  imageUrl: string;
+  post: any;
   onClose: () => void;
+  selectedPost: any;
+  setSelectedPost: (post: any) => void;
+  userLikes: any;
+  setUserLikes: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  updatePostInFeed: (postId: string, newPost: any) => void;
 }
 
-export default function ImageViewer({ imageUrl, onClose }: ImageViewerProps) {
+export default function ImageViewer({
+  post,
+  onClose,
+  setSelectedPost,
+  userLikes,
+  setUserLikes,
+  updatePostInFeed,
+}: ImageViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const [scale, setScale] = useState(1);
   const [initialDistance, setInitialDistance] = useState<number | null>(null);
+  const [openComments, setOpenComments] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -53,7 +69,6 @@ export default function ImageViewer({ imageUrl, onClose }: ImageViewerProps) {
     <div
       ref={containerRef}
       className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center overflow-hidden touch-pan-x touch-pan-y"
-      onClick={onClose}
     >
       <button
         className="absolute top-4 right-4 h-full w-full text-white hover:text-gray-300 transition-colors z-[60]"
@@ -68,7 +83,7 @@ export default function ImageViewer({ imageUrl, onClose }: ImageViewerProps) {
       >
         <img
           ref={imgRef}
-          src={imageUrl}
+          src={post.mediaUrl}
           alt="Fullscreen view"
           className="max-w-full max-h-[95vh] w-auto h-auto object-contain touch-pinch-zoom"
           style={{
@@ -78,7 +93,35 @@ export default function ImageViewer({ imageUrl, onClose }: ImageViewerProps) {
             transition: "transform 0.1s",
           }}
         />
+        <div className="absolute bottom-0 p-4 z-[70]">
+          <div className="flex items-center space-x-4 mb-4">
+            <LikeButton
+              postId={post.id}
+              initialLikeCount={post.likeCount}
+              userLikes={userLikes}
+              setUserLikes={setUserLikes}
+              updatePostInFeed={updatePostInFeed}
+            />
+            <button
+              onClick={() => setSelectedPost(post)}
+              className="flex items-center space-x-1 text-gray-600 hover:text-indigo-600"
+            >
+              <MessageCircle className="w-6 h-6" />
+              <span>{post.commentCount}</span>
+            </button>
+          </div>
+          <p className="text-gray-900">{post.caption}</p>
+        </div>
       </div>
+      {openComments && (
+        <div className="fixed inset-0 z-[80] bg-black bg-opacity-90 flex items-center justify-center overflow-auto">
+          <button
+            className="absolute top-4 right-4 h-full w-full text-white hover:text-gray-300 transition-colors z-[60]"
+            onClick={() => setOpenComments(false)}
+          />
+          <CommentModal post={post} onClose={() => setOpenComments(false)} />
+        </div>
+      )}
     </div>
   );
 }
