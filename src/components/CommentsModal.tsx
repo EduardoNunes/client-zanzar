@@ -120,7 +120,7 @@ export default function CommentModal({ post, onClose }: CommentModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 flex justify-center items-end bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex justify-center items-end bg-opacity-50 z-80">
       <div className="bg-white rounded-t-lg w-full max-w-lg flex flex-col h-[500px]">
         <div className="p-6">
           <button
