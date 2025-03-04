@@ -31,7 +31,7 @@ interface PostsByCategory {
 
 export default function PostsGridProfile({ username }: PostsGridProfileProps) {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<Post | null>(null);
   const [postsByCategory, setPostsByCategory] = useState<PostsByCategory>({});
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
@@ -42,6 +42,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
   const [categoryLoading, setCategoryLoading] = useState<
     Record<string, boolean>
   >({}); //Prevê requisição duplicada
+  const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
 
   let scrollTriggered = false;
 
@@ -76,6 +77,14 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
         if (initialPosts) {
           setAllPosts(initialPosts);
 
+          const likesMap = initialPosts.reduce(
+            (acc: Record<string, boolean>, post: Post) => {
+              acc[post.id] = post.likedByLoggedInUser || false;
+              return acc;
+            },
+            {}
+          );
+          setUserLikes(likesMap);
           const grouped = groupPostsByCategory(initialPosts);
           setPostsByCategory(grouped);
 
@@ -102,7 +111,17 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
         if (newPosts && newPosts.length > 0) {
           setAllPosts((prevPosts) => [...prevPosts, ...newPosts]);
           setPage((prevPage) => prevPage + 1);
-
+          const newLikesMap = newPosts.reduce(
+            (acc: Record<string, boolean>, post: Post) => {
+              acc[post.id] = post.likedByLoggedInUser || false;
+              return acc;
+            },
+            {}
+          );
+          setUserLikes((prevLikes) => ({
+            ...prevLikes,
+            ...newLikesMap,
+          }));
           // Append new categories to the existing postsByCategory
           setPostsByCategory((prevPostsByCategory) => {
             const newPostsByCategory = groupPostsByCategory(newPosts);
@@ -163,6 +182,17 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
             ...prevPages,
             [category]: nextPage,
           }));
+          const newLikesMap = newPosts.reduce(
+            (acc: Record<string, boolean>, post: Post) => {
+              acc[post.id] = post.likedByLoggedInUser || false;
+              return acc;
+            },
+            {}
+          );
+          setUserLikes((prevLikes) => ({
+            ...prevLikes,
+            ...newLikesMap,
+          }));
         }
       } catch (error) {
         console.error("Error loading more posts for category:", error);
@@ -176,7 +206,6 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
   };
 
   const renderPost = (post: Post) => {
-    console.log("POST", post)
     return (
       <div
         key={post.id}
@@ -199,7 +228,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
               img.classList.add("opacity-0");
               spinner.classList.add("hidden");
             }}
-            onClick={() => setFullscreenImage(post.mediaUrl)}
+            onClick={() => setFullscreenImage(post)}
           />
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
@@ -222,6 +251,14 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
           </div>
         </div>
       </div>
+    );
+  };
+
+  const updatePostInFeed = (postId: string, newPost: any) => {
+    setAllPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId ? { ...post, likeCount: newPost.likesCount } : post
+      )
     );
   };
 
@@ -256,8 +293,13 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
 
       {fullscreenImage && (
         <ImageViewer
-          imageUrl={fullscreenImage}
+          post={fullscreenImage}
           onClose={() => setFullscreenImage(null)}
+          userLikes={userLikes}
+          setUserLikes={setUserLikes}
+          updatePostInFeed={updatePostInFeed}
+          setSelectedPost={setSelectedPost}
+          selectedPost={selectedPost}
         />
       )}
 
