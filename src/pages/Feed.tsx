@@ -43,6 +43,9 @@ export default function Feed() {
   const [videoRefsState, setVideoRefsState] = useState<{
     [key: number]: HTMLVideoElement | null;
   }>({});
+  const [videoLoading, setVideoLoading] = useState<{ [key: number]: boolean }>(
+    {}
+  );
 
   // Refs for Intersection Observer
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -62,7 +65,6 @@ export default function Feed() {
       (entries) => {
         entries.forEach((entry) => {
           const videoElement = entry.target as HTMLVideoElement;
-
           if (!entry.isIntersecting) {
             // Video is not in view
             videoElement.pause();
@@ -121,6 +123,16 @@ export default function Feed() {
         };
       });
 
+      const initialVideoLoadingState = processedPosts.reduce(
+        (acc: { [key: number]: boolean }, _: any, index: number) => {
+          acc[index] = true; // Initially loading for all videos
+          return acc;
+        },
+        {}
+      );
+
+      setVideoLoading(initialVideoLoadingState);
+      
       setPosts(processedPosts || []);
       const likesMap = processedPosts.reduce(
         (acc: Record<string, boolean>, post: Post) => {
@@ -163,6 +175,16 @@ export default function Feed() {
           mediaType: isVideo ? "video" : "image",
         };
       });
+      
+      const newVideoLoadingState = processedPosts.reduce(
+        (acc: { [key: number]: boolean }, _: any, index: number) => {
+          acc[index + posts.length] = true; // Initially loading for all new videos, considering the index shift
+          return acc;
+        },
+        {}
+      );
+
+      setVideoLoading((prev) => ({ ...prev, ...newVideoLoadingState }));
 
       const newLikesMap = processedPosts.reduce(
         (acc: Record<string, boolean>, post: Post) => {
@@ -280,6 +302,11 @@ export default function Feed() {
                 <div className="relative w-full h-full">
                   {post.mediaType === "video" ? (
                     <div className="relative w-full h-full">
+                      {videoLoading[index] && (
+                        <div className="absolute inset-0 z-20 flex justify-center items-center bg-gray-100/50">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                        </div>
+                      )}
                       <video
                         ref={(el) => {
                           videoRefs.current[index] = el;
@@ -293,6 +320,12 @@ export default function Feed() {
                               setVideoRefsState((prev) => ({
                                 ...prev,
                                 [index]: el,
+                              })); // Atualiza o estado para re-renderizar o componente
+                            });
+                            el.addEventListener("loadeddata", () => {
+                              setVideoLoading((prev) => ({
+                                ...prev,
+                                [index]: false,
                               })); // Atualiza o estado para re-renderizar o componente
                             });
 
