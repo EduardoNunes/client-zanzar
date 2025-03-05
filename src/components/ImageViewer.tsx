@@ -1,7 +1,8 @@
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, ChevronLeft } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import CommentModal from "./CommentsModal";
 import LikeButton from "./LikeButton";
+import VideoProgressBar from "./VideoProgressBar";
 
 interface ImageViewerProps {
   post: any;
@@ -24,9 +25,11 @@ export default function ImageViewer({
 }: ImageViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [scale, setScale] = useState(1);
   const [initialDistance, setInitialDistance] = useState<number | null>(null);
   const [openComments, setOpenComments] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(true);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -34,6 +37,17 @@ export default function ImageViewer({
       document.body.style.overflow = "unset";
     };
   }, []);
+
+  useEffect(() => {
+    if (post.mediaType === "video" && videoRef.current) {
+      const video = videoRef.current;
+      video.muted = true;
+      video.volume = 0;
+      video.play().catch((error) => {
+        console.warn("Autoplay prevented", error);
+      });
+    }
+  }, [post.mediaType]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
@@ -82,19 +96,51 @@ export default function ImageViewer({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <img
-          ref={imgRef}
-          src={post.mediaUrl}
-          alt="Fullscreen view"
-          className="max-w-full max-h-[95vh] w-auto h-auto object-contain touch-pinch-zoom"
-          style={{
-            WebkitUserSelect: "none",
-            userSelect: "none",
-            transform: `scale(${scale})`,
-            transition: "transform 0.1s",
-          }}
-        />
-        <div className="absolute bottom-0 p-4 z-[70]">
+        {post.mediaType === "video" ? (
+          <div className="relative w-full h-full">
+            {videoLoading && (
+              <div className="absolute inset-0 z-20 flex justify-center items-center bg-gray-100/50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+              </div>
+            )}
+            <video
+              ref={videoRef}
+              src={post.mediaUrl}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="max-w-full max-h-[95vh] w-auto h-auto object-contain touch-pinch-zoom"
+              style={{
+                WebkitUserSelect: "none",
+                userSelect: "none",
+                transform: `scale(${scale})`,
+                transition: "transform 0.1s",
+              }}
+              onLoadedData={() => {
+                setVideoLoading(false);
+              }}
+            />
+            <div className="absolute bottom-0 w-full z-[70]">
+              <VideoProgressBar videoElement={videoRef.current} />
+            </div>
+          </div>
+        ) : (
+          <img
+            ref={imgRef}
+            src={post.mediaUrl}
+            alt="Fullscreen view"
+            className="max-w-full max-h-full w-auto h-auto object-contain touch-pinch-zoom"
+            style={{
+              WebkitUserSelect: "none",
+              userSelect: "none",
+              transform: `scale(${scale})`,
+              transition: "transform 0.1s",
+            }}
+          />
+        )}
+
+        <div className="absolute bottom-0 left-0 p-4 z-[70] bg-black/60 rounded-tr-lg">
           <div className="flex items-center space-x-4 mb-4">
             <LikeButton
               postId={post.id}
@@ -111,7 +157,11 @@ export default function ImageViewer({
               <span>{post.commentCount}</span>
             </button>
           </div>
-          <p className="text-gray-900">{post.caption}</p>
+          <p className="text-white">{post.caption}</p>
+          <ChevronLeft
+            className="w-6 h-6 z-[80] mt-2 text-white"
+            onClick={() => onClose()}
+          />
         </div>
       </div>
       {openComments && (
