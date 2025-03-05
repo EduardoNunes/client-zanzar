@@ -1,12 +1,12 @@
 import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
+import { FileImage } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getPostsByCategoryReq,
   getPostsReq,
 } from "../requests/profileRequests";
 import CommentModal from "./CommentsModal";
 import ImageViewer from "./ImageViewer";
-import { FileImage } from "lucide-react";
 
 interface Post {
   category: { categories: string; id: string };
@@ -15,6 +15,7 @@ interface Post {
   commentCount: number;
   id: string;
   mediaUrl: string | null;
+  mediaType?: "image" | "video";
   caption: string;
   createdAt: string;
   comments: { id: string; profile: { username: string }; content: string }[];
@@ -43,8 +44,58 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
     Record<string, boolean>
   >({}); //Prevê requisição duplicada
   const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
+  const [videoLoading, setVideoLoading] = useState<{ [key: number]: boolean }>(
+    {}
+  );
+
+  // Refs for Intersection Observer
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   let scrollTriggered = false;
+
+  // Cleanup function for observer
+  const cleanupObserver = useCallback(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+  }, []);
+
+  // Setup Intersection Observer
+  useEffect(() => {
+    // Create Intersection Observer
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const videoElement = entry.target as HTMLVideoElement;
+          if (!entry.isIntersecting) {
+            // Video is not in view
+            videoElement.pause();
+            videoElement.muted = true;
+            videoElement.currentTime = 0;
+          } else {
+            // Video is in view
+            videoElement.play().catch(() => {
+              console.warn("Autoplay prevented");
+            });
+          }
+        });
+      },
+      {
+        threshold: 0.5, // Trigger when at least 50% of the video is visible
+      }
+    );
+
+    // Observe videos
+    videoRefs.current.forEach((videoEl) => {
+      if (videoEl) {
+        observerRef.current?.observe(videoEl);
+      }
+    });
+
+    // Cleanup
+    return cleanupObserver;
+  }, [allPosts, cleanupObserver]);
 
   useEffect(() => {
     fetchPosts();
@@ -74,18 +125,42 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
       if (username) {
         const initialPosts = await getPostsReq(username, 1);
 
-        if (initialPosts) {
-          setAllPosts(initialPosts);
+        const processedPosts = initialPosts.map((post: Post) => {
+          // You might want to adjust this logic based on how you store media type in the backend
+          const isVideo =
+            post.mediaUrl?.includes("/videos/") ||
+            post.mediaUrl?.includes(".mp4") ||
+            post.mediaUrl?.includes("video");
 
-          const likesMap = initialPosts.reduce(
+          return {
+            ...post,
+            mediaType: isVideo ? "video" : "image",
+          };
+        });
+
+        const initialVideoLoadingState = processedPosts.reduce(
+          (acc: { [key: number]: boolean }, _: any, index: number) => {
+            acc[index] = true; // Initially loading for all videos
+            return acc;
+          },
+          {}
+        );
+
+        setVideoLoading(initialVideoLoadingState);
+
+        if (initialPosts) {
+          setAllPosts(processedPosts);
+
+          const likesMap = processedPosts.reduce(
             (acc: Record<string, boolean>, post: Post) => {
               acc[post.id] = post.likedByLoggedInUser || false;
               return acc;
             },
             {}
           );
+
           setUserLikes(likesMap);
-          const grouped = groupPostsByCategory(initialPosts);
+          const grouped = groupPostsByCategory(processedPosts);
           setPostsByCategory(grouped);
 
           // Initialize page numbers for each category
@@ -93,6 +168,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
           Object.keys(grouped).forEach((category) => {
             initialCategoryPages[category] = 1;
           });
+
           setCategoryPages(initialCategoryPages);
         }
       }
@@ -108,10 +184,34 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
     try {
       if (username) {
         const newPosts = await getPostsReq(username, page + 1);
+
+        // Determine media type for each post
+        const processedPosts = newPosts.map((post: Post) => {
+          const isVideo =
+            post.mediaUrl?.includes("/videos/") ||
+            post.mediaUrl?.includes(".mp4") ||
+            post.mediaUrl?.includes("video");
+
+          return {
+            ...post,
+            mediaType: isVideo ? "video" : "image",
+          };
+        });
+
+        const newVideoLoadingState = processedPosts.reduce(
+          (acc: { [key: number]: boolean }, _: any, index: number) => {
+            acc[index + allPosts.length] = true; // Initially loading for all new videos, considering the index shift
+            return acc;
+          },
+          {}
+        );
+
+        setVideoLoading((prev) => ({ ...prev, ...newVideoLoadingState }));
+
         if (newPosts && newPosts.length > 0) {
-          setAllPosts((prevPosts) => [...prevPosts, ...newPosts]);
+          setAllPosts((prevPosts) => [...prevPosts, ...processedPosts]);
           setPage((prevPage) => prevPage + 1);
-          const newLikesMap = newPosts.reduce(
+          const newLikesMap = processedPosts.reduce(
             (acc: Record<string, boolean>, post: Post) => {
               acc[post.id] = post.likedByLoggedInUser || false;
               return acc;
@@ -122,9 +222,10 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
             ...prevLikes,
             ...newLikesMap,
           }));
+
           // Append new categories to the existing postsByCategory
           setPostsByCategory((prevPostsByCategory) => {
-            const newPostsByCategory = groupPostsByCategory(newPosts);
+            const newPostsByCategory = groupPostsByCategory(processedPosts);
             return { ...prevPostsByCategory, ...newPostsByCategory };
           });
         }
@@ -173,16 +274,29 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
           profileId,
           nextPage
         );
-        if (newPosts && newPosts.length > 0) {
+
+        const processedPosts = newPosts.map((post: Post) => {
+          const isVideo =
+            post.mediaUrl?.includes("/videos/") ||
+            post.mediaUrl?.includes(".mp4") ||
+            post.mediaUrl?.includes("video");
+
+          return {
+            ...post,
+            mediaType: isVideo ? "video" : "image",
+          };
+        });
+
+        if (processedPosts && processedPosts.length > 0) {
           setPostsByCategory((prevPosts) => ({
             ...prevPosts,
-            [category]: [...(prevPosts[category] || []), ...newPosts],
+            [category]: [...(prevPosts[category] || []), ...processedPosts],
           }));
           setCategoryPages((prevPages) => ({
             ...prevPages,
             [category]: nextPage,
           }));
-          const newLikesMap = newPosts.reduce(
+          const newLikesMap = processedPosts.reduce(
             (acc: Record<string, boolean>, post: Post) => {
               acc[post.id] = post.likedByLoggedInUser || false;
               return acc;
@@ -205,34 +319,76 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
     }
   };
 
-  const renderPost = (post: Post) => {
+  const renderPost = (post: Post, index: number) => {
     return (
       <div
         key={post.id}
         className="overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity cursor-zoom-in relative w-1/3 shrink-0"
       >
         <div className="relative w-full aspect-[9/14]">
-          <img
-            src={post.mediaUrl || ""}
-            alt={post.caption}
-            className="w-full h-full object-cover opacity-0"
-            onLoad={(e) => {
-              const img = e.currentTarget;
-              const spinner = img.nextElementSibling as HTMLDivElement;
-              img.classList.remove("opacity-0");
-              spinner.classList.add("hidden");
-            }}
-            onError={(e) => {
-              const img = e.currentTarget;
-              const spinner = img.nextElementSibling as HTMLDivElement;
-              img.classList.add("opacity-0");
-              spinner.classList.add("hidden");
-            }}
-            onClick={() => setFullscreenImage(post)}
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
-          </div>
+          {post.mediaType === "video" ? (
+            <div className="relative w-full h-full">
+              {videoLoading[index] && (
+                <div className="absolute inset-0 z-20 flex justify-center items-center bg-gray-100/50">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
+                </div>
+              )}
+              <video
+                ref={(el) => {
+                  videoRefs.current[index] = el;
+
+                  if (el) {
+                    el.muted = true;
+                    el.volume = 0;
+                    el.dataset.feedVideoIndex = String(index);
+                    
+                    el.addEventListener("loadeddata", () => {
+                      setVideoLoading((prev) => ({
+                        ...prev,
+                        [index]: false,
+                      })); // Atualiza o estado para re-renderizar o componente
+                    });
+
+                    el.play().catch((error) => {
+                      console.warn("Autoplay foi bloqueado", error);
+                    });
+                  }
+                }}
+                data-feed-video-index={index}
+                src={post.mediaUrl || ""}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full h-full object-cover"
+                onClick={() => setFullscreenImage(post)}
+              />
+            </div>
+          ) : (
+            <>
+              <img
+                src={post.mediaUrl || ""}
+                alt={post.caption}
+                className="w-full h-full object-cover opacity-0"
+                onLoad={(e) => {
+                  const img = e.currentTarget;
+                  const spinner = img.nextElementSibling as HTMLDivElement;
+                  img.classList.remove("opacity-0");
+                  spinner.classList.add("hidden");
+                }}
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  const spinner = img.nextElementSibling as HTMLDivElement;
+                  img.classList.add("opacity-0");
+                  spinner.classList.add("hidden");
+                }}
+                onClick={() => setFullscreenImage(post)}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -278,7 +434,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
                 handleCategoryScroll(category, posts[0]?.category.id, e)
               }
             >
-              {posts.map((post) => renderPost(post))}
+              {posts.map((post, index) => renderPost(post, index))}
               {placeholders}
             </div>
           </div>
