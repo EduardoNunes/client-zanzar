@@ -22,7 +22,7 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
 
     if (!video || !progressBar) return;
 
-    // Ensure controls are visible when video is ready
+    // Garante q os controls do video estejam visíveis
     const handleCanPlay = () => {
       setIsControlsVisible(true);
     };
