@@ -5,12 +5,14 @@ import { toast } from "react-toastify";
 import LogoZanzar from "../assets/logo-zanzar-indigo-96.png";
 import { loginUserReq } from "../requests/authRequests";
 import { loginSchema } from "../validations/loginSchema";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,21 +23,22 @@ export default function Login() {
       await loginSchema.validate({ email, password }, { abortEarly: false });
 
       const data = await loginUserReq(email, password);
-  
+
       // Explicitly set cookies
-      Cookies.set("access_token", data.token, { path: '/' });
-      Cookies.set("profile_id", data.profileId, { path: '/' });
-      Cookies.set("user_name", data.userName, { path: '/' });
-      Cookies.set("unread_notifications", data.unreadNotificationsCount, { path: '/' });
-      Cookies.set('unread_chat_messages', data.unreadChatMessages, { path: '/' });
-      Cookies.set('invites', data.invites, { path: '/' });
+      Cookies.set("access_token", data.token, { path: "/" });
+      Cookies.set("profile_id", data.profileId, { path: "/" });
+      Cookies.set("user_name", data.userName, { path: "/" });
+      Cookies.set("unread_notifications", data.unreadNotificationsCount, {
+        path: "/",
+      });
+      Cookies.set("unread_chat_messages", data.unreadChatMessages, { path: "/" });
+      Cookies.set("invites", data.invites, { path: "/" });
 
       // Show success toast
       toast.success("Autenticado com sucesso!");
 
       // Use window.location for direct navigation
       window.location.href = "/";
-
     } catch (error: any) {
       console.error("Login error:", error);
 
@@ -50,7 +53,9 @@ export default function Login() {
       setLoading(false);
     }
   };
-
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-white flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
@@ -72,7 +77,7 @@ export default function Login() {
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block text-gray-700 text-sm font-semibold mb-2">
-              Email
+              E-mail
             </label>
             <input
               type="email"
@@ -87,14 +92,23 @@ export default function Login() {
             <label className="block text-gray-700 text-sm font-semibold mb-2">
               Senha
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
-              placeholder="••••••••"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                onClick={toggleShowPassword}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
           <button
             type="submit"
@@ -116,7 +130,7 @@ export default function Login() {
             to="/register"
             className="text-indigo-600 hover:text-indigo-800 font-semibold"
           >
-            Registre-se
+            Cadastre-se
           </Link>
         </p>
       </div>
