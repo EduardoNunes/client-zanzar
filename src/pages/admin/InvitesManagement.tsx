@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { getAllInvitesReq, grantInviteReq, sendInvitesToAllUsersReq, revokeInviteReq } from "../../requests/invitesManagementRequests";
+import {
+  getAllInvitesReq,
+  grantInviteReq,
+  sendInvitesToAllUsersReq,
+  revokeInviteReq,
+} from "../../requests/invitesManagementRequests";
 import { toast } from "react-toastify";
 
 interface User {
@@ -25,44 +30,60 @@ export default function InvitesManagement() {
 
   const fetchUsers = async () => {
     setLoading(true);
-    getAllInvitesReq().then((res) => {
-      setUsers(res.data);
-    }).finally(() => {
-      setLoading(false);
-    })
+    getAllInvitesReq()
+      .then((res) => {
+        setUsers(res.data);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   // Conceder convites a um usuário específico
   const grantInvite = async () => {
     setLoading(true);
-    grantInviteReq(username.toLowerCase(), inviteCount).then((res) => {
-      toast.success(res.message);
-      setUserName("");
-      setInviteCount(1);
-    }).finally(() => {
-      setLoading(false);
-    })
+    grantInviteReq(username.toLowerCase(), inviteCount)
+      .then((res) => {
+        toast.success(res.message);
+        setUserName("");
+        setInviteCount(1);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   // Conceder convites para todos os usuários
   const grantToAll = async () => {
     setLoading(true);
-    sendInvitesToAllUsersReq(inviteCountForAll).then((res) => {
-      toast.success(res.message);
-      setInviteCountForAll(1);
-    }).finally(() => {
-      setLoading(false);
-    })
+    sendInvitesToAllUsersReq(inviteCountForAll)
+      .then((res) => {
+        toast.success(res.message);
+        setInviteCountForAll(1);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const revokeInvite = async (id: string) => {
     setLoading(true);
-    revokeInviteReq(id).then((res) => {
-      setUsers((prevUsers) => prevUsers.filter(user => user.id !== id));
-      toast.success(res.message);      
-    }).finally(() => {
-      setLoading(false);
-    })
+    revokeInviteReq(id)
+      .then((res) => {
+        setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
+        toast.success(res.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const handleUserNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitizedValue = e.target.value
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, "");
+
+    setUserName(sanitizedValue);
   };
 
   return (
@@ -71,13 +92,15 @@ export default function InvitesManagement() {
         <h2 className="text-xl font-bold">Gerenciamento de Convites</h2>
       </div>
       <div className="card-body">
-        <h2 className="text-xl font-semibold mb-3 text-gray-800">Conceder Convites Individualmente</h2>
+        <h2 className="text-xl font-semibold mb-3 text-gray-800">
+          Conceder Convites Individualmente
+        </h2>
         <div className="flex flex-col md:flex-row gap-3 mb-4">
           <input
             type="text"
             placeholder="Digite o username do usuário"
             value={username}
-            onChange={(e) => setUserName(e.target.value)}
+            onChange={handleUserNameChange}
             className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
@@ -95,7 +118,9 @@ export default function InvitesManagement() {
           </button>
         </div>
 
-        <h2 className="text-xl font-semibold mb-3 text-gray-800">Conceder Convites para Todos</h2>
+        <h2 className="text-xl font-semibold mb-3 text-gray-800">
+          Conceder Convites para Todos
+        </h2>
         <div className="flex flex-col md:flex-row gap-3 mb-4">
           <input
             type="number"
@@ -128,20 +153,31 @@ export default function InvitesManagement() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="text-center py-4">Loading...</td>
+                  <td colSpan={4} className="text-center py-4">
+                    Loading...
+                  </td>
                 </tr>
               ) : (
-                users.map(user => (
+                users.map((user) => (
                   <tr key={user.id} className="border-b">
                     <td className="py-2 px-4">{user.inviter.username}</td>
                     <td className="py-2 px-4">{user.email}</td>
-                    <td className={`py-2 px-4 font-semibold ${user.status === 'accepted' ? 'text-green-600' : 'text-yellow-600'}`}>
+                    <td
+                      className={`py-2 px-4 font-semibold ${
+                        user.status === "accepted"
+                          ? "text-green-600"
+                          : "text-yellow-600"
+                      }`}
+                    >
                       {user.status}
                     </td>
                     <td className="py-2 px-4">
                       <button
                         className="text-red-600 hover:underline"
-                        onClick={() => revokeInvite(user.id)}>Revogar</button>
+                        onClick={() => revokeInvite(user.id)}
+                      >
+                        Revogar
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -154,4 +190,4 @@ export default function InvitesManagement() {
       </div>
     </div>
   );
-};
+}
