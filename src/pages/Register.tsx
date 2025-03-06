@@ -42,6 +42,14 @@ export default function Register() {
     }
   };
 
+  const handleUserNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitizedValue = e.target.value
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, "");
+
+    setUsername(sanitizedValue);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-white flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
@@ -68,7 +76,7 @@ export default function Register() {
             <input
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={handleUserNameChange}
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
               required
             />
