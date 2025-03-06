@@ -1,8 +1,8 @@
 import Cookies from "js-cookie";
-import { LogIn } from "lucide-react";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import LogoZanzar from "../assets/logo-zanzar-indigo-96.png";
 import { loginUserReq } from "../requests/authRequests";
 import { loginSchema } from "../validations/loginSchema";
 
@@ -54,8 +54,8 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-white flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <div className="flex items-center justify-center mb-8">
-          <LogIn className="w-12 h-12 text-indigo-600" />
+        <div className="flex items-center justify-center mb-2">
+          <img src={LogoZanzar} alt="Zanzar" className="w-24 h-24" />
         </div>
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
           Login

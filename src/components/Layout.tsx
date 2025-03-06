@@ -18,6 +18,7 @@ import AdModal from "./AdModal";
 import { NotificationIndicator } from "../indicators/NotificationIndicator";
 import { MessageIndicator } from "../indicators/MessageIndicator";
 import { InvitesIndicator } from "../indicators/InvitesIndicator";
+import LogoZanzar from "../assets/logo-zanzar-indigo-clean-40.png";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -53,66 +54,66 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     },
     ...(token
       ? [
-        {
-          icon: <StickyNote className="w-8 h-8" />,
-          label: "Notifications",
-          path: "/notifications",
-          onClick: () => userName && navigate(`/notifications`),
-        },
-        {
-          icon: <User className="w-8 h-8" />,
-          label: "Profile",
-          path: `/profile/${userName}`,
-          onClick: () => userName && navigate(`/profile/${userName}`),
-        },
-        {
-          icon: <PlusSquare className="w-8 h-8" />,
-          label: "Create Post",
-          path: "/create",
-          onClick: () => navigate("/create"),
-        },
-        {
-          icon: <MessageSquare className="w-8 h-8" />,
-          label: "Messages",
-          path: "/messages",
-          onClick: () => navigate("/messages"),
-        },
-/*         {
+          {
+            icon: <StickyNote className="w-8 h-8" />,
+            label: "Notifications",
+            path: "/notifications",
+            onClick: () => userName && navigate(`/notifications`),
+          },
+          {
+            icon: <User className="w-8 h-8" />,
+            label: "Profile",
+            path: `/profile/${userName}`,
+            onClick: () => userName && navigate(`/profile/${userName}`),
+          },
+          {
+            icon: <PlusSquare className="w-8 h-8" />,
+            label: "Create Post",
+            path: "/create",
+            onClick: () => navigate("/create"),
+          },
+          {
+            icon: <MessageSquare className="w-8 h-8" />,
+            label: "Messages",
+            path: "/messages",
+            onClick: () => navigate("/messages"),
+          },
+          /*         {
           icon: <ShoppingBag className="w-8 h-8" />,
           label: "Store",
           path: "/store",
           onClick: () => navigate("/store"),
         }, */
-        {
-          icon: <Send className="w-8 h-8" />,
-          label: "Invites",
-          path: "/invites",
-          onClick: () => navigate("/invites"),
-        },
-        ...(isAdmin
-          ? [
-            {
-              icon: <Shield className="w-8 h-8" />,
-              label: "Admin",
-              path: "/admin",
-              onClick: () => navigate("/admin"),
-            },
-          ]
-          : []),
-        {
-          icon: <LogOut className="w-8 h-8" />,
-          label: "Logout",
-          className: "text-red-600",
-          onClick: handleLogout,
-        },
-      ]
+          {
+            icon: <Send className="w-8 h-8" />,
+            label: "Invites",
+            path: "/invites",
+            onClick: () => navigate("/invites"),
+          },
+          ...(isAdmin
+            ? [
+                {
+                  icon: <Shield className="w-8 h-8" />,
+                  label: "Admin",
+                  path: "/admin",
+                  onClick: () => navigate("/admin"),
+                },
+              ]
+            : []),
+          {
+            icon: <LogOut className="w-8 h-8" />,
+            label: "Logout",
+            className: "text-red-600",
+            onClick: handleLogout,
+          },
+        ]
       : [
-        {
-          icon: <LogIn className="w-8 h-8" />,
-          label: "Login",
-          onClick: () => navigate("/login"),
-        },
-      ]),
+          {
+            icon: <LogIn className="w-8 h-8" />,
+            label: "Login",
+            onClick: () => navigate("/login"),
+          },
+        ]),
   ];
 
   return (
@@ -122,7 +123,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <Home className="w-6 h-6 text-indigo-600" />
+              <img src={LogoZanzar} alt="Zanzar Logo" className="w-10 h-10" />
               <span className="ml-2 font-semibold text-lg">Zanzar</span>
             </div>
             {/* Desktop Menu */}
@@ -131,10 +132,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <button
                   key={index}
                   onClick={item.onClick}
-                  className={`relative flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-gray-100 ${item.path === location.pathname
-                    ? "text-indigo-600"
-                    : "text-gray-700"
-                    } ${item.className || ""}`}
+                  className={`relative flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-gray-100 ${
+                    item.path === location.pathname
+                      ? "text-indigo-600"
+                      : "text-gray-700"
+                  } ${item.className || ""}`}
                 >
                   {item.icon}
                   <span>{item.label}</span>
@@ -170,10 +172,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
           {/* Mobile Menu */}
           <div
-            className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen
-              ? "opacity-100 visible scale-100"
-              : "opacity-0 invisible scale-0"
-              }`}
+            className={`md:hidden transition-all duration-300 ease-in-out ${
+              isMenuOpen
+                ? "opacity-100 visible scale-100"
+                : "opacity-0 invisible scale-0"
+            }`}
             style={{
               position: "fixed",
               bottom: "60px",
@@ -206,13 +209,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   {React.cloneElement(item.icon, {
                     className: "w-8 h-8",
                   })}
-                  <div className="absolute bottom-10 left-11" style={{
-                    transition: "transform 0.3s ease-in-out",
-                    transform: "rotate(90deg)"
-                  }}>
-                    {item.label === "Notifications" ? <NotificationIndicator isMenuOpen={isMenuOpen} /> : null}
-                    {item.label === "Messages" ? <MessageIndicator isMenuOpen={isMenuOpen} /> : null}
-                    {item.label === "Invites" ? <InvitesIndicator isMenuOpen={isMenuOpen} /> : null}
+                  <div
+                    className="absolute bottom-10 left-11"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      transform: "rotate(90deg)",
+                    }}
+                  >
+                    {item.label === "Notifications" ? (
+                      <NotificationIndicator isMenuOpen={isMenuOpen} />
+                    ) : null}
+                    {item.label === "Messages" ? (
+                      <MessageIndicator isMenuOpen={isMenuOpen} />
+                    ) : null}
+                    {item.label === "Invites" ? (
+                      <InvitesIndicator isMenuOpen={isMenuOpen} />
+                    ) : null}
                   </div>
                   <span className="text-xs">{item.label}</span>
                 </button>
