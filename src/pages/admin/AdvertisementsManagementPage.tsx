@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Eye, Pencil, Trash2, MousePointer, Loader2 } from 'lucide-react';
-import { Advertisement, deleteAdvertisementReq, getAdvertisementsReq } from '../../requests/advertisementsManagementRequests';
-import { AdvertisementForm } from '../../components/AdvertisementForm';
+import { Eye, Loader2, MousePointer, Pencil, Trash2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { AdvertisementForm } from "../../components/AdvertisementForm";
+import {
+  Advertisement,
+  deleteAdvertisementReq,
+  getAdvertisementsReq,
+} from "../../requests/advertisementsManagementRequests";
 
 export const AdvertisementsManagementPage: React.FC = () => {
   const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
@@ -15,7 +19,7 @@ export const AdvertisementsManagementPage: React.FC = () => {
       const ads = await getAdvertisementsReq();
       setAdvertisements(ads);
     } catch (error) {
-      console.error('Error fetching advertisements:', error);
+      console.error("Error fetching advertisements:", error);
     } finally {
       setIsLoading(false);
     }
@@ -26,13 +30,13 @@ export const AdvertisementsManagementPage: React.FC = () => {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this advertisement?')) return;
+    if (!confirm("Are you sure you want to delete this advertisement?")) return;
 
     try {
       await deleteAdvertisementReq(id);
       fetchAdvertisements();
     } catch (error) {
-      console.error('Error deleting advertisement:', error);
+      console.error("Error deleting advertisement:", error);
     }
   };
 
@@ -44,7 +48,9 @@ export const AdvertisementsManagementPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold mb-4 md:mb-0">Advertisements Management</h1>
+        <h1 className="text-3xl font-bold mb-4 md:mb-0">
+          Gerenciamneto de Anúncios
+        </h1>
         <button
           onClick={() => {
             setEditingAd(null);
@@ -52,7 +58,7 @@ export const AdvertisementsManagementPage: React.FC = () => {
           }}
           className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
         >
-          Create Advertisement
+          Criar Anúncio
         </button>
       </div>
 
@@ -62,7 +68,7 @@ export const AdvertisementsManagementPage: React.FC = () => {
         </div>
       ) : advertisements.length === 0 ? (
         <div className="text-center text-gray-500 py-10">
-          No advertisements found. Create your first advertisement!
+          Nenhum anúncio encontrado. Crie um anúncio!
         </div>
       ) : (
         <div className="grid gap-4">
@@ -89,36 +95,57 @@ export const AdvertisementsManagementPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
-                  <span>Start: {new Date(ad.startDate).toLocaleDateString()}</span>
+                  <span>
+                    Início: {new Date(ad.startDate).toLocaleDateString()}
+                  </span>
                   <span>•</span>
-                  <span>End: {new Date(ad.endDate).toLocaleDateString()}</span>
+                  <span>Fim: {new Date(ad.endDate).toLocaleDateString()}</span>
                 </div>
                 {ad.scheduleStart && ad.scheduleEnd && (
                   <p className="text-sm">
-                    <span className="font-medium">Schedule:</span>{' '}
+                    <span className="font-medium">Schedule:</span>{" "}
                     {ad.scheduleStart} - {ad.scheduleEnd}
                   </p>
                 )}
                 {ad.dailyLimit && (
                   <p className="text-sm mb-2">
-                    <span className="font-medium">Daily Limit:</span> {ad.dailyLimit}
+                    <span className="font-medium">Limite Diário:</span>{" "}
+                    {ad.dailyLimit}
                   </p>
                 )}
 
                 <div className="flex items-center space-x-2">
-                  <span className={`w-2 h-2 rounded-full ${ad.active ? 'bg-green-500' : 'bg-red-500'}`} />
-                  <span className="text-sm">{ad.active ? 'Active' : 'Inactive'}</span>
-                  <span className={`w-2 h-2 rounded-full ${ad.showOnStartup ? 'bg-green-500' : 'bg-red-500'}`} />
-                  <span className="text-sm">{ad.showOnStartup ? 'Show on startup' : 'Do not show on startup'}</span>
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      ad.active ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  />
+                  <span className="text-sm">
+                    {ad.active ? "Ativo" : "Inativo"}
+                  </span>
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      ad.showOnStartup ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  />
+                  <span className="text-sm">
+                    {ad.showOnStartup
+                      ? "Mostrar no início"
+                      : "Não mostrar no início"}
+                  </span>
                 </div>
                 <div className="flex items-center gap-4 mt-2">
                   <div className="flex items-center gap-1">
                     <Eye className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">{ad.views_count} views</span>
+                    <span className="text-sm text-gray-600">
+                      {ad.views_count} Visualizações
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <MousePointer className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">{ad.clicks_count} clicks</span>
+                    <span className="text-sm text-gray-600">
+                      {ad.clicks_count} Cliques
+                    </span>
                   </div>
                 </div>
 
