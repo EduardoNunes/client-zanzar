@@ -1,4 +1,12 @@
-import { Eye, Loader2, MousePointer, Pencil, Trash2 } from "lucide-react";
+import {
+  User,
+  Eye,
+  Loader2,
+  MousePointer,
+  Link,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { AdvertisementForm } from "../../components/AdvertisementForm";
 import {
@@ -13,6 +21,10 @@ export const AdvertisementsManagementPage: React.FC = () => {
   const [editingAd, setEditingAd] = useState<Advertisement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    fetchAdvertisements();
+  }, []);
+
   const fetchAdvertisements = async () => {
     try {
       setIsLoading(true);
@@ -24,10 +36,6 @@ export const AdvertisementsManagementPage: React.FC = () => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchAdvertisements();
-  }, []);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this advertisement?")) return;
@@ -44,7 +52,7 @@ export const AdvertisementsManagementPage: React.FC = () => {
     setEditingAd(ad);
     setIsModalOpen(true);
   };
-
+  
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
@@ -134,24 +142,42 @@ export const AdvertisementsManagementPage: React.FC = () => {
                       : "Não mostrar no início"}
                   </span>
                 </div>
-                <div className="flex items-center gap-4 mt-2">
+                <div className="flex flex-col gap-1 mt-2">
+                  <div className="flex items-center gap-1">
+                    <User className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm text-gray-600">
+                      {`${
+                        ad.usersViewsCount <= 1
+                          ? `${ad.usersViewsCount} Usuário alcançado`
+                          : `${ad.usersViewsCount} Usuários alcançados`
+                      }`}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-1">
                     <Eye className="w-4 h-4 text-gray-500" />
                     <span className="text-sm text-gray-600">
-                      {ad.views_count} Visualizações
+                      {`${
+                        ad.totalViews <= 1
+                          ? `${ad.totalViews} Visualização`
+                          : `${ad.totalViews} Visualizações totais`
+                      }`}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <MousePointer className="w-4 h-4 text-gray-500" />
                     <span className="text-sm text-gray-600">
-                      {ad.clicks_count} Cliques
+                      {`${
+                        ad.totalClicks <= 1
+                          ? `${ad.totalClicks} Clique no link`
+                          : `${ad.totalClicks} Cliques no link`
+                      }`}
                     </span>
                   </div>
                 </div>
 
                 {ad.linkUrl && (
                   <div className="flex items-center space-x-2 mt-2">
-                    <MousePointer className="h-4 w-4 text-gray-500" />
+                    <Link className="h-4 w-4 text-gray-500" />
                     <a
                       href={ad.linkUrl}
                       target="_blank"
