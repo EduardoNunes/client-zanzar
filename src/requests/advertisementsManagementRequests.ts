@@ -18,8 +18,9 @@ export interface Advertisement {
   scheduleEnd: string;
   showOnStartup: boolean;
   active: boolean;
-  views_count: number;
-  clicks_count: number;
+  usersViewsCount: number;
+  totalViews: number;
+  totalClicks: number;
 }
 
 export interface CreateAdvertisementDto {
