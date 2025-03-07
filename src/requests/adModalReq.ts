@@ -7,7 +7,7 @@ export interface Advertisement {
   title: string;
   description: string;
   mediaUrl: string;
-  mediaType: 'image' | 'video';
+  mediaType: "image" | "video";
   linkUrl: string | null;
   showOnStartup: boolean;
   startDate: string;
@@ -17,7 +17,9 @@ export interface Advertisement {
   scheduleEnd?: string;
 }
 
-export const getEligibleAdReq = async (profileId?: string): Promise<Advertisement | null> => {
+export const getEligibleAdReq = async (
+  profileId?: string
+): Promise<Advertisement | null> => {
   const token = Cookies.get("access_token");
 
   if (!token) {
@@ -40,39 +42,16 @@ export const getEligibleAdReq = async (profileId?: string): Promise<Advertisemen
     return response.data;
   } catch (error: any) {
     console.error("Error fetching eligible ad:", error);
-    toast.error(error.response?.data?.message || "Error fetching advertisement");
+    toast.error(
+      error.response?.data?.message || "Error fetching advertisement"
+    );
     return null;
   }
 };
 
-export const recordAdViewReq = async (adId: string, profileId?: string) => {
+export const recordAddClickReq = async (adId: string, profileId?: string) => {
   const token = Cookies.get("access_token");
 
-  if (!token) {
-    toast.error("Access token not found.");
-    return;
-  }
-
-  try {
-    await api.post(
-      "/ad-modal/view",
-      { adId, profileId },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-  } catch (error: any) {
-    console.error("Error recording ad view:", error);
-    toast.error(error.response?.data?.message || "Error recording ad view");
-  }
-};
-
-export const recordAdClickReq = async (adId: string, profileId?: string) => {
-  const token = Cookies.get("access_token");
-console.log("CHEGOU3")
   if (!token) {
     toast.error("Access token not found.");
     return;
