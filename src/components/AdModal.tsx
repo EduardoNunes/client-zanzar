@@ -6,6 +6,7 @@ import {
   getEligibleAdReq,
   recordAdClickReq,
 } from "../requests/adModalReq";
+import VideoProgressBar from "./VideoProgressBar";
 
 export default function AdModal() {
   const [ad, setAd] = useState<Advertisement | null>(null);
@@ -13,6 +14,11 @@ export default function AdModal() {
   const [hasShownAd, setHasShownAd] = useState(false);
   const [showCloseButton, setShowCloseButton] = useState(false);
   const loading = useRef(false); // UseRef para evitar chamadas duplicadas
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoLoading, setVideoLoading] = useState(true);
+  const [videoRefsState, setVideoRefsState] = useState<HTMLVideoElement | null>(
+    null
+  );
 
   useEffect(() => {
     if (!hasShownAd && !loading.current) {
@@ -71,7 +77,6 @@ export default function AdModal() {
   return (
     <div className="fixed inset-0 bg-white/10 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
-        {/* Header - Fixed */}
         <div className="p-4 border-b flex justify-between items-center">
           <h2 className="text-xl font-semibold">{ad.title}</h2>
           {showCloseButton && (
@@ -83,11 +88,8 @@ export default function AdModal() {
             </button>
           )}
         </div>
-
-        {/* Content - Scrollable */}
         <div className="p-4 overflow-y-auto flex-1">
-          {/* Media */}
-          <div className="mb-4">
+          <div className="mb-4 relative w-full">
             {ad.mediaType === "image" ? (
               <img
                 src={ad.mediaUrl}
@@ -95,18 +97,41 @@ export default function AdModal() {
                 className="w-full h-auto rounded-lg"
               />
             ) : (
-              <video
-                src={ad.mediaUrl}
-                controls
-                className="w-full h-auto rounded-lg"
-              />
+              <div className="relative w-full">
+                {videoLoading && (
+                  <div className="absolute inset-0 z-20 flex justify-center items-center bg-gray-100/50">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                  </div>
+                )}
+                <video
+                  ref={(el) => {
+                    videoRef.current = el;
+                    if (el) {
+                      el.muted = true;
+                      el.volume = 0;
+                      el.addEventListener("loadedmetadata", () => {
+                        setVideoRefsState(el);
+                      });
+                      el.addEventListener("loadeddata", () => {
+                        setVideoLoading(false);
+                      });
+                      el.play().catch((error) => {
+                        console.warn("Autoplay was blocked", error);
+                      });
+                    }
+                  }}
+                  src={ad.mediaUrl}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-auto rounded-lg"
+                />
+                <VideoProgressBar videoElement={videoRefsState} />
+              </div>
             )}
           </div>
-
-          {/* Description */}
           <p className="text-gray-600 mb-4">{ad.description}</p>
-
-          {/* Link */}
           {ad.linkUrl && (
             <a
               href={ad.linkUrl}
