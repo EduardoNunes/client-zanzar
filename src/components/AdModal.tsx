@@ -31,7 +31,7 @@ export default function AdModal() {
     if (isOpen) {
       const timer = setTimeout(() => {
         setShowCloseButton(true);
-      }, 3000);
+      }, 10000);
 
       return () => clearTimeout(timer);
     }
@@ -107,8 +107,6 @@ export default function AdModal() {
                   ref={(el) => {
                     videoRef.current = el;
                     if (el) {
-                      el.muted = true;
-                      el.volume = 0;
                       el.addEventListener("loadedmetadata", () => {
                         setVideoRefsState(el);
                       });
@@ -122,7 +120,6 @@ export default function AdModal() {
                   }}
                   src={ad.mediaUrl}
                   autoPlay
-                  muted
                   loop
                   playsInline
                   className="w-full h-auto rounded-lg"
