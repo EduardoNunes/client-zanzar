@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import { Upload, X } from "lucide-react";
+import React, { useState } from "react";
 import {
   Advertisement,
   createAdvertisementReq,
@@ -180,7 +180,7 @@ export const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-lg w-full max-w-md relative">
+      <div className="bg-white p-8 rounded-lg h-[95%] w-full max-w-md relative overflow-y-auto">
         <button
           onClick={() => setIsModalOpen(false)}
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
@@ -370,7 +370,10 @@ export const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                 type="number"
                 value={form.userLimitShow}
                 onChange={(e) =>
-                  setForm((prev) => ({ ...prev, userLimitShow: e.target.value }))
+                  setForm((prev) => ({
+                    ...prev,
+                    userLimitShow: e.target.value,
+                  }))
                 }
                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-400"
               />
