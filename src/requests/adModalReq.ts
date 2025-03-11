@@ -49,7 +49,7 @@ export const getEligibleAdReq = async (
   }
 };
 
-export const recordAddClickReq = async (adId: string, profileId?: string) => {
+export const recordAdClickReq = async (adId: string, profileId?: string) => {
   const token = Cookies.get("access_token");
 
   if (!token) {
