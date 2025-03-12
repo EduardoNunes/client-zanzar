@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import Cookies from "js-cookie";
-import { CircleUserRound, LogIn, MessageCircle, Loader2 } from "lucide-react";
+import { CircleUserRound, Loader2, LogIn, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSinglePostReq } from "../requests/SinglePostRequests";
@@ -40,13 +40,12 @@ export default function SinglePostModal({
     try {
       setLoading(true);
       const data = await getSinglePostReq(postId, profileId);
-      
-      // Determine media type
+
       const isVideo =
         data.mediaUrl?.includes("/videos/") ||
         data.mediaUrl?.includes(".mp4") ||
         data.mediaUrl?.includes("video");
-        
+
       const processedPost = {
         ...data,
         mediaType: isVideo ? "video" : "image",
@@ -122,7 +121,6 @@ export default function SinglePostModal({
         className="w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
         <button
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
           onClick={onClose}
@@ -130,7 +128,6 @@ export default function SinglePostModal({
           X
         </button>
 
-        {/* Header (Profile Info) */}
         <div className="p-4 border-b">
           <div className="flex items-center space-x-3">
             {post.profile.avatarUrl ? (
@@ -159,7 +156,6 @@ export default function SinglePostModal({
           </div>
         </div>
 
-        {/* Media */}
         <div className="cursor-zoom-in relative">
           {post.mediaType === "video" ? (
             <div className="relative w-full">
@@ -198,7 +194,6 @@ export default function SinglePostModal({
           )}
         </div>
 
-        {/* Actions and Caption */}
         <div className="p-4">
           <div className="flex items-center space-x-4 mb-4">
             <LikeButton
@@ -220,15 +215,14 @@ export default function SinglePostModal({
         </div>
       </div>
 
-      {/* Comment Modal Render (Conditional) */}
       {selectedPost && (
         <div
           className="md:hidden fixed inset-0 z-50 flex items-end"
-          onClick={onClose} // Close modal if clicked outside
+          onClick={onClose}
         >
           <div
             className="bg-white w-full rounded-t-lg max-h-[80vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicked inside
+            onClick={(e) => e.stopPropagation()} // previne o click de fechar o modal
           >
             <CommentModal
               post={selectedPost}
@@ -239,7 +233,6 @@ export default function SinglePostModal({
         </div>
       )}
 
-      {/* Image Viewer (Conditional) */}
       {fullscreenImage && (
         <ImageViewer
           onClose={() => setFullscreenImage(null)}
