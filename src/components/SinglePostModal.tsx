@@ -21,9 +21,10 @@ export default function SinglePostModal({
   const [post, setPost] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
-  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<any | null>(null);
   const [selectedPost, setSelectedPost] = useState<any | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
+  const [videoLoading, setVideoLoading] = useState(true);
   const token = Cookies.get("access_token");
 
   useEffect(() => {
@@ -39,8 +40,20 @@ export default function SinglePostModal({
     try {
       setLoading(true);
       const data = await getSinglePostReq(postId, profileId);
-      setPost(data);
-      setUserLikes({ [postId]: data.likedByLoggedInUser || false });
+      
+      // Determine media type
+      const isVideo =
+        data.mediaUrl?.includes("/videos/") ||
+        data.mediaUrl?.includes(".mp4") ||
+        data.mediaUrl?.includes("video");
+        
+      const processedPost = {
+        ...data,
+        mediaType: isVideo ? "video" : "image",
+      };
+
+      setPost(processedPost);
+      setUserLikes({ [postId]: processedPost.likedByLoggedInUser || false });
     } catch (error) {
       console.error("Error fetching post:", error);
     } finally {
@@ -146,20 +159,42 @@ export default function SinglePostModal({
           </div>
         </div>
 
-        {/* Image */}
+        {/* Media */}
         <div className="cursor-zoom-in relative">
-          <img
-            src={post.mediaUrl}
-            alt="Post content"
-            className="w-full max-h-[600px] min-h-[200px] object-cover"
-            onClick={() => setFullscreenImage(post.mediaUrl)}
-            onLoad={() => setImageLoading(false)}
-            onError={() => setImageLoading(false)}
-          />
-          {imageLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-              <Loader2 className="animate-spin text-indigo-600" size={48} />
+          {post.mediaType === "video" ? (
+            <div className="relative w-full">
+              {videoLoading && (
+                <div className="absolute inset-0 z-20 flex justify-center items-center bg-gray-100/50">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                </div>
+              )}
+              <video
+                src={post.mediaUrl}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full max-h-[600px] min-h-[200px] object-cover"
+                onClick={() => setFullscreenImage(post)}
+                onLoadedData={() => setVideoLoading(false)}
+              />
             </div>
+          ) : (
+            <>
+              <img
+                src={post.mediaUrl}
+                alt="Post content"
+                className="w-full max-h-[600px] min-h-[200px] object-cover"
+                onClick={() => setFullscreenImage(post)}
+                onLoad={() => setImageLoading(false)}
+                onError={() => setImageLoading(false)}
+              />
+              {imageLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+                  <Loader2 className="animate-spin text-indigo-600" size={48} />
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -207,9 +242,8 @@ export default function SinglePostModal({
       {/* Image Viewer (Conditional) */}
       {fullscreenImage && (
         <ImageViewer
-          imageUrl={fullscreenImage}
           onClose={() => setFullscreenImage(null)}
-          post={post}
+          post={fullscreenImage}
           selectedPost={selectedPost}
           setSelectedPost={setSelectedPost}
           userLikes={userLikes}
