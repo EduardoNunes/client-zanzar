@@ -42,6 +42,7 @@ export default function LikeButton({
       navigate("/login");
       return;
     }
+    
     const newIsLiked = !isLiked;
     setIsLiked(newIsLiked);
     setLikeCount((prevLikeCount) =>

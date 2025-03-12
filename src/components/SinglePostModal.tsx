@@ -1,18 +1,12 @@
 import { formatDistanceToNow } from "date-fns";
 import Cookies from "js-cookie";
-import {
-  CircleUserRound,
-  Heart,
-  LogIn,
-  MessageCircle,
-  Loader2,
-} from "lucide-react";
+import { CircleUserRound, LogIn, MessageCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { handleLikeReq } from "../requests/feedRequests";
 import { getSinglePostReq } from "../requests/SinglePostRequests";
 import CommentModal from "./CommentsModal";
 import ImageViewer from "./ImageViewer";
+import LikeButton from "./LikeButton";
 
 interface SinglePostModalProps {
   postId: string;
@@ -26,7 +20,7 @@ export default function SinglePostModal({
   const navigate = useNavigate();
   const [post, setPost] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isLiked, setIsLiked] = useState<Record<string, boolean>>({});
+  const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<any | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
@@ -46,7 +40,7 @@ export default function SinglePostModal({
       setLoading(true);
       const data = await getSinglePostReq(postId, profileId);
       setPost(data);
-      setIsLiked({ [postId]: data.likedByLoggedInUser || false });
+      setUserLikes({ [postId]: data.likedByLoggedInUser || false });
     } catch (error) {
       console.error("Error fetching post:", error);
     } finally {
@@ -54,21 +48,23 @@ export default function SinglePostModal({
     }
   }
 
-  const handleLike = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    const profileId = Cookies.get("profile_id");
-    if (!profileId) {
-      navigate("/login");
-      return;
-    }
+  const updatePostInFeed = (postId: string, newPost: any) => {
+    setPost((prevPost: { id: string }) =>
+      prevPost.id === postId
+        ? { ...prevPost, likeCount: newPost.likesCount }
+        : prevPost
+    );
+  };
 
-    setIsLiked((prev) => ({ ...prev, [post.id]: !prev[post.id] }));
-    setPost((prevPost: any) => ({
-      ...prevPost,
-      likeCount: isLiked ? prevPost.likeCount - 1 : prevPost.likeCount + 1,
-    }));
-
-    await handleLikeReq(post.id, profileId);
+  const updateCommentCountInPost = (
+    postId: string,
+    newCommentCount: number
+  ) => {
+    setPost((prevPost: { id: string }) =>
+      prevPost.id === postId
+        ? { ...prevPost, commentCount: newCommentCount }
+        : prevPost
+    );
   };
 
   const navigateToProfile = (username: string) => {
@@ -113,12 +109,15 @@ export default function SinglePostModal({
         className="w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close Button */}
         <button
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
           onClick={onClose}
         >
           X
         </button>
+
+        {/* Header (Profile Info) */}
         <div className="p-4 border-b">
           <div className="flex items-center space-x-3">
             {post.profile.avatarUrl ? (
@@ -146,6 +145,8 @@ export default function SinglePostModal({
             </div>
           </div>
         </div>
+
+        {/* Image */}
         <div className="cursor-zoom-in relative">
           <img
             src={post.mediaUrl}
@@ -162,20 +163,16 @@ export default function SinglePostModal({
           )}
         </div>
 
+        {/* Actions and Caption */}
         <div className="p-4">
           <div className="flex items-center space-x-4 mb-4">
-            <button
-              onClick={(e) => handleLike(e)}
-              className="flex items-center space-x-1 text-gray-600 hover:text-red-600"
-            >
-              <Heart
-                className={`w-6 h-6 ${
-                  isLiked ? "fill-red-600 text-red-600" : ""
-                }`}
-              />
-              <span>{post.likeCount}</span>
-            </button>
-
+            <LikeButton
+              postId={post.id}
+              initialLikeCount={post.likeCount}
+              userLikes={userLikes}
+              setUserLikes={setUserLikes}
+              updatePostInFeed={updatePostInFeed}
+            />
             <button
               onClick={() => setSelectedPost(post)}
               className="flex items-center space-x-1 text-gray-600 hover:text-indigo-600"
@@ -184,26 +181,30 @@ export default function SinglePostModal({
               <span>{post.commentCount}</span>
             </button>
           </div>
-
           <p className="text-gray-900">{post.caption}</p>
         </div>
       </div>
 
-      <div
-        className={`md:hidden transition-all duration-100 ease-in-out ${
-          selectedPost
-            ? "max-h-screen opacity-100 visible"
-            : "max-h-0 opacity-0 invisible"
-        }`}
-      >
-        {selectedPost && (
-          <CommentModal
-            post={selectedPost}
-            onClose={() => setSelectedPost(null)}
-          />
-        )}
-      </div>
+      {/* Comment Modal Render (Conditional) */}
+      {selectedPost && (
+        <div
+          className="md:hidden fixed inset-0 z-50 flex items-end"
+          onClick={onClose} // Close modal if clicked outside
+        >
+          <div
+            className="bg-white w-full rounded-t-lg max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicked inside
+          >
+            <CommentModal
+              post={selectedPost}
+              onClose={() => setSelectedPost(null)}
+              updateCommentCountInPost={updateCommentCountInPost}
+            />
+          </div>
+        </div>
+      )}
 
+      {/* Image Viewer (Conditional) */}
       {fullscreenImage && (
         <ImageViewer
           imageUrl={fullscreenImage}
@@ -211,9 +212,9 @@ export default function SinglePostModal({
           post={post}
           selectedPost={selectedPost}
           setSelectedPost={setSelectedPost}
-          userLikes={isLiked}
-          setUserLikes={setIsLiked}
-          updatePostInFeed={(updatedPost) => setPost(updatedPost)}
+          userLikes={userLikes}
+          setUserLikes={setUserLikes}
+          updatePostInFeed={updatePostInFeed}
         />
       )}
     </div>

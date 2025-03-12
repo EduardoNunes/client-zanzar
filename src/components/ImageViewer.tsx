@@ -1,6 +1,5 @@
-import { MessageCircle, ChevronLeft } from "lucide-react";
+import { ChevronLeft, MessageCircle } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import CommentModal from "./CommentsModal";
 import LikeButton from "./LikeButton";
 import VideoProgressBar from "./VideoProgressBar";
 
@@ -13,6 +12,8 @@ interface ImageViewerProps {
   userLikes: any;
   setUserLikes: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   updatePostInFeed: (postId: string, newPost: any) => void;
+  commentsCount?: number;
+  setCommentsCount?: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function ImageViewer({
@@ -22,13 +23,14 @@ export default function ImageViewer({
   userLikes,
   setUserLikes,
   updatePostInFeed,
+  commentsCount,
+  setCommentsCount,
 }: ImageViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [scale, setScale] = useState(1);
   const [initialDistance, setInitialDistance] = useState<number | null>(null);
-  const [openComments, setOpenComments] = useState(false);
   const [videoLoading, setVideoLoading] = useState(true);
 
   useEffect(() => {
@@ -80,6 +82,13 @@ export default function ImageViewer({
     setInitialDistance(null);
   };
 
+  const handleClose = () => {
+    if (setCommentsCount) {
+      setCommentsCount(0);
+    }
+    onClose();
+  };
+
   return (
     <div
       ref={containerRef}
@@ -87,7 +96,7 @@ export default function ImageViewer({
     >
       <button
         className="absolute top-4 right-4 h-full w-full text-white hover:text-gray-300 transition-colors z-[60]"
-        onClick={onClose}
+        onClick={handleClose}
       />
       <div
         className="relative w-full h-full flex items-center justify-center overflow-auto"
@@ -154,7 +163,9 @@ export default function ImageViewer({
               className="flex items-center space-x-1 text-gray-600 hover:text-indigo-600"
             >
               <MessageCircle className="w-6 h-6" />
-              <span>{post.commentCount}</span>
+              <span>
+                {commentsCount === 0 ? post.commentCount : commentsCount}
+              </span>
             </button>
           </div>
           <p className="text-white">{post.caption}</p>
@@ -164,15 +175,6 @@ export default function ImageViewer({
           />
         </div>
       </div>
-      {openComments && (
-        <div className="fixed inset-0 z-[80] bg-black bg-opacity-90 flex items-center justify-center overflow-auto">
-          <button
-            className="absolute top-4 right-4 h-full w-full text-white hover:text-gray-300 transition-colors z-[60]"
-            onClick={() => setOpenComments(false)}
-          />
-          <CommentModal post={post} onClose={() => setOpenComments(false)} />
-        </div>
-      )}
     </div>
   );
 }

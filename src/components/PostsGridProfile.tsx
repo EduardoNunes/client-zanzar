@@ -47,6 +47,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
   const [videoLoading, setVideoLoading] = useState<{ [key: number]: boolean }>(
     {}
   );
+  const [commentsCount, setCommentsCount] = useState<number>(0);
 
   // Refs for Intersection Observer
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -341,7 +342,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
                     el.muted = true;
                     el.volume = 0;
                     el.dataset.feedVideoIndex = String(index);
-                    
+
                     el.addEventListener("loadeddata", () => {
                       setVideoLoading((prev) => ({
                         ...prev,
@@ -418,6 +419,34 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
     );
   };
 
+  const updateCommentCountInPost = (
+    postId: string,
+    newCommentCount: number
+  ) => {
+    setCommentsCount(newCommentCount);
+    setAllPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId ? { ...post, commentCount: newCommentCount } : post
+      )
+    );
+
+    setPostsByCategory((prevPostsByCategory) => {
+      const updatedPostsByCategory = { ...prevPostsByCategory };
+
+      for (const category in updatedPostsByCategory) {
+        updatedPostsByCategory[category] = updatedPostsByCategory[category].map(
+          (post) => {
+            if (post.id === postId) {
+              return { ...post, commentCount: newCommentCount };
+            }
+            return post;
+          }
+        );
+      }
+      return updatedPostsByCategory;
+    });
+  };
+
   return (
     <div>
       {Object.entries(postsByCategory).map(([category, posts]) => {
@@ -450,6 +479,8 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
       {fullscreenImage && (
         <ImageViewer
           post={fullscreenImage}
+          commentsCount={commentsCount}
+          setCommentsCount={setCommentsCount}
           onClose={() => setFullscreenImage(null)}
           userLikes={userLikes}
           setUserLikes={setUserLikes}
@@ -481,6 +512,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
           <CommentModal
             post={selectedPost}
             onClose={() => setSelectedPost(null)}
+            updateCommentCountInPost={updateCommentCountInPost}
           />
         )}
       </div>
