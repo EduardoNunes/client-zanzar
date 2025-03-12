@@ -171,7 +171,7 @@ export default function ImageViewer({
           <p className="text-white">{post.caption}</p>
           <ChevronLeft
             className="w-6 h-6 z-[80] mt-2 text-white"
-            onClick={() => onClose()}
+            onClick={handleClose}
           />
         </div>
       </div>
