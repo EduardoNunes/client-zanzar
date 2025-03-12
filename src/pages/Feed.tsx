@@ -46,6 +46,7 @@ export default function Feed() {
   const [videoLoading, setVideoLoading] = useState<{ [key: number]: boolean }>(
     {}
   );
+  const [commentsCount, setCommentsCount] = useState<number>(0);
 
   // Refs for Intersection Observer
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -242,6 +243,7 @@ export default function Feed() {
     postId: string,
     newCommentCount: number
   ) => {
+    setCommentsCount(newCommentCount);
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
         post.id === postId ? { ...post, commentCount: newCommentCount } : post
@@ -425,6 +427,8 @@ export default function Feed() {
       {fullscreenImage && (
         <ImageViewer
           post={fullscreenImage}
+          commentsCount={commentsCount}
+          setCommentsCount={setCommentsCount}
           onClose={() => setFullscreenImage(null)}
           selectedPost={selectedPost}
           setSelectedPost={setSelectedPost}
