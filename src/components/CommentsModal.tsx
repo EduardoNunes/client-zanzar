@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from "react";
-import { get15commentsReq, newCommentReq } from "../requests/feedRequests";
 import Cookies from "js-cookie";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { get15commentsReq, newCommentReq } from "../requests/feedRequests";
 
 interface Post {
   post: string;
@@ -19,9 +19,14 @@ interface Post {
 interface CommentModalProps {
   post: Post;
   onClose: () => void;
+  updateCommentCountInPost: (postId: string, newCommentCount: number) => void;
 }
 
-export default function CommentModal({ post, onClose }: CommentModalProps) {
+export default function CommentModal({
+  post,
+  onClose,
+  updateCommentCountInPost,
+}: CommentModalProps) {
   const navigate = useNavigate();
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState(post.comments || []);
@@ -30,7 +35,6 @@ export default function CommentModal({ post, onClose }: CommentModalProps) {
   const commentContainerRef = useRef<HTMLDivElement>(null);
 
   const loadedCommentIds = useRef<Set<string>>(new Set());
-
   useEffect(() => {
     fetchComments();
   }, [page]);
@@ -109,7 +113,7 @@ export default function CommentModal({ post, onClose }: CommentModalProps) {
       };
 
       setComments((prevComments) => [newCommentData, ...prevComments]);
-      post.commentCount += 1;
+      updateCommentCountInPost(post.id, post.commentCount + 1);
 
       loadedCommentIds.current.add(newCommentData.id);
 
@@ -149,7 +153,9 @@ export default function CommentModal({ post, onClose }: CommentModalProps) {
                 </div>
               ))
             ) : (
-              <div className="text-center text-gray-500 py-4">No comments yet</div>
+              <div className="text-center text-gray-500 py-4">
+                No comments yet
+              </div>
             )}
           </div>
         </div>

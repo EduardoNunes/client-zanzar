@@ -132,7 +132,7 @@ export default function Feed() {
       );
 
       setVideoLoading(initialVideoLoadingState);
-      
+
       setPosts(processedPosts || []);
       const likesMap = processedPosts.reduce(
         (acc: Record<string, boolean>, post: Post) => {
@@ -175,7 +175,7 @@ export default function Feed() {
           mediaType: isVideo ? "video" : "image",
         };
       });
-      
+
       const newVideoLoadingState = processedPosts.reduce(
         (acc: { [key: number]: boolean }, _: any, index: number) => {
           acc[index + posts.length] = true; // Initially loading for all new videos, considering the index shift
@@ -234,6 +234,17 @@ export default function Feed() {
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
         post.id === postId ? { ...post, likeCount: newPost.likesCount } : post
+      )
+    );
+  };
+
+  const updateCommentCountInPost = (
+    postId: string,
+    newCommentCount: number
+  ) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId ? { ...post, commentCount: newCommentCount } : post
       )
     );
   };
@@ -407,6 +418,7 @@ export default function Feed() {
           <CommentModal
             post={selectedPost}
             onClose={() => setSelectedPost(null)}
+            updateCommentCountInPost={updateCommentCountInPost}
           />
         )}
       </div>
