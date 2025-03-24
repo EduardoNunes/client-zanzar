@@ -42,21 +42,24 @@ export default function LikeButton({
       navigate("/login");
       return;
     }
-    
+
     const newIsLiked = !isLiked;
     setIsLiked(newIsLiked);
     setLikeCount((prevLikeCount) =>
-      newIsLiked ? prevLikeCount + 1 : prevLikeCount - 1
+      newIsLiked ? (prevLikeCount ?? 0) + 1 : (prevLikeCount ?? 0) - 1
     );
 
     setUserLikes((prev) => ({ ...prev, [postId]: newIsLiked }));
 
-    // Call the API to handle the like/unlike action
-    const response = await handleLikeReq(postId, profileId);
+    try {
+      const response = await handleLikeReq(postId, profileId);
 
-    if (response) {
-      const newPost = await response;
-      updatePostInFeed(postId, newPost);
+      if (response && response.likeCount !== undefined) {
+        updatePostInFeed(postId, response);
+        setLikeCount(response.likeCount);
+      }
+    } catch (error) {
+      console.error("Erro ao processar like:", error);
     }
   };
 
