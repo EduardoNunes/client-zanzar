@@ -1,4 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import Cookies from "js-cookie";
 import { CircleUserRound, LogIn, MessageCircle } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -48,31 +49,31 @@ export default function Feed() {
   );
   const [commentsCount, setCommentsCount] = useState<number>(0);
 
-  // Refs for Intersection Observer
+  // Refs para os elementos de vídeo
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Cleanup function for observer
+  // Limpar o observer
   const cleanupObserver = useCallback(() => {
     if (observerRef.current) {
       observerRef.current.disconnect();
     }
   }, []);
 
-  // Setup Intersection Observer
+  // Configurar o observer
   useEffect(() => {
-    // Create Intersection Observer
+    // Criar o observer
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const videoElement = entry.target as HTMLVideoElement;
           if (!entry.isIntersecting) {
-            // Video is not in view
+            // video não está visível
             videoElement.pause();
             videoElement.muted = true;
             videoElement.currentTime = 0;
           } else {
-            // Video is in view
+            // Video visível
             videoElement.play().catch(() => {
               console.warn("Autoplay prevented");
             });
@@ -80,7 +81,7 @@ export default function Feed() {
         });
       },
       {
-        threshold: 0.5, // Trigger when at least 50% of the video is visible
+        threshold: 0.3, // exibir quando 30% do vídeo estiver visível
       }
     );
 
@@ -91,7 +92,6 @@ export default function Feed() {
       }
     });
 
-    // Cleanup
     return cleanupObserver;
   }, [posts, cleanupObserver]);
 
@@ -110,9 +110,9 @@ export default function Feed() {
       setLoading(true);
       const data = await getFeedReq(profileId, 1, 3);
 
-      // Determine media type for each post
+      // Determine tipo de media para cada post
       const processedPosts = data.map((post: Post) => {
-        // You might want to adjust this logic based on how you store media type in the backend
+        // você pode usar a função includes para verificar se a string contém outra string
         const isVideo =
           post.mediaUrl.includes("/videos/") ||
           post.mediaUrl.includes(".mp4") ||
@@ -126,7 +126,7 @@ export default function Feed() {
 
       const initialVideoLoadingState = processedPosts.reduce(
         (acc: { [key: number]: boolean }, _: any, index: number) => {
-          acc[index] = true; // Initially loading for all videos
+          acc[index] = true; // inicialmente carregando para todos os vídeos
           return acc;
         },
         {}
@@ -164,7 +164,7 @@ export default function Feed() {
       setLoading(true);
       const newPosts = await getFeedReq(profileId, page + 1, 3);
 
-      // Determine media type for each post
+      // Determina o tipo de media para cada post
       const processedPosts = newPosts.map((post: Post) => {
         const isVideo =
           post.mediaUrl.includes("/videos/") ||
@@ -179,7 +179,7 @@ export default function Feed() {
 
       const newVideoLoadingState = processedPosts.reduce(
         (acc: { [key: number]: boolean }, _: any, index: number) => {
-          acc[index + posts.length] = true; // Initially loading for all new videos, considering the index shift
+          acc[index + posts.length] = true; // inicialmente carregando para todos os vídeos
           return acc;
         },
         {}
@@ -305,6 +305,7 @@ export default function Feed() {
                   <p className="text-sm text-gray-500">
                     {formatDistanceToNow(new Date(post.createdAt), {
                       addSuffix: true,
+                      locale: ptBR,
                     })}
                   </p>
                 </div>
