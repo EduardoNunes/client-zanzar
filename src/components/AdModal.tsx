@@ -31,7 +31,7 @@ export default function AdModal() {
     if (isOpen) {
       const timer = setTimeout(() => {
         setShowCloseButton(true);
-      }, 10000);
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
