@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PostsGridProfile from "../components/PostsGridProfile";
@@ -7,6 +6,7 @@ import {
   getProfileReq,
   updateProfileImageReq,
 } from "../requests/profileRequests";
+import { useGlobalContext } from "../context/globalContext";
 
 interface Profile {
   profileId: string;
@@ -24,6 +24,7 @@ interface FollowStats {
 }
 
 export default function Profile() {
+  const { token, profileId, isLoadingToken } = useGlobalContext();
   const navigate = useNavigate();
   const { username } = useParams<{ username: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -37,18 +38,17 @@ export default function Profile() {
   const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
-    const profileId = Cookies.get("profile_id");
-    if (!profileId) {
+    if (!isLoadingToken && !profileId && !token) {
       navigate("/login");
+    } else {
+      fetchProfileAndPosts();
     }
-    fetchProfileAndPosts();
-  }, [username]);
+  }, [isLoadingToken, profileId, navigate]);
 
   async function fetchProfileAndPosts() {
     try {
-      const profileId = Cookies.get("profile_id");
-
-      const profileData = username && (await getProfileReq(username));
+      setLoading(true);
+      const profileData = username && (await getProfileReq(username, token));
       profileData && setProfile(profileData);
 
       setIsFollowing(profileData.isFollowed);
@@ -70,18 +70,18 @@ export default function Profile() {
   const handleAvatarChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const profileId = Cookies.get("profile_id");
-    if (!profileId) {
+    if (!profileId || !token) {
       navigate("/login");
+      return;
     }
+
     try {
       const file = event.target.files?.[0];
       if (!file) return;
       setUploadingAvatar(true);
-      if (profileId) {
-        await updateProfileImageReq(profileId, file);
-        await fetchProfileAndPosts();
-      }
+
+      await updateProfileImageReq(profileId, file, token);
+      await fetchProfileAndPosts();
     } catch (error) {
       console.error("Error updating avatar:", error);
     } finally {

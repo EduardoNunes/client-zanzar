@@ -1,10 +1,7 @@
 import api from "../server/axios";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 
-export const getInvitesReq = async () => {
-  const token = Cookies.get("access_token");
-
+export const getInvitesReq = async (token: string | null) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -15,7 +12,7 @@ export const getInvitesReq = async () => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    })
+    });
 
     return response.data;
   } catch (error: any) {
@@ -24,21 +21,23 @@ export const getInvitesReq = async () => {
     toast.error(errorMessage);
     throw new Error(errorMessage);
   }
-}
+};
 
-export const sendInvitesReq = async (email: string) => {
-  const token = Cookies.get("access_token");
-
+export const sendInvitesReq = async (email: string, token: string | null) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
   }
   try {
-    const response = await api.post("/invites/send-invite", { email }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const response = await api.post(
+      "/invites/send-invite",
+      { email },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return response.data;
   } catch (error: any) {
@@ -47,4 +46,4 @@ export const sendInvitesReq = async (email: string) => {
     toast.error(errorMessage);
     throw new Error(errorMessage);
   }
-}
+};

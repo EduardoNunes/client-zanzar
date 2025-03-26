@@ -1,10 +1,11 @@
-import Cookies from "js-cookie";
 import api from "../server/axios";
 import { toast } from "react-toastify";
 
-export const getSinglePostReq = async (postId: string, profileId: string) => {
-  const token = Cookies.get("access_token");
-
+export const getSinglePostReq = async (
+  postId: string,
+  profileId: string,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;

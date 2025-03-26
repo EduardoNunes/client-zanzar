@@ -1,7 +1,9 @@
-import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { get15commentsReq, newCommentReq } from "../requests/feedRequests";
+import { useGlobalContext } from "../context/globalContext";
+import { toast } from "react-toastify";
+import { X } from "lucide-react";
 
 interface Post {
   post: string;
@@ -27,17 +29,27 @@ export default function CommentModal({
   onClose,
   updateCommentCountInPost,
 }: CommentModalProps) {
+  const { token, profileId, userName, isLoadingToken } = useGlobalContext();
   const navigate = useNavigate();
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState(post.comments || []);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const commentContainerRef = useRef<HTMLDivElement>(null);
-
   const loadedCommentIds = useRef<Set<string>>(new Set());
+
   useEffect(() => {
-    fetchComments();
-  }, [page]);
+    if (!isLoadingToken && !profileId) {
+      navigate("/login");
+      return;
+    }
+  }, [isLoadingToken, profileId, navigate]);
+
+  useEffect(() => {
+    if (token) {
+      fetchComments();
+    }
+  }, [page, token]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,8 +79,13 @@ export default function CommentModal({
     if (loading) return;
     setLoading(true);
 
+    if (!token) {
+      toast.error("Token não encontrado");
+      return;
+    }
+
     try {
-      const newComments = await get15commentsReq(post.id, page);
+      const newComments = await get15commentsReq(post.id, page, token);
 
       if (Array.isArray(newComments)) {
         const uniqueComments = newComments.filter(
@@ -86,7 +103,8 @@ export default function CommentModal({
         console.error("Comentários carregados não são um array:", newComments);
       }
     } catch (error) {
-      console.error("Error fetching comments:", error);
+      console.error("Erro ao carregar comentários:", error);
+      toast.error("Comentários carregados não são um array");
     } finally {
       setLoading(false);
     }
@@ -96,12 +114,9 @@ export default function CommentModal({
     if (!newComment.trim()) return;
 
     try {
-      const profileId = Cookies.get("profile_id");
-      const userName = Cookies.get("user_name");
-
       if (!profileId) navigate("/login");
 
-      profileId && newCommentReq(post.id, profileId, newComment);
+      profileId && newCommentReq(post.id, profileId, newComment, token);
 
       const newCommentData = {
         id: String(new Date().getTime()),
@@ -119,19 +134,20 @@ export default function CommentModal({
 
       setNewComment("");
     } catch (error) {
-      console.error("Error posting comment:", error);
+      console.error("Erro ao enviar comentário:", error);
+      toast.error("Erro ao enviar comentário");
     }
   };
 
   return (
     <div className="fixed inset-0 flex justify-center items-end bg-opacity-50 z-80">
       <div className="bg-white rounded-t-lg w-full max-w-lg flex flex-col h-[500px]">
-        <div className="p-6">
+        <div className="text-end p-6">
           <button
             onClick={onClose}
             className="text-gray-600 hover:text-indigo-600"
           >
-            Close
+            <X className="w-6 h-6" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-6" ref={commentContainerRef}>
@@ -154,7 +170,7 @@ export default function CommentModal({
               ))
             ) : (
               <div className="text-center text-gray-500 py-4">
-                No comments yet
+                Sem comentários ainda
               </div>
             )}
           </div>
@@ -172,7 +188,7 @@ export default function CommentModal({
               onClick={handleComment}
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
             >
-              Post
+              Enviar
             </button>
           </div>
         </div>

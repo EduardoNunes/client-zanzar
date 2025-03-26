@@ -19,30 +19,45 @@ import { NotificationIndicator } from "../indicators/NotificationIndicator";
 import { MessageIndicator } from "../indicators/MessageIndicator";
 import { InvitesIndicator } from "../indicators/InvitesIndicator";
 import LogoZanzar from "../assets/logo-zanzar-indigo-clean-40.png";
+import { useGlobalContext } from "../context/globalContext";
+import { Preferences } from "@capacitor/preferences";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const { token, autentication, userName, totalUnread } = useGlobalContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const token = Cookies.get("access_token");
-  const userName = Cookies.get("user_name");
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    autentication();
+
     if (token) {
       const decoded: any = jwtDecode(token);
       const isAdmin = decoded.role === "admin";
       setIsAdmin(isAdmin);
     }
-  }, []);
+  }, [token]);
 
   const handleLogout = async () => {
     navigate("/login");
-    Cookies.remove("access_token");
-    Cookies.remove("profile_id");
-    Cookies.remove("user_name");
-    Cookies.remove("unread_notifications");
-    Cookies.remove("unread_chat_messages");
+
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      Preferences.remove({ key: "access_token" });
+      Preferences.remove({ key: "profile_id" });
+      Preferences.remove({ key: "user_name" });
+      Preferences.remove({ key: "unread_notifications" });
+      Preferences.remove({ key: "unread_chat_messages" });
+      Preferences.remove({ key: "invites" });
+    } else {
+      Cookies.remove("access_token");
+      Cookies.remove("profile_id");
+      Cookies.remove("user_name");
+      Cookies.remove("unread_notifications");
+      Cookies.remove("unread_chat_messages");
+      Cookies.remove("invites");
+    }
   };
 
   const menuItems = [
@@ -163,11 +178,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 transform: isMenuOpen ? "rotate(90deg)" : "rotate(270deg)",
               }}
             >
-              <div>
-                <NotificationIndicator isMenuOpen={isMenuOpen} />
-                <MessageIndicator isMenuOpen={isMenuOpen} />
-                <InvitesIndicator isMenuOpen={isMenuOpen} />
-              </div>
+              {totalUnread > 0 && (
+                <div className="absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-xs rotate-270">
+                  {isMenuOpen ? totalUnread : ""}
+                </div>
+              )}
             </button>
           </div>
           {/* Mobile Menu */}

@@ -1,7 +1,21 @@
-import { Activity, Bell, Image, MessageSquare, Package, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getAdsCountReq, getMessagesCountReq, getPostsCountReq, getProductsCountReq, getTotalUsersReq } from '../requests/adminRequests';
+import {
+  Activity,
+  Bell,
+  Image,
+  MessageSquare,
+  Package,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  getAdsCountReq,
+  getMessagesCountReq,
+  getPostsCountReq,
+  getProductsCountReq,
+  getTotalUsersReq,
+} from "../requests/adminRequests";
+import { useGlobalContext } from "../context/globalContext";
 
 interface Stats {
   totalPosts: number;
@@ -12,13 +26,14 @@ interface Stats {
 }
 
 export default function Admin() {
+  const { token } = useGlobalContext();
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({
     totalPosts: 0,
     totalProducts: 0,
     totalMessages: 0,
     totalAds: 0,
-    totalUsers: 0
+    totalUsers: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -29,29 +44,24 @@ export default function Admin() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const [
-        totalUsers,
-        postsCount,
-        productsCount,
-        messagesCount,
-        adsCount
-      ] = await Promise.all([
-        getTotalUsersReq(),
-        getPostsCountReq(),
-        getProductsCountReq(),
-        getMessagesCountReq(),
-        getAdsCountReq()
-      ]);
+      const [totalUsers, postsCount, productsCount, messagesCount, adsCount] =
+        await Promise.all([
+          getTotalUsersReq(token),
+          getPostsCountReq(token),
+          getProductsCountReq(token),
+          getMessagesCountReq(token),
+          getAdsCountReq(token),
+        ]);
 
       setStats({
         totalUsers: totalUsers.count || 0,
         totalPosts: postsCount.count || 0,
         totalProducts: productsCount.count || 0,
         totalMessages: messagesCount.count || 0,
-        totalAds: adsCount.count || 0
+        totalAds: adsCount.count || 0,
       });
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error("Error fetching stats:", error);
     } finally {
       setLoading(false);
     }
@@ -59,59 +69,59 @@ export default function Admin() {
 
   const adminModules = [
     {
-      title: 'Recent Activity',
-      description: 'Monitor user activity and engagement',
+      title: "Recent Activity",
+      description: "Monitor user activity and engagement",
       icon: <Activity className="w-8 h-8 text-indigo-600" />,
-      path: '/admin/activity',
+      path: "/admin/activity",
       stat: stats.totalUsers,
-      statLabel: 'Total Users'
+      statLabel: "Total Users",
     },
     {
-      title: 'Users Management',
-      description: 'Manage users, roles, and permissions',
+      title: "Users Management",
+      description: "Manage users, roles, and permissions",
       icon: <Users className="w-8 h-8 text-indigo-600" />,
-      path: '/admin/users',
+      path: "/admin/users",
     },
     {
-      title: 'Posts Management',
-      description: 'Monitor and manage user posts',
+      title: "Posts Management",
+      description: "Monitor and manage user posts",
       icon: <Image className="w-8 h-8 text-indigo-600" />,
-      path: '/admin/posts',
+      path: "/admin/posts",
       stat: stats.totalPosts,
-      statLabel: 'Total Posts'
+      statLabel: "Total Posts",
     },
     {
-      title: 'Messages Management',
-      description: 'Monitor user communications',
+      title: "Messages Management",
+      description: "Monitor user communications",
       icon: <MessageSquare className="w-8 h-8 text-indigo-600" />,
-      path: '/admin/messages',
+      path: "/admin/messages",
       stat: stats.totalMessages,
-      statLabel: 'Total Messages'
+      statLabel: "Total Messages",
     },
     {
-      title: 'Products Management',
-      description: 'Manage store products and inventory',
+      title: "Products Management",
+      description: "Manage store products and inventory",
       icon: <Package className="w-8 h-8 text-indigo-600" />,
-      path: '/admin/products',
+      path: "/admin/products",
       stat: stats.totalProducts,
-      statLabel: 'Total Products'
+      statLabel: "Total Products",
     },
     {
-      title: 'Advertisements',
-      description: 'Manage promotional content',
+      title: "Advertisements",
+      description: "Manage promotional content",
       icon: <Bell className="w-8 h-8 text-indigo-600" />,
-      path: '/admin/ads',
+      path: "/admin/ads",
       stat: stats.totalAds,
-      statLabel: 'Total Ads'
+      statLabel: "Total Ads",
     },
     {
-      title: 'Invites Management',
-      description: 'Manage invite management',
+      title: "Invites Management",
+      description: "Manage invite management",
       icon: <Bell className="w-8 h-8 text-indigo-600" />,
-      path: '/admin/invites-management',
+      path: "/admin/invites-management",
       stat: "",
-      statLabel: 'Total Invites'
-    }
+      statLabel: "Total Invites",
+    },
   ];
 
   if (loading) {
@@ -138,7 +148,9 @@ export default function Admin() {
               {module.icon}
               <div>
                 <h2 className="text-lg font-semibold">{module.title}</h2>
-                <p className="text-gray-600 text-sm mt-1">{module.description}</p>
+                <p className="text-gray-600 text-sm mt-1">
+                  {module.description}
+                </p>
                 {module.stat !== undefined && (
                   <p className="text-indigo-600 font-semibold mt-2">
                     {module.statLabel}: {module.stat}

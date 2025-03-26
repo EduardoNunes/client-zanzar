@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -7,8 +6,10 @@ import {
   recordAdClickReq,
 } from "../requests/adModalReq";
 import VideoProgressBar from "./VideoProgressBar";
+import { useGlobalContext } from "../context/globalContext";
 
 export default function AdModal() {
+  const { token, profileId, isLoadingToken } = useGlobalContext();
   const [ad, setAd] = useState<Advertisement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [hasShownAd, setHasShownAd] = useState(false);
@@ -21,11 +22,11 @@ export default function AdModal() {
   );
 
   useEffect(() => {
-    if (!hasShownAd && !loading.current) {
+    if (!hasShownAd && !loading.current && !isLoadingToken) {
       loading.current = true; // Marca que a requisição começou
       checkAndShowAd();
     }
-  }, []);
+  }, [isLoadingToken]);
 
   useEffect(() => {
     if (isOpen) {
@@ -38,9 +39,12 @@ export default function AdModal() {
   }, [isOpen]);
 
   const checkAndShowAd = async () => {
+    if (!token) {
+      console.error("Token not found");
+      return;
+    }
     try {
-      const profileId = Cookies.get("profile_id");
-      const eligibleAd = await getEligibleAdReq(profileId);
+      const eligibleAd = await getEligibleAdReq(profileId, token);
 
       if (!eligibleAd) return;
 
@@ -60,9 +64,8 @@ export default function AdModal() {
 
   const handleClick = async () => {
     if (ad && ad.linkUrl) {
-      const profileId = Cookies.get("profile_id");
       try {
-        await recordAdClickReq(ad.id, profileId);
+        await recordAdClickReq(ad.id, profileId, token);
         window.open(ad.linkUrl, "_blank");
       } catch (error) {
         console.error("Error recording ad click:", error);

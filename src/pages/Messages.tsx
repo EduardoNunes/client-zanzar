@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import { CircleUserRound, MessagesSquare, Search, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +8,8 @@ import {
   getUserChatsReq,
 } from "../requests/chatRequests";
 import { MessageIndicator } from "../indicators/MessageIndicator";
+import { useGlobalContext } from "../context/globalContext";
+import { toast } from "react-toastify";
 
 interface FollowedUser {
   avatarUrl: any;
@@ -37,6 +38,8 @@ interface UserChats {
 }
 
 export default function Messages() {
+  const { profileId, token, isLoadingToken, setUnreadChatMessages } =
+    useGlobalContext();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentUser, setCurrentUser] = useState<string | null>(null);
@@ -47,20 +50,27 @@ export default function Messages() {
   const [usersTemp, setUsersTemp] = useState<FollowedUser[]>([]);
 
   useEffect(() => {
-    const profileId = Cookies.get("profile_id");
-
-    if (!profileId) {
+    if (!isLoadingToken && !profileId) {
       navigate("/login");
       return;
     }
+  }, [isLoadingToken, profileId, navigate]);
 
-    setCurrentUser(profileId);
-    fetchFollowedUsers(profileId);
-    fetchUserChats(profileId);
-  }, []);
+  useEffect(() => {
+    if (profileId && token) {
+      setCurrentUser(profileId);
+      fetchFollowedUsers(profileId);
+      fetchUserChats(profileId);
+    }
+  }, [profileId, token]);
 
   const fetchFollowedUsers = async (profileId: string) => {
-    const data = await getFollowedUsersReq(profileId);
+    if (!token) {
+      console.error("Token não encontrado.");
+      return;
+    }
+
+    const data = await getFollowedUsersReq(profileId, token);
 
     const users = data.map((item: FollowedUser) => ({
       id: item.id,
@@ -73,7 +83,12 @@ export default function Messages() {
   };
 
   const fetchUserChats = async (profileId: string) => {
-    const data = await getUserChatsReq(profileId);
+    if (!token) {
+      console.error("Token not found");
+      return;
+    }
+
+    const data = await getUserChatsReq(profileId, token);
     const chats = data.map((item: UserChats) => ({
       conversationId: item.conversationId,
       chatName: item.name,
@@ -101,11 +116,9 @@ export default function Messages() {
   };
 
   const startChat = async (selectedProfileId: string) => {
-    const profileId = Cookies.get("profile_id");
-
-    if (!profileId) {
+    if (!profileId || !token) {
       navigate("/");
-      throw new Error("User ID is undefined");
+      throw new Error("Usuário não encontrado.");
     }
 
     // Confere se o chat já existe
@@ -135,7 +148,8 @@ export default function Messages() {
       const newChat = await createChatReq(
         nameChat,
         profileId,
-        selectedProfileId
+        selectedProfileId,
+        token
       );
 
       fetchUserChats(profileId);
@@ -143,6 +157,7 @@ export default function Messages() {
       setSelectedChatId(newChat.conversationId);
     } catch (error) {
       console.error("Error starting chat:", error);
+      toast.error("Erro ao iniciar o chat.");
     } finally {
       setLoading(false);
     }
@@ -151,27 +166,24 @@ export default function Messages() {
   const openChat = async (chatId: string) => {
     setSelectedChatId(chatId);
 
-    // Update messages count to zero for the specific chat
+    // atualiza o contador de mensagens não lidas
     const updatedChats = userChats.map((chat) => {
       if (chat.conversationId === chatId) {
         return { ...chat, messagesCount: 0 };
       }
       return chat;
     });
+
     setUserChats(updatedChats);
 
-    // Recalculate total unread messages
+    // Recalcula o total de mensagens não lidas
     const remainingUnreadMessages = updatedChats.reduce(
-      (total, chat) => total + chat.messagesCount, 
+      (total, chat) => total + chat.messagesCount,
       0
     );
 
-    // Update the unread_chat_messages cookie
-    if (remainingUnreadMessages === 0) {
-      Cookies.remove('unread_chat_messages');
-    } else {
-      Cookies.set('unread_chat_messages', remainingUnreadMessages.toString(), { path: '/' });
-    }
+    // Atualiza o contador de mensagens não lidas
+    setUnreadChatMessages(remainingUnreadMessages);
   };
 
   return (
@@ -196,18 +208,18 @@ export default function Messages() {
           <div className="mb-6">
             <div className="flex items-center space-x-2 text-gray-600 mb-4">
               <Users className="w-4 h-4" />
-              <span className="text-sm font-medium">Chats</span>
+              <span className="text-sm font-medium">Diálogos</span>
             </div>
             <div className="space-y-2">
               {userChats?.map((userChat: UserChats) => {
                 const participantNames =
                   userChat.participants && userChat.participants.length > 0
                     ? userChat.participants
-                      .map(
-                        (participant) =>
-                          participant.username || "Desconhecido"
-                      )
-                      .join(", ")
+                        .map(
+                          (participant) =>
+                            participant.username || "Desconhecido"
+                        )
+                        .join(", ")
                     : "Sem participantes";
 
                 return (
@@ -217,11 +229,18 @@ export default function Messages() {
                     disabled={loading}
                     className="relative w-full px-3 py-1 text-left hover:bg-gray-50 rounded-lg flex items-center space-x-3 transition-colors disabled:opacity-50"
                   >
-                    {userChat.messagesCount > 0 ?
-                      <div className="absolute top-[-8px] left-[-24px] z-50" style={{ transform: "rotate(90deg)" }}>
-                        <MessageIndicator messagesCount={userChat.messagesCount} />
+                    {userChat.messagesCount > 0 ? (
+                      <div
+                        className="absolute top-[-8px] left-[-24px] z-50"
+                        style={{ transform: "rotate(90deg)" }}
+                      >
+                        <MessageIndicator
+                          messagesCount={userChat.messagesCount}
+                        />
                       </div>
-                      : ''}
+                    ) : (
+                      ""
+                    )}
                     {/* Avatares dos participantes */}
                     <div className="flex -space-x-2">
                       {userChat.participants?.map((participant, index) => (
@@ -259,7 +278,7 @@ export default function Messages() {
           <div>
             <div className="flex items-center space-x-2 text-gray-600 mb-4">
               <Users className="w-4 h-4" />
-              <span className="text-sm font-medium">Following</span>
+              <span className="text-sm font-medium">Contatos</span>
             </div>
             <div className="space-y-2">
               {followedUsers.map((user) => (
@@ -274,8 +293,9 @@ export default function Messages() {
                       <img
                         src={user.avatarUrl}
                         alt={user.username}
-                        className={` object-cover ${!user.avatarUrl ? "h-6 w-6" : "w-full h-full"
-                          }`}
+                        className={` object-cover ${
+                          !user.avatarUrl ? "h-6 w-6" : "w-full h-full"
+                        }`}
                       />
                     ) : (
                       <CircleUserRound />

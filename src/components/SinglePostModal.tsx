@@ -1,5 +1,4 @@
 import { formatDistanceToNow } from "date-fns";
-import Cookies from "js-cookie";
 import { CircleUserRound, Loader2, LogIn, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +6,7 @@ import { getSinglePostReq } from "../requests/SinglePostRequests";
 import CommentModal from "./CommentsModal";
 import ImageViewer from "./ImageViewer";
 import LikeButton from "./LikeButton";
+import { useGlobalContext } from "../context/globalContext";
 
 interface SinglePostModalProps {
   postId: string;
@@ -17,6 +17,7 @@ export default function SinglePostModal({
   postId,
   onClose,
 }: SinglePostModalProps) {
+  const { token, profileId } = useGlobalContext();
   const navigate = useNavigate();
   const [post, setPost] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,21 +26,19 @@ export default function SinglePostModal({
   const [selectedPost, setSelectedPost] = useState<any | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
   const [videoLoading, setVideoLoading] = useState(true);
-  const token = Cookies.get("access_token");
 
   useEffect(() => {
     fetchPost();
   }, []);
 
   async function fetchPost() {
-    const profileId = Cookies.get("profile_id");
     if (!profileId) {
       navigate("/login");
       return;
     }
     try {
       setLoading(true);
-      const data = await getSinglePostReq(postId, profileId);
+      const data = await getSinglePostReq(postId, profileId, token);
 
       const isVideo =
         data.mediaUrl?.includes("/videos/") ||

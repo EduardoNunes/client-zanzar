@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import { FileImage } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -7,6 +6,7 @@ import {
 } from "../requests/profileRequests";
 import CommentModal from "./CommentsModal";
 import ImageViewer from "./ImageViewer";
+import { useGlobalContext } from "../context/globalContext";
 
 interface Post {
   category: { categories: string; id: string };
@@ -31,6 +31,7 @@ interface PostsByCategory {
 }
 
 export default function PostsGridProfile({ username }: PostsGridProfileProps) {
+  const { profileId, token } = useGlobalContext();
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [fullscreenImage, setFullscreenImage] = useState<Post | null>(null);
   const [postsByCategory, setPostsByCategory] = useState<PostsByCategory>({});
@@ -39,7 +40,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [categoryPages, setCategoryPages] = useState<Record<string, number>>(
     {}
-  ); // Track pages for each category
+  ); // páginas de cada categoria
   const [categoryLoading, setCategoryLoading] = useState<
     Record<string, boolean>
   >({}); //Prevê requisição duplicada
@@ -49,33 +50,33 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
   );
   const [commentsCount, setCommentsCount] = useState<number>(0);
 
-  // Refs for Intersection Observer
+  // Refs para os elementos de vídeo
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   let scrollTriggered = false;
 
-  // Cleanup function for observer
+  // limpa o observer
   const cleanupObserver = useCallback(() => {
     if (observerRef.current) {
       observerRef.current.disconnect();
     }
   }, []);
 
-  // Setup Intersection Observer
+  // configurar o observer
   useEffect(() => {
-    // Create Intersection Observer
+    // cria o observer
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const videoElement = entry.target as HTMLVideoElement;
           if (!entry.isIntersecting) {
-            // Video is not in view
+            // Video não está visível
             videoElement.pause();
             videoElement.muted = true;
             videoElement.currentTime = 0;
           } else {
-            // Video is in view
+            // Video está visível
             videoElement.play().catch(() => {
               console.warn("Autoplay prevented");
             });
@@ -83,18 +84,17 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
         });
       },
       {
-        threshold: 0.5, // Trigger when at least 50% of the video is visible
+        threshold: 0.3, // aciona quando 30% do vídeo está visível
       }
     );
 
-    // Observe videos
+    // Observa videos
     videoRefs.current.forEach((videoEl) => {
       if (videoEl) {
         observerRef.current?.observe(videoEl);
       }
     });
 
-    // Cleanup
     return cleanupObserver;
   }, [allPosts, cleanupObserver]);
 
@@ -124,10 +124,9 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
   const fetchPosts = async () => {
     try {
       if (username) {
-        const initialPosts = await getPostsReq(username, 1);
-
+        const initialPosts = await getPostsReq(username, 1, token);
         const processedPosts = initialPosts.map((post: Post) => {
-          // You might want to adjust this logic based on how you store media type in the backend
+          // verificar se a string contém uma substring
           const isVideo =
             post.mediaUrl?.includes("/videos/") ||
             post.mediaUrl?.includes(".mp4") ||
@@ -141,7 +140,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
 
         const initialVideoLoadingState = processedPosts.reduce(
           (acc: { [key: number]: boolean }, _: any, index: number) => {
-            acc[index] = true; // Initially loading for all videos
+            acc[index] = true; // inicialmente carregando todos os vídeos
             return acc;
           },
           {}
@@ -164,7 +163,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
           const grouped = groupPostsByCategory(processedPosts);
           setPostsByCategory(grouped);
 
-          // Initialize page numbers for each category
+          // inicializa as páginas de cada categoria
           const initialCategoryPages: Record<string, number> = {};
           Object.keys(grouped).forEach((category) => {
             initialCategoryPages[category] = 1;
@@ -184,9 +183,9 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
     setLoadingMore(true);
     try {
       if (username) {
-        const newPosts = await getPostsReq(username, page + 1);
+        const newPosts = await getPostsReq(username, page + 1, token);
 
-        // Determine media type for each post
+        // determina se o post é um vídeo
         const processedPosts = newPosts.map((post: Post) => {
           const isVideo =
             post.mediaUrl?.includes("/videos/") ||
@@ -224,7 +223,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
             ...newLikesMap,
           }));
 
-          // Append new categories to the existing postsByCategory
+          // anexa novos posts à categoria existente
           setPostsByCategory((prevPostsByCategory) => {
             const newPostsByCategory = groupPostsByCategory(processedPosts);
             return { ...prevPostsByCategory, ...newPostsByCategory };
@@ -258,7 +257,6 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
     event: React.UIEvent<HTMLDivElement>
   ) => {
     const element = event.currentTarget;
-    const profileId = Cookies.get("profile_id");
     if (!profileId || categoryLoading[category]) return;
 
     if (element.scrollWidth - element.scrollLeft - element.clientWidth < 10) {
@@ -273,7 +271,8 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
         const newPosts = await getPostsByCategoryReq(
           categoryId,
           profileId,
-          nextPage
+          nextPage,
+          token
         );
 
         const processedPosts = newPosts.map((post: Post) => {
@@ -293,10 +292,12 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
             ...prevPosts,
             [category]: [...(prevPosts[category] || []), ...processedPosts],
           }));
+
           setCategoryPages((prevPages) => ({
             ...prevPages,
             [category]: nextPage,
           }));
+
           const newLikesMap = processedPosts.reduce(
             (acc: Record<string, boolean>, post: Post) => {
               acc[post.id] = post.likedByLoggedInUser || false;

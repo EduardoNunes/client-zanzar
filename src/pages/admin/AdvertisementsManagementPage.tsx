@@ -14,37 +14,60 @@ import {
   deleteAdvertisementReq,
   getAdvertisementsReq,
 } from "../../requests/advertisementsManagementRequests";
+import { useGlobalContext } from "../../context/globalContext";
+import { toast } from "react-toastify";
 
 export const AdvertisementsManagementPage: React.FC = () => {
+  const { token, isLoadingToken } = useGlobalContext();
   const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAd, setEditingAd] = useState<Advertisement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchAdvertisements();
-  }, []);
+    if (!isLoadingToken && !token) {
+      toast.error("Token não encontrado.");
+      return;
+    }
+  }, [isLoadingToken, token]);
+
+  useEffect(() => {
+    if (token) {
+      fetchAdvertisements();
+    }
+  }, [token]);
 
   const fetchAdvertisements = async () => {
+    if (!token) {
+      console.error("Token não encontrado.");
+      return;
+    }
     try {
       setIsLoading(true);
-      const ads = await getAdvertisementsReq();
+      const ads = await getAdvertisementsReq(token);
       setAdvertisements(ads);
     } catch (error) {
-      console.error("Error fetching advertisements:", error);
+      console.error("Erro ao buscar anúncios:", error);
+      toast.error("Erro ao buscar anúncios");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this advertisement?")) return;
+    if (!token) {
+      console.error("Token não encontrado.");
+      return;
+    }
+
+    if (!confirm("Você tem certeza que deseja deletar este anúncio?")) return;
 
     try {
-      await deleteAdvertisementReq(id);
+      await deleteAdvertisementReq(id, token);
       fetchAdvertisements();
     } catch (error) {
       console.error("Error deleting advertisement:", error);
+      toast.error("Erro ao deletar anúncio");
     }
   };
 
@@ -52,7 +75,7 @@ export const AdvertisementsManagementPage: React.FC = () => {
     setEditingAd(ad);
     setIsModalOpen(true);
   };
-  
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">

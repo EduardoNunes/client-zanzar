@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
-import Cookies from "js-cookie";
 import { handleLikeReq } from "../requests/feedRequests";
 import { useNavigate } from "react-router-dom";
+import { useGlobalContext } from "../context/globalContext";
+import { toast } from "react-toastify";
 
 interface LikeButtonProps {
   postId: string;
@@ -19,6 +20,7 @@ export default function LikeButton({
   setUserLikes,
   updatePostInFeed,
 }: LikeButtonProps) {
+  const { token, profileId } = useGlobalContext();
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [isLiked, setIsLiked] = useState(userLikes[postId] || false);
   const navigate = useNavigate();
@@ -36,7 +38,6 @@ export default function LikeButton({
     postId: string
   ) => {
     e.preventDefault();
-    const profileId = Cookies.get("profile_id");
 
     if (!profileId) {
       navigate("/login");
@@ -52,14 +53,20 @@ export default function LikeButton({
     setUserLikes((prev) => ({ ...prev, [postId]: newIsLiked }));
 
     try {
-      const response = await handleLikeReq(postId, profileId);
+      const response = await handleLikeReq(postId, profileId, token);
 
       if (response && response.likeCount !== undefined) {
         updatePostInFeed(postId, response);
         setLikeCount(response.likeCount);
       }
     } catch (error) {
-      console.error("Erro ao processar like:", error);
+      console.error("Error processing like:", error);
+      toast.error("Error processing like");
+      setIsLiked(!newIsLiked);
+      setLikeCount((prevLikeCount) =>
+        !newIsLiked ? (prevLikeCount ?? 0) + 1 : (prevLikeCount ?? 0) - 1
+      );
+      setUserLikes((prev) => ({ ...prev, [postId]: !newIsLiked }));
     }
   };
 

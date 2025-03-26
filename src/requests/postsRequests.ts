@@ -1,16 +1,14 @@
 import api from "../server/axios";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 
 export const createPostWithMediaReq = async (
   profileId: string,
   file: File,
   caption: string,
   filePath: string,
-  selectedCategory: string
+  selectedCategory: string,
+  token: string | null
 ) => {
-  const token = Cookies.get("access_token");
-
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -19,8 +17,13 @@ export const createPostWithMediaReq = async (
   const allowedImageTypes = ["image/jpeg", "image/jpg"];
   const allowedVideoTypes = ["video/mp4"];
 
-  if (!allowedImageTypes.includes(file.type) && !allowedVideoTypes.includes(file.type)) {
-    toast.error("Formato de arquivo não suportado. Apenas JPG, JPEG e MP4 são permitidos.");
+  if (
+    !allowedImageTypes.includes(file.type) &&
+    !allowedVideoTypes.includes(file.type)
+  ) {
+    toast.error(
+      "Formato de arquivo não suportado. Apenas JPG, JPEG e MP4 são permitidos."
+    );
     return;
   }
 
@@ -51,9 +54,10 @@ export const createPostWithMediaReq = async (
   }
 };
 
-export const loadCategoriesReq = async (profileId: string) => {
-  const token = Cookies.get("access_token");
-
+export const loadCategoriesReq = async (
+  profileId: string,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -66,7 +70,7 @@ export const loadCategoriesReq = async (profileId: string) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    
+
     return response.data;
   } catch (error: any) {
     const errorMessage =
@@ -76,22 +80,28 @@ export const loadCategoriesReq = async (profileId: string) => {
     console.error("Error:", error);
     throw new Error(errorMessage);
   }
-}
+};
 
-export const createCategoryReq = async (newCategory: string, profileId: string) => {
-  const token = Cookies.get("access_token");
-
+export const createCategoryReq = async (
+  newCategory: string,
+  profileId: string,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
   }
 
   try {
-    const response = await api.post("/posts/category", { newCategory, profileId }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.post(
+      "/posts/category",
+      { newCategory, profileId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return response.data;
   } catch (error: any) {
@@ -102,4 +112,4 @@ export const createCategoryReq = async (newCategory: string, profileId: string) 
     console.error("Error:", error);
     throw new Error(errorMessage);
   }
-}
+};

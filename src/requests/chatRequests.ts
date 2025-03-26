@@ -1,15 +1,15 @@
 import api from "../server/axios";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 
-export const getUsersSearchReq = async (userName: string) => {
+export const getUsersSearchReq = async (
+  userName: string,
+  token: string | null
+) => {
   if (!userName) {
     toast.error("O nome de usuário não pode estar vazio.");
     return [];
   }
   const formattedUsername = userName.toLowerCase().trim().replace(/\s+/g, "_");
-  const token = Cookies.get("access_token");
-
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return [];
@@ -33,9 +33,10 @@ export const getUsersSearchReq = async (userName: string) => {
   }
 };
 
-export const getFollowedUsersReq = async (profileId: string) => {
-  const token = Cookies.get("access_token");
-
+export const getFollowedUsersReq = async (
+  profileId: string,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -52,9 +53,10 @@ export const getFollowedUsersReq = async (profileId: string) => {
   }
 };
 
-export const getUserChatsReq = async (profileId: string) => {
-  const token = Cookies.get("access_token");
-
+export const getUserChatsReq = async (
+  profileId: string,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -74,9 +76,9 @@ export const getUserChatsReq = async (profileId: string) => {
 export const createChatReq = async (
   nameChat: string,
   profileId: string,
-  selectedProfileId: string
+  selectedProfileId: string,
+  token: string | null
 ) => {
-  const token = Cookies.get("access_token");
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -105,10 +107,9 @@ export const createChatReq = async (
 export const getMessagesReq = async (
   conversationId: string,
   limit: number,
-  offset: number
+  offset: number,
+  token: string | null
 ) => {
-  const token = Cookies.get("access_token");
-
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;

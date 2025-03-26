@@ -4,6 +4,8 @@ import { formatDistanceToNow } from "date-fns";
 import { Send, X } from "lucide-react";
 import { getMessagesReq } from "../requests/chatRequests";
 import { SOCKET_URL } from "../server/socket";
+import { useGlobalContext } from "../context/globalContext";
+import { ptBR } from "date-fns/locale";
 
 const socket = io(SOCKET_URL);
 
@@ -29,6 +31,7 @@ export default function ChatModal({
   onClose,
   currentUser,
 }: ChatModalProps) {
+  const { token } = useGlobalContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,7 +48,7 @@ export default function ChatModal({
     readAllMessages();
 
     // Mark conversation as read when opening chat
-    socket.emit('openChat', {
+    socket.emit("openChat", {
       conversationId,
       profileId: currentUser,
     });
@@ -53,9 +56,9 @@ export default function ChatModal({
     const handleNewMessage = (message: Message) => {
       // Adiciona a nova mensagem ao final da lista
       setMessages((prev) => [...prev, message]);
-      
+
       // Automatically mark conversation as read when receiving a new message
-      socket.emit('openChat', {
+      socket.emit("openChat", {
         conversationId,
         profileId: currentUser,
       });
@@ -81,14 +84,14 @@ export default function ChatModal({
   useEffect(() => {
     if (conversationId && socket) {
       // Listen for conversation read confirmation
-      socket.on('conversationRead', (readResult) => {
-        console.log('Conversation marked as read:', readResult);
+      socket.on("conversationRead", (readResult) => {
+        console.log("Conversation marked as read:", readResult);
         // Optional: Update UI or state if needed
       });
 
       // Cleanup listener
       return () => {
-        socket.off('conversationRead');
+        socket.off("conversationRead");
       };
     }
   }, [conversationId, socket]);
@@ -96,7 +99,12 @@ export default function ChatModal({
   const readAllMessages = async () => {
     setLoading(true);
     try {
-      const initialMessages = await getMessagesReq(conversationId, 15, 0);
+      const initialMessages = await getMessagesReq(
+        conversationId,
+        15,
+        0,
+        token
+      );
       // Verifica a ordem das mensagens recebidas pelo backend
       const orderedMessages = isDescendingOrder(initialMessages)
         ? initialMessages.reverse()
@@ -118,7 +126,8 @@ export default function ChatModal({
       const additionalMessages = await getMessagesReq(
         conversationId,
         15,
-        offset
+        offset,
+        token
       );
       if (additionalMessages.length > 0) {
         // Verifica a ordem das mensagens recebidas pelo backend
@@ -185,7 +194,7 @@ export default function ChatModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-white w-full max-w-2xl h-full flex flex-col">
         <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Chat</h2>
+          <h2 className="text-xl font-semibold">Diálogo</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -207,8 +216,9 @@ export default function ChatModal({
             return (
               <div
                 key={message.id}
-                className={`flex items-start space-x-3 ${isCurrentUser ? "justify-end" : "justify-start"
-                  }`}
+                className={`flex items-start space-x-3 ${
+                  isCurrentUser ? "justify-end" : "justify-start"
+                }`}
               >
                 {!isCurrentUser && (
                   <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0 flex items-center justify-center">
@@ -226,15 +236,17 @@ export default function ChatModal({
                   </div>
                 )}
                 <div
-                  className={`max-w-[75%] rounded-lg p-3 ${isCurrentUser
+                  className={`max-w-[75%] rounded-lg p-3 ${
+                    isCurrentUser
                       ? "bg-indigo-600 text-white self-end"
                       : "bg-gray-200 text-gray-900 self-start"
-                    }`}
+                  }`}
                 >
                   <p className="text-sm mb-1">{message.content}</p>
                   <p className="text-xs opacity-75">
                     {formatDistanceToNow(new Date(message.createdAt), {
                       addSuffix: true,
+                      locale: ptBR,
                     })}
                   </p>
                 </div>

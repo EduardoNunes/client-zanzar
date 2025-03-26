@@ -1,17 +1,15 @@
 import api from "../server/axios";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 
 export const getFeedReq = async (
   profileId: string,
   page: number,
-  limit: number
+  limit: number,
+  token: string | null
 ) => {
-  const token = Cookies.get("access_token");
-
   if (!token) {
-    toast.error("Token de acesso não encontrado.");
-    return;
+    toast.error("Token não encontrado.");
+    return null;
   }
 
   try {
@@ -36,9 +34,11 @@ export const getFeedReq = async (
   }
 };
 
-export const handleLikeReq = async (postId: string, profileId: string) => {
-  const token = Cookies.get("access_token");
-
+export const handleLikeReq = async (
+  postId: string,
+  profileId: string,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -67,10 +67,9 @@ export const handleLikeReq = async (postId: string, profileId: string) => {
 export const newCommentReq = async (
   postId: string,
   profileId: string,
-  content: string
+  content: string,
+  token: string | null
 ) => {
-  const token = Cookies.get("access_token");
-
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -96,9 +95,11 @@ export const newCommentReq = async (
   }
 };
 
-export const get15commentsReq = async (postId: string, page: number = 1) => {
-  const token = Cookies.get("access_token");
-
+export const get15commentsReq = async (
+  postId: string,
+  page: number = 1,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;

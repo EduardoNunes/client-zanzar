@@ -1,10 +1,10 @@
 import api from "../server/axios";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 
-export const getAllInvitesReq = async (page: number = 1) => {
-  const token = Cookies.get("access_token");
-
+export const getAllInvitesReq = async (
+  page: number = 1,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -26,16 +26,20 @@ export const getAllInvitesReq = async (page: number = 1) => {
   }
 };
 
-export const grantInviteReq = async (username: string, inviteCount: number) => {
-  const token = Cookies.get("access_token");
-
+export const grantInviteReq = async (
+  username: string,
+  inviteCount: number,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
   }
 
   try {
-    const response = await api.post("/invite-management/invites-to-one", { username, inviteCount },
+    const response = await api.post(
+      "/invite-management/invites-to-one",
+      { username, inviteCount },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -52,16 +56,19 @@ export const grantInviteReq = async (username: string, inviteCount: number) => {
   }
 };
 
-export const sendInvitesToAllUsersReq = async (inviteCount: number) => {
-  const token = Cookies.get("access_token");
-
+export const sendInvitesToAllUsersReq = async (
+  inviteCount: number,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
   }
 
   try {
-    const response = await api.post("/invite-management/invites-to-all", { inviteCount },
+    const response = await api.post(
+      "/invite-management/invites-to-all",
+      { inviteCount },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -78,20 +85,21 @@ export const sendInvitesToAllUsersReq = async (inviteCount: number) => {
   }
 };
 
-export const revokeInviteReq = async (id: string) => {
-  const token = Cookies.get("access_token");
-
+export const revokeInviteReq = async (id: string, token: string | null) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
   }
 
   try {
-    const response = await api.delete(`/invite-management/remove-invite/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.delete(
+      `/invite-management/remove-invite/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return response.data;
   } catch (error: any) {
@@ -101,4 +109,3 @@ export const revokeInviteReq = async (id: string) => {
     throw new Error(errorMessage);
   }
 };
-

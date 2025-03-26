@@ -1,10 +1,12 @@
 import { Upload, X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import {
   Advertisement,
   createAdvertisementReq,
   updateAdvertisementReq,
 } from "../requests/advertisementsManagementRequests";
+import { useGlobalContext } from "../context/globalContext";
 
 interface AdvertisementFormProps {
   editingAd?: Advertisement | null;
@@ -19,7 +21,25 @@ export const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
   setIsModalOpen,
   fetchAdvertisements,
 }) => {
-  const [form, setForm] = useState({
+  const { token, isLoadingToken } = useGlobalContext();
+  const [form, setForm] = useState<{
+    title: string;
+    description: string;
+    mediaUrl: string;
+    mediaType: "video" | "image";
+    linkUrl: string;
+    startDate: string;
+    endDate: string;
+    dailyLimit: string;
+    userLimitShow: string;
+    timeInterval: string;
+    scheduleStart: string;
+    scheduleEnd: string;
+    showOnStartup: boolean;
+    active: boolean;
+    file: File | null;
+    mediaPreview: string;
+  }>({
     title: "",
     description: "",
     mediaUrl: "",
@@ -38,6 +58,13 @@ export const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
     mediaPreview: "",
   });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isLoadingToken && !token) {
+      toast.error("Token não encontrado.");
+      return;
+    }
+  }, [isLoadingToken, token]);
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -58,7 +85,8 @@ export const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
         mediaPreview: filePreviewUrl,
       }));
     } catch (error) {
-      console.error("Error preparing file:", error);
+      console.error("Erro ao carregar a pré-visualização:", error);
+      toast.error("Erro ao carregar a pré-visualização.");
     } finally {
       setLoading(false);
     }
@@ -68,46 +96,60 @@ export const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
     e.preventDefault();
     setLoading(true);
 
+    if (!token) {
+      toast.error("Token não encontrado.");
+      return;
+    }
+
     try {
       if (!form.title || !form.startDate || !form.endDate) {
-        throw new Error("Please fill in all required fields");
+        toast.error("Por favor, preencha todos os campos obrigatórios");
+        return;
       }
 
       const startDate = new Date(form.startDate);
       const endDate = new Date(form.endDate);
 
       if (startDate > endDate) {
-        throw new Error("End date must be after start date");
+        toast.error("Data de início não pode ser maior que a data de término");
+        return;
       }
 
       if (editingAd) {
-        await updateAdvertisementReq(editingAd.id, {
-          ...form,
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
-          scheduleStart: form.scheduleStart
-            ? new Date(form.scheduleStart).toISOString()
-            : undefined,
-          scheduleEnd: form.scheduleEnd
-            ? new Date(form.scheduleEnd).toISOString()
-            : undefined,
-          file: form.file === null ? undefined : form.file,
-          mediaType: "image",
-        });
+        await updateAdvertisementReq(
+          editingAd.id,
+          {
+            ...form,
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
+            scheduleStart: form.scheduleStart
+              ? new Date(form.scheduleStart).toISOString()
+              : undefined,
+            scheduleEnd: form.scheduleEnd
+              ? new Date(form.scheduleEnd).toISOString()
+              : undefined,
+            file: form.file === null ? undefined : form.file,
+            mediaType: form.mediaType,
+          },
+          token
+        );
       } else {
-        await createAdvertisementReq({
-          ...form,
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
-          scheduleStart: form.scheduleStart
-            ? new Date(form.scheduleStart).toISOString()
-            : undefined,
-          scheduleEnd: form.scheduleEnd
-            ? new Date(form.scheduleEnd).toISOString()
-            : undefined,
-          file: form.file || undefined,
-          mediaType: "image",
-        });
+        await createAdvertisementReq(
+          {
+            ...form,
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
+            scheduleStart: form.scheduleStart
+              ? new Date(form.scheduleStart).toISOString()
+              : undefined,
+            scheduleEnd: form.scheduleEnd
+              ? new Date(form.scheduleEnd).toISOString()
+              : undefined,
+            file: form.file || undefined,
+            mediaType: form.mediaType,
+          },
+          token
+        );
       }
 
       setForm({
@@ -129,15 +171,11 @@ export const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
         mediaPreview: "",
       });
 
-      fetchAdvertisements();
+      await fetchAdvertisements();
       setIsModalOpen(false);
     } catch (error) {
-      console.error("Error submitting advertisement:", error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to submit advertisement"
-      );
+      console.error("Erro ao enviar o formulário:", error);
+      toast.error("Falha ao enviar o formulário");
     } finally {
       setLoading(false);
     }

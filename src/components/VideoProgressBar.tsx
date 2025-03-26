@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Volume2, VolumeX, Maximize2, Volume1, Play } from 'lucide-react';
+import React, { useRef, useState, useEffect } from "react";
+import { Volume2, VolumeX, Maximize2, Volume1, Play } from "lucide-react";
 
 interface VideoProgressBarProps {
   videoElement?: HTMLVideoElement | null;
@@ -8,7 +8,7 @@ interface VideoProgressBarProps {
 
 const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
   videoElement = null,
-  onFullscreen
+  onFullscreen,
 }) => {
   const progressRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
@@ -38,11 +38,11 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
       setIsVideoPaused(video.paused);
     };
 
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('play', handlePlayPauseState);
-    video.addEventListener('pause', handlePlayPauseState);
-    video.addEventListener('timeupdate', updateProgress);
-    video.addEventListener('ended', () => {
+    video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("play", handlePlayPauseState);
+    video.addEventListener("pause", handlePlayPauseState);
+    video.addEventListener("timeupdate", updateProgress);
+    video.addEventListener("ended", () => {
       video.currentTime = 0;
       video.play();
     });
@@ -51,11 +51,11 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
     setIsVideoPaused(video.paused);
 
     return () => {
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('play', handlePlayPauseState);
-      video.removeEventListener('pause', handlePlayPauseState);
-      video.removeEventListener('timeupdate', updateProgress);
-      video.removeEventListener('ended', () => {
+      video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("play", handlePlayPauseState);
+      video.removeEventListener("pause", handlePlayPauseState);
+      video.removeEventListener("timeupdate", updateProgress);
+      video.removeEventListener("ended", () => {
         video.currentTime = 0;
         video.play();
       });
@@ -69,7 +69,7 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
 
     if (video.paused) {
       video.play().catch((error) => {
-        console.warn('Play failed:', error);
+        console.warn("Play failed:", error);
       });
     } else {
       video.pause();
@@ -113,10 +113,7 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
   if (!videoElement) return null;
 
   return (
-    <div
-      className="absolute inset-0 z-10"
-      onClick={toggleVideoPlayPause}
-    >
+    <div className="absolute inset-0 z-10" onClick={toggleVideoPlayPause}>
       {isControlsVisible && isVideoPaused && (
         <div
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"

@@ -6,6 +6,8 @@ import {
   revokeInviteReq,
 } from "../../requests/invitesManagementRequests";
 import { toast } from "react-toastify";
+import { useGlobalContext } from "../../context/globalContext";
+import { Loader2 } from "lucide-react";
 
 interface User {
   id: string;
@@ -18,64 +20,106 @@ interface User {
 }
 
 export default function InvitesManagement() {
+  const { token } = useGlobalContext();
   const [users, setUsers] = useState<User[]>([]);
   const [username, setUserName] = useState("");
   const [inviteCount, setInviteCount] = useState(1);
   const [inviteCountForAll, setInviteCountForAll] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [page]);
 
   const fetchUsers = async () => {
-    setLoading(true);
-    getAllInvitesReq()
-      .then((res) => {
-        setUsers(res.data);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    if (!token) {
+      toast.error("Token de acesso não encontrado.");
+      return;
+    }
+    setUsersLoading(true);
+    try {
+      const response = await getAllInvitesReq(page, token);
+      if (response) {
+        setUsers(response.data);
+        setTotalPages(response.totalPages);
+      }
+    } catch (error) {
+      // Error is already handled in getAllInvitesReq
+    } finally {
+      setUsersLoading(false);
+    }
   };
 
   // Conceder convites a um usuário específico
   const grantInvite = async () => {
+    if (!token) {
+      toast.error("Token de acesso não encontrado.");
+      return;
+    }
     setLoading(true);
-    grantInviteReq(username.toLowerCase(), inviteCount)
-      .then((res) => {
-        toast.success(res.message);
+    try {
+      const response = await grantInviteReq(
+        username.toLowerCase(),
+        inviteCount,
+        token
+      );
+      if (response) {
+        toast.success(response.message);
         setUserName("");
         setInviteCount(1);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      }
+    } catch (error) {
+      // Error is already handled in grantInviteReq
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Conceder convites para todos os usuários
   const grantToAll = async () => {
+    if (!token) {
+      toast.error("Token de acesso não encontrado.");
+      return;
+    }
     setLoading(true);
-    sendInvitesToAllUsersReq(inviteCountForAll)
-      .then((res) => {
-        toast.success(res.message);
+    try {
+      const response = await sendInvitesToAllUsersReq(
+        inviteCountForAll,
+        token
+      );
+      if (response) {
+        toast.success(response.message);
         setInviteCountForAll(1);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      }
+    } catch (error) {
+      // Error is already handled in sendInvitesToAllUsersReq
+    } finally {
+      setLoading(false);
+    }
   };
 
   const revokeInvite = async (id: string) => {
+    if (!token) {
+      toast.error("Token de acesso não encontrado.");
+      return;
+    }
     setLoading(true);
-    revokeInviteReq(id)
-      .then((res) => {
-        setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
-        toast.success(res.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      const response = await revokeInviteReq(id, token);
+      if (response) {
+        setUsers((prevUsers) =>
+          prevUsers.filter((user) => user.id !== id)
+        );
+        toast.success(response.message);
+      }
+    } catch (error) {
+      // Error is already handled in revokeInviteReq
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUserNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,6 +128,12 @@ export default function InvitesManagement() {
       .replace(/[^a-z0-9_]/g, "");
 
     setUserName(sanitizedValue);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
   };
 
   return (
@@ -113,8 +163,16 @@ export default function InvitesManagement() {
           <button
             onClick={grantInvite}
             className="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition duration-200 w-full md:w-auto"
+            disabled={loading}
           >
-            Conceder
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Processando...</span>
+              </div>
+            ) : (
+              "Conceder"
+            )}
           </button>
         </div>
 
@@ -135,7 +193,14 @@ export default function InvitesManagement() {
             className="bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition duration-200 w-full md:w-auto"
             disabled={loading}
           >
-            {loading ? "Processando..." : "Conceder"}
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Processando...</span>
+              </div>
+            ) : (
+              "Conceder"
+            )}
           </button>
         </div>
 
@@ -151,10 +216,19 @@ export default function InvitesManagement() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {usersLoading ? (
                 <tr>
                   <td colSpan={4} className="text-center py-4">
-                    Loading...
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                      <span>Carregando...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : users.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="text-center py-4">
+                    Nenhum usuário encontrado.
                   </td>
                 </tr>
               ) : (
@@ -175,7 +249,13 @@ export default function InvitesManagement() {
                       <button
                         className="text-red-600 hover:underline"
                         onClick={() => revokeInvite(user.id)}
+                        disabled={loading}
                       >
+                        {loading && (
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          </div>
+                        )}
                         Revogar
                       </button>
                     </td>
@@ -185,8 +265,39 @@ export default function InvitesManagement() {
             </tbody>
           </table>
         </div>
-
-        {loading && <p className="mt-4 text-blue-500">Carregando...</p>}
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-4 space-x-2">
+            <button
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1}
+              className="px-3 py-1 rounded-md border border-gray-300 disabled:opacity-50"
+            >
+              Anterior
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+              (pageNumber) => (
+                <button
+                  key={pageNumber}
+                  onClick={() => handlePageChange(pageNumber)}
+                  className={`px-3 py-1 rounded-md border ${
+                    pageNumber === page
+                      ? "bg-blue-500 text-white"
+                      : "border-gray-300"
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              )
+            )}
+            <button
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page === totalPages}
+              className="px-3 py-1 rounded-md border border-gray-300 disabled:opacity-50"
+            >
+              Próxima
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

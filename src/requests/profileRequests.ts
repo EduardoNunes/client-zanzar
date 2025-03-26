@@ -1,10 +1,10 @@
 import api from "../server/axios";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 
-export const getProfileReq = async (username: string) => {
-  const token = Cookies.get("access_token");
-
+export const getProfileReq = async (
+  username: string,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -25,14 +25,16 @@ export const getProfileReq = async (username: string) => {
   }
 };
 
-export const getPostsReq = async (username: string, page: number) => {
-  const token = Cookies.get("access_token");
-  const profileId = Cookies.get("profile_id");
-
+export const getPostsReq = async (
+  username: string,
+  page: number,
+  token: string | null,
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
   }
+
   try {
     const response = await api.get(`/profile/user-posts/${username}`, {
       headers: {
@@ -40,7 +42,6 @@ export const getPostsReq = async (username: string, page: number) => {
       },
       params: {
         page: page,
-        profileId: profileId,
       },
     });
 
@@ -52,9 +53,11 @@ export const getPostsReq = async (username: string, page: number) => {
   }
 };
 
-export const updateProfileImageReq = async (profileId: string, file: File) => {
-  const token = Cookies.get("access_token");
-
+export const updateProfileImageReq = async (
+  profileId: string,
+  file: File,
+  token?: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -84,10 +87,9 @@ export const updateProfileImageReq = async (profileId: string, file: File) => {
 
 export const followProfileReq = async (
   profileId: string,
-  currentProfileId: string
+  currentProfileId: string,
+  token: string | null
 ) => {
-  const token = Cookies.get("access_token");
-
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -115,10 +117,9 @@ export const followProfileReq = async (
 export const getPostsByCategoryReq = async (
   categoryId: string,
   profileId: string,
-  page: number
+  page: number,
+  token: string | null
 ) => {
-  const token = Cookies.get("access_token");
-
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;

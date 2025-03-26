@@ -1,31 +1,35 @@
-import Cookies from "js-cookie";
+import React from "react";
 import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "./App.css";
 import Layout from "./components/Layout";
+import { GlobalProvider, useGlobalContext } from "./context/globalContext";
 import CreatePost from "./pages/CreatePost";
 import Feed from "./pages/Feed";
+import InvitesPage from "./pages/InvitesPage";
 import Login from "./pages/Login";
 import Messages from "./pages/Messages";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import AdminRoutes from "./routes/AdminRoutes";
-import InvitesPage from "./pages/InvitesPage";
 
 export default function App() {
   const [isTokenLoaded, setIsTokenLoaded] = useState(false);
-  const [token, setToken] = useState<string | undefined>(undefined);
+  const { token, autentication, isLoadingToken } = useGlobalContext();
 
   useEffect(() => {
-    const loadedToken = Cookies.get("access_token");
-    setToken(loadedToken);
-    setIsTokenLoaded(true);
+    const loadToken = async () => {
+      await autentication();
+      setIsTokenLoaded(true);
+    };
+
+    loadToken();
   }, []);
 
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    if (!isTokenLoaded) {
+    if (!isTokenLoaded || isLoadingToken) {
       return null;
     }
 
@@ -50,86 +54,88 @@ export default function App() {
         pauseOnHover
         theme="colored"
       />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+      <GlobalProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Protected routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Feed />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/create"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <CreatePost />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/messages"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Messages />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Notifications />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile/:username"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Profile />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/*"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <AdminRoutes />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/invites"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <InvitesPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+            {/* Protected routes */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Feed />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/create"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <CreatePost />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Messages />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Notifications />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/:username"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Profile />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/*"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <AdminRoutes />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/invites"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <InvitesPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </GlobalProvider>
     </>
   );
 }

@@ -1,6 +1,5 @@
 import api from "../server/axios";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 
 export interface Advertisement {
   id: string;
@@ -18,10 +17,9 @@ export interface Advertisement {
 }
 
 export const getEligibleAdReq = async (
-  profileId?: string
+  profileId: string | null,
+  token: string | null
 ): Promise<Advertisement | null> => {
-  const token = Cookies.get("access_token");
-
   if (!token) {
     toast.error("Access token not found.");
     return null;
@@ -49,9 +47,11 @@ export const getEligibleAdReq = async (
   }
 };
 
-export const recordAdClickReq = async (adId: string, profileId?: string) => {
-  const token = Cookies.get("access_token");
-
+export const recordAdClickReq = async (
+  adId: string,
+  profileId: string | null,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Access token not found.");
     return;

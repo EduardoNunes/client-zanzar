@@ -1,17 +1,22 @@
-import Cookies from "js-cookie";
 import { Camera as CameraIcon, Loader2, Trash2, Upload } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { openCamera } from "../components/OpenCamera";
-import { createPostWithMediaReq, loadCategoriesReq, createCategoryReq } from "../requests/postsRequests";
+import {
+  createPostWithMediaReq,
+  loadCategoriesReq,
+  createCategoryReq,
+} from "../requests/postsRequests";
+import { useGlobalContext } from "../context/globalContext";
 
 export default function CreatePost() {
+  const { profileId, token } = useGlobalContext();
   const navigate = useNavigate();
   const [caption, setCaption] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
-  const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
+  const [fileType, setFileType] = useState<"image" | "video" | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
@@ -25,14 +30,14 @@ export default function CreatePost() {
 
   useEffect(() => {
     fetchCategories();
-  }, [])
+  }, []);
 
   const fetchCategories = async () => {
-    const profileId = Cookies.get("profile_id");
-    profileId && loadCategoriesReq(profileId).then((res) => {
-      setCategories(res);
-    });
-  }
+    profileId &&
+      loadCategoriesReq(profileId, token).then((res) => {
+        setCategories(res);
+      });
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFile(null);
@@ -42,28 +47,27 @@ export default function CreatePost() {
     const currentFile = event.target.files?.[0];
     if (!currentFile) {
       toast.info("Nenhum arquivo selecionado.");
-      event.target.value = '';
+      event.target.value = "";
       return;
     }
 
-    if (currentFile.type.startsWith('image/')) {
-      setFileType("image")
+    if (currentFile.type.startsWith("image/")) {
+      setFileType("image");
 
       const objectUrl = URL.createObjectURL(currentFile);
       setPreview(objectUrl);
 
       setFile(currentFile);
-      event.target.value = '';
-
-    } else if (currentFile.type.startsWith('video/')) {
-      setFileType("video")
+      event.target.value = "";
+    } else if (currentFile.type.startsWith("video/")) {
+      setFileType("video");
 
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
         setFile(currentFile);
 
-        const videoElement = document.createElement('video');
+        const videoElement = document.createElement("video");
         videoElement.src = reader.result as string;
 
         videoElement.onloadedmetadata = () => {
@@ -73,17 +77,17 @@ export default function CreatePost() {
           setVideoDuration(duration);
         };
 
-        event.target.value = '';
+        event.target.value = "";
       };
 
       reader.onerror = () => {
         toast.error("Erro ao carregar vídeo");
-        event.target.value = '';
+        event.target.value = "";
       };
       reader.readAsDataURL(currentFile);
     } else {
       toast.info("Formato de arquivo não suportado.");
-      event.target.value = '';
+      event.target.value = "";
     }
     setError("");
   };
@@ -111,13 +115,13 @@ export default function CreatePost() {
       toast.info("Por favor, insira uma nova categoria.");
       return;
     }
-    const profileId = Cookies.get("profile_id");
-    profileId && createCategoryReq(newCategory, profileId).then(() => {
-      fetchCategories();
-      toast.success("Categoria criada com sucesso!");
-      setNewCategory("");
-    })
-  }
+    profileId &&
+      createCategoryReq(newCategory, profileId, token).then(() => {
+        fetchCategories();
+        toast.success("Categoria criada com sucesso!");
+        setNewCategory("");
+      });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,10 +135,10 @@ export default function CreatePost() {
       return;
     }
 
-    if (fileType === 'image' && file.size > MAX_IMAGE_SIZE) {
+    if (fileType === "image" && file.size > MAX_IMAGE_SIZE) {
       toast.info("O tamanho máximo para imagens é de 10MB.");
       return;
-    } else if (fileType === 'video' && file.size > MAX_VIDEO_SIZE) {
+    } else if (fileType === "video" && file.size > MAX_VIDEO_SIZE) {
       toast.info("O tamanho máximo para videos é de 30MB.");
       return;
     } else if (videoDuration && videoDuration > MAX_VIDEO_TIME) {
@@ -146,8 +150,6 @@ export default function CreatePost() {
     setError("");
 
     try {
-      const profileId = Cookies.get("profile_id");
-
       if (!profileId) {
         navigate("/login");
       }
@@ -157,11 +159,16 @@ export default function CreatePost() {
       const filePath = `${profileId}/${fileName}`;
 
       profileId &&
-        (await createPostWithMediaReq(profileId, file, caption, filePath, selectedCategory).then(
-          () => {
-            navigate("/");
-          }
-        ));
+        (await createPostWithMediaReq(
+          profileId,
+          file,
+          caption,
+          filePath,
+          selectedCategory,
+          token
+        ).then(() => {
+          navigate("/");
+        }));
     } catch (error) {
       setError("Erro ao criar postagem. Por favor, tente novamente.");
       console.error("Error:", error);
@@ -188,9 +195,10 @@ export default function CreatePost() {
           <div className="flex flex-col items-center justify-center w-full">
             <label
               className={`w-full h-64 border-2 border-dashed rounded-lg cursor-pointer
-                ${preview
-                  ? "border-transparent"
-                  : "border-gray-300 hover:border-indigo-400"
+                ${
+                  preview
+                    ? "border-transparent"
+                    : "border-gray-300 hover:border-indigo-400"
                 }
                 transition-colors duration-200 ease-in-out
                 flex flex-col items-center justify-center relative overflow-hidden`}
@@ -216,9 +224,13 @@ export default function CreatePost() {
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-12 h-12 text-gray-400 mb-3" />
                   <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">Clique para fazer upload</span>
+                    <span className="font-semibold">
+                      Clique para fazer upload
+                    </span>
                   </p>
-                  <p className="text-xs text-gray-500">PNG, JPG ou MP4 (Máx. 30MB, Vídeo até 15s)</p>
+                  <p className="text-xs text-gray-500">
+                    PNG, JPG ou MP4 (Máx. 30MB, Vídeo até 15s)
+                  </p>
                 </div>
               )}
 
@@ -237,7 +249,7 @@ export default function CreatePost() {
                     setPreview("");
                     setFileType(null);
                     setError("");
-                    setLoading(false)
+                    setLoading(false);
                   }}
                   className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
                 >
@@ -252,9 +264,10 @@ export default function CreatePost() {
               onClick={() => handleOpenPhoto()}
               disabled={!!preview}
               className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center 
-                ${preview
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-green-500 text-white hover:bg-green-600'
+                ${
+                  preview
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-green-500 text-white hover:bg-green-600"
                 }`}
             >
               <CameraIcon className="mr-2" /> Capturar Foto
@@ -288,17 +301,29 @@ export default function CreatePost() {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="w-full px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent h-[40px]"
           >
-            <option value="" disabled className="text-gray-700 text-sm font-semibold">
+            <option
+              value=""
+              disabled
+              className="text-gray-700 text-sm font-semibold"
+            >
               Selecione uma categoria
             </option>
             {categories.length > 0 ? (
               categories.map((category) => (
-                <option key={category.id} value={category.id} className="text-gray-700 text-sm font-semibold hover:bg-gray-50">
+                <option
+                  key={category.id}
+                  value={category.id}
+                  className="text-gray-700 text-sm font-semibold hover:bg-gray-50"
+                >
                   {category.categories}
                 </option>
               ))
             ) : (
-              <option value="" disabled className="text-gray-700 text-sm font-semibold">
+              <option
+                value=""
+                disabled
+                className="text-gray-700 text-sm font-semibold"
+              >
                 Nenhuma categoria encontrada
               </option>
             )}
@@ -317,7 +342,8 @@ export default function CreatePost() {
           <button
             type="button"
             onClick={() => handleCreateCategory(newCategory)}
-            className="flex-1 w-1/2 bg-indigo-600 mt-4 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="flex-1 w-1/2 bg-indigo-600 mt-4 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Criar
           </button>
         </div>

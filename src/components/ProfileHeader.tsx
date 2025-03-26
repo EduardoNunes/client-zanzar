@@ -21,12 +21,16 @@ interface ProfileHeaderProps {
     following: number;
   };
   uploadingAvatar: boolean;
-  handleAvatarChange: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handleAvatarChange: (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => Promise<void>;
   setIsFollowing: React.Dispatch<React.SetStateAction<boolean>>;
-  setFollowStats: React.Dispatch<React.SetStateAction<{
-    followers: number;
-    following: number;
-  }>>;
+  setFollowStats: React.Dispatch<
+    React.SetStateAction<{
+      followers: number;
+      following: number;
+    }>
+  >;
 }
 
 export default function ProfileHeader({
@@ -53,14 +57,14 @@ export default function ProfileHeader({
                   onLoad={(e) => {
                     const img = e.currentTarget;
                     const spinner = img.nextElementSibling as HTMLDivElement;
-                    img.classList.remove('opacity-0');
-                    spinner.classList.add('hidden');
+                    img.classList.remove("opacity-0");
+                    spinner.classList.add("hidden");
                   }}
                   onError={(e) => {
                     const img = e.currentTarget;
                     const spinner = img.nextElementSibling as HTMLDivElement;
-                    img.classList.add('opacity-0');
-                    spinner.classList.add('hidden');
+                    img.classList.add("opacity-0");
+                    spinner.classList.add("hidden");
                   }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">

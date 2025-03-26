@@ -1,11 +1,12 @@
+import { Preferences } from "@capacitor/preferences";
 import Cookies from "js-cookie";
+import { Eye, EyeOff } from "lucide-react";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import LogoZanzar from "../assets/logo-zanzar-indigo-96.png";
 import { loginUserReq } from "../requests/authRequests";
 import { loginSchema } from "../validations/loginSchema";
-import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -24,20 +25,41 @@ export default function Login() {
 
       const data = await loginUserReq(email, password);
 
-      // Explicitly set cookies
-      Cookies.set("access_token", data.token, { path: "/" });
-      Cookies.set("profile_id", data.profileId, { path: "/" });
-      Cookies.set("user_name", data.userName, { path: "/" });
-      Cookies.set("unread_notifications", data.unreadNotificationsCount, {
-        path: "/",
-      });
-      Cookies.set("unread_chat_messages", data.unreadChatMessages, { path: "/" });
-      Cookies.set("invites", data.invites, { path: "/" });
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-      // Show success toast
+      if (isMobile) {
+        // Armazena no Preferences (para mobile)
+        await Preferences.set({ key: "access_token", value: data.token });
+        await Preferences.set({ key: "profile_id", value: data.profileId });
+        await Preferences.set({ key: "user_name", value: data.userName });
+        await Preferences.set({
+          key: "unread_notifications",
+          value: data.unreadNotificationsCount.toString(),
+        });
+        await Preferences.set({
+          key: "unread_chat_messages",
+          value: data.unreadChatMessages.toString(),
+        });
+        await Preferences.set({
+          key: "invites",
+          value: data.invites.toString(),
+        });
+      } else {
+        // Armazena no Cookies (para web)
+        Cookies.set("access_token", data.token, { path: "/" });
+        Cookies.set("profile_id", data.profileId, { path: "/" });
+        Cookies.set("user_name", data.userName, { path: "/" });
+        Cookies.set("unread_notifications", data.unreadNotificationsCount, {
+          path: "/",
+        });
+        Cookies.set("unread_chat_messages", data.unreadChatMessages, {
+          path: "/",
+        });
+        Cookies.set("invites", data.invites, { path: "/" });
+      }
+
       toast.success("Autenticado com sucesso!");
 
-      // Use window.location for direct navigation
       window.location.href = "/";
     } catch (error: any) {
       console.error("Login error:", error);
@@ -53,9 +75,11 @@ export default function Login() {
       setLoading(false);
     }
   };
+
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-white flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">

@@ -1,6 +1,5 @@
 import api from "../server/axios";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 
 export interface Advertisement {
   timeInterval: string;
@@ -42,9 +41,15 @@ export interface UploadProgressCallback {
   (progress: number): void;
 }
 
-export const getAdvertisementsReq = async (): Promise<Advertisement[]> => {
+export const getAdvertisementsReq = async (
+  token: string | null
+): Promise<Advertisement[]> => {
   try {
-    const token = Cookies.get("access_token");
+    if (!token) {
+      toast.error("Access token not found.");
+      return [];
+    }
+
     const response = await api.get("/admin/advertisements", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -59,10 +64,15 @@ export const getAdvertisementsReq = async (): Promise<Advertisement[]> => {
 };
 
 export const createAdvertisementReq = async (
-  data: CreateAdvertisementDto & { file?: File }
+  data: CreateAdvertisementDto & { file?: File },
+  token: string | null
 ): Promise<Advertisement> => {
   try {
-    const token = Cookies.get("access_token");
+    if (!token) {
+      toast.error("Token não encontrado.");
+      throw new Error("Token not found.");
+    }
+
     const formData = new FormData();
 
     // Anexar todos os campos de texto
@@ -97,13 +107,18 @@ export const createAdvertisementReq = async (
 
 export const updateAdvertisementReq = async (
   id: string,
-  data: CreateAdvertisementDto & { file?: File }
+  data: CreateAdvertisementDto & { file?: File },
+  token: string | null
 ): Promise<Advertisement> => {
   try {
-    const token = Cookies.get("access_token");
+    if (!token) {
+      toast.error("Access token not found.");
+      throw new Error("Access token not found.");
+    }
+
     const formData = new FormData();
 
-    // Append all text fields
+    // anexa todos os campos de texto
     Object.keys(data).forEach((key) => {
       const value =
         data[key as keyof (CreateAdvertisementDto & { file?: File })];
@@ -112,7 +127,7 @@ export const updateAdvertisementReq = async (
       }
     });
 
-    // Append file if exists
+    // anexa arquivo se existir
     if (data.file) {
       formData.append("file", data.file);
     }
@@ -133,9 +148,16 @@ export const updateAdvertisementReq = async (
   }
 };
 
-export const deleteAdvertisementReq = async (id: string): Promise<void> => {
+export const deleteAdvertisementReq = async (
+  id: string,
+  token: string | null
+): Promise<void> => {
   try {
-    const token = Cookies.get("access_token");
+    if (!token) {
+      toast.error("Access token not found.");
+      return;
+    }
+
     await api.delete(`/admin/advertisements/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,

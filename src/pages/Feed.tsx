@@ -1,6 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import Cookies from "js-cookie";
 import { CircleUserRound, LogIn, MessageCircle } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +7,7 @@ import CommentModal from "../components/CommentsModal";
 import ImageViewer from "../components/ImageViewer";
 import LikeButton from "../components/LikeButton";
 import VideoProgressBar from "../components/VideoProgressBar";
+import { useGlobalContext } from "../context/globalContext";
 import { getFeedReq } from "../requests/feedRequests";
 
 interface Post {
@@ -32,6 +32,7 @@ interface Post {
 }
 
 export default function Feed() {
+  const { token, profileId, isLoadingToken } = useGlobalContext();
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +41,6 @@ export default function Feed() {
   const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
   const [fullscreenImage, setFullscreenImage] = useState<Post | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const token = Cookies.get("access_token");
   const [videoRefsState, setVideoRefsState] = useState<{
     [key: number]: HTMLVideoElement | null;
   }>({});
@@ -96,23 +96,25 @@ export default function Feed() {
   }, [posts, cleanupObserver]);
 
   useEffect(() => {
-    fetchPosts();
-  }, []);
+    if (!isLoadingToken) {
+      fetchPosts();
+    }
+  }, [isLoadingToken]);
 
   async function fetchPosts() {
-    const profileId = Cookies.get("profile_id");
-
     if (!profileId) {
+      console.log("NÂO TEM PROFILE ID");
       navigate("/login");
       return;
     }
+
     try {
       setLoading(true);
-      const data = await getFeedReq(profileId, 1, 3);
+      const data = await getFeedReq(profileId, 1, 3, token);
 
       // Determine tipo de media para cada post
       const processedPosts = data.map((post: Post) => {
-        // você pode usar a função includes para verificar se a string contém outra string
+        // verificando se a string contém outra string
         const isVideo =
           post.mediaUrl.includes("/videos/") ||
           post.mediaUrl.includes(".mp4") ||
@@ -155,14 +157,13 @@ export default function Feed() {
     if (!hasMorePosts || loading) return;
 
     try {
-      const profileId = Cookies.get("profile_id");
       if (!profileId) {
         navigate("/login");
         return;
       }
 
       setLoading(true);
-      const newPosts = await getFeedReq(profileId, page + 1, 3);
+      const newPosts = await getFeedReq(profileId, page + 1, 3, token);
 
       // Determina o tipo de media para cada post
       const processedPosts = newPosts.map((post: Post) => {

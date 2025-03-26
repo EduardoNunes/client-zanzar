@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import { CircleAlert, CircleCheckBig } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -6,32 +5,47 @@ import { io, Socket } from "socket.io-client";
 import SinglePostModal from "../components/SinglePostModal";
 import api from "../server/axios";
 import { SOCKET_URL } from "../server/socket";
+import { useGlobalContext } from "../context/globalContext";
+
+interface Notification {
+  id: string;
+  content: string;
+  createdAt: string;
+  isRead: boolean;
+  referenceId: string;
+}
 
 const NotificationsPage = () => {
+  const {
+    profileId,
+    isLoadingToken,
+    unreadNotifications,
+    setUnreadNotifications,
+  } = useGlobalContext();
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [profileId, setProfileId] = useState("");
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isShowPost, setIsShowPost] = useState(false);
   const [postId, setPostId] = useState<string | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const profile = Cookies.get("profile_id");
-    if (!profile) {
+    if (!isLoadingToken && !profileId) {
       navigate("/login");
     }
-
-    setProfileId(profile || "");
-  }, []);
+  }, [isLoadingToken, profileId, navigate]);
 
   useEffect(() => {
     if (profileId) {
       const fetchNotifications = async () => {
         try {
+          setLoading(true);
           const res = await api.get(`/notifications/read-all/${profileId}`);
           setNotifications(res.data);
         } catch (error) {
           console.error("Erro ao buscar notificações:", error);
+        } finally {
+          setLoading(false);
         }
       };
 
@@ -45,8 +59,11 @@ const NotificationsPage = () => {
         query: { userId: profileId },
       });
 
-      newSocket.on("newNotification", (newNotification) => {
+      newSocket.on("newNotification", (newNotification: Notification) => {
         setNotifications((prev) => [newNotification, ...prev]);
+        setUnreadNotifications(
+          unreadNotifications !== null ? unreadNotifications + 1 : 1
+        );
       });
 
       setSocket(newSocket);
@@ -54,7 +71,7 @@ const NotificationsPage = () => {
         newSocket.disconnect();
       };
     }
-  }, [profileId]);
+  }, [profileId, setUnreadNotifications]);
 
   const markNotificationAsRead = (notificationId: string) => {
     if (socket) {
@@ -64,12 +81,12 @@ const NotificationsPage = () => {
       const updatedNotifications = notifications.map((n) =>
         n.id === notificationId ? { ...n, isRead: true } : n
       );
-      const unreadCount = updatedNotifications.filter(n => !n.isRead).length;
-      Cookies.set('unread_notifications', unreadCount.toString());
+      const unreadCount = updatedNotifications.filter((n) => !n.isRead).length;
+      setUnreadNotifications(unreadCount);
     }
   };
 
-  const openPost = (notification: any) => {
+  const openPost = (notification: Notification) => {
     const updatedNotifications = notifications.map((n) =>
       n.id === notification.id ? { ...n, isRead: true } : n
     );
@@ -77,8 +94,8 @@ const NotificationsPage = () => {
     setNotifications(updatedNotifications);
 
     // Update unread notifications count
-    const unreadCount = updatedNotifications.filter(n => !n.isRead).length;
-    Cookies.set('unread_notifications', unreadCount.toString());
+    const unreadCount = updatedNotifications.filter((n) => !n.isRead).length;
+    setUnreadNotifications(unreadCount);
 
     setPostId(notification.referenceId);
     setIsShowPost(true);
@@ -89,6 +106,14 @@ const NotificationsPage = () => {
     setIsShowPost(false);
     setPostId(null);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
