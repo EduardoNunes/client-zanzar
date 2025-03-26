@@ -1,6 +1,5 @@
 import api from "../server/axios";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 
 interface CountResponse {
   count: number;

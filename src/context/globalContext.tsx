@@ -1,5 +1,3 @@
-"use client";
-
 import { Preferences } from "@capacitor/preferences";
 import Cookies from "js-cookie";
 import React, { ReactNode, createContext, useContext } from "react";
