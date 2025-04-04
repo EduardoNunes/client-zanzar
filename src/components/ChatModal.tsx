@@ -184,7 +184,7 @@ export default function ChatModal({
 
   // Função para verificar se as mensagens estão em ordem decrescente
   const isDescendingOrder = (messages: Message[]): boolean => {
-    if (messages.length < 2) return true; // Não é possível determinar a ordem com menos de 2 mensagens
+    if (messages.length < 2) return true;
     const firstDate = new Date(messages[0].createdAt).getTime();
     const secondDate = new Date(messages[1].createdAt).getTime();
     return firstDate > secondDate;
@@ -193,7 +193,7 @@ export default function ChatModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-white w-full max-w-2xl h-full flex flex-col">
-        <div className="p-4 border-b flex justify-between items-center">
+        <div className="p-4 border-b flex justify-between items-center mb-1">
           <h2 className="text-xl font-semibold">Diálogo</h2>
           <button
             onClick={onClose}
