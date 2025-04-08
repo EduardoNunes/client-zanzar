@@ -1,32 +1,105 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { SOCKET_URL } from "../server/socket";
+import { Preferences } from "@capacitor/preferences";
+import { io, Socket } from "socket.io-client";
 import { useGlobalContext } from "../context/globalContext";
 
 interface MessageIndicatorProps {
-  className?: string;
   isMenuOpen?: boolean;
-  messagesCount?: number;
+  unreadChatsCount?: number;
+  setUnreadChatsCount?: (count: number) => void;
 }
 
 export const MessageIndicator: React.FC<MessageIndicatorProps> = ({
-  className,
   isMenuOpen,
-  messagesCount,
+  unreadChatsCount,
+  setUnreadChatsCount,
 }) => {
-  const { unreadChatMessages } = useGlobalContext();
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  const { profileId } = useGlobalContext();
+  const [socket, setSocket] = useState<Socket | null>(null);
 
-  if (!unreadChatMessages || unreadChatMessages <= 0) {
+  useEffect(() => {
+    const fetchMessagesStorage = async () => {
+      let messagesStorage;
+
+      if (isMobile) {
+        const result = await Preferences.get({ key: "unread_chat_messages" });
+        messagesStorage = result.value;
+      } else {
+        messagesStorage = localStorage.getItem("unread_chat_messages");
+      }
+
+      if (setUnreadChatsCount) {
+        const parsedValue = messagesStorage ? parseInt(messagesStorage, 10) : 0;
+
+        setUnreadChatsCount(parsedValue);
+      }
+    };
+
+    fetchMessagesStorage();
+  }, [isMenuOpen, setUnreadChatsCount, unreadChatsCount]);
+
+  useEffect(() => {
+    if (profileId) {
+      const newSocket = io(SOCKET_URL, {
+        query: { userId: profileId },
+      });
+
+      newSocket.on("connect", () => {});
+
+      newSocket.on("connect_error", (error) => {
+        console.error("Erro na conexão do socket:", error);
+      });
+
+      setSocket(newSocket);
+
+      return () => {
+        if (newSocket) {
+          newSocket.disconnect();
+        }
+      };
+    }
+  }, [profileId]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("newMessage", async (message) => {
+        // Verificar se a mensagem é para o usuário atual
+        if (message.profileId !== profileId) {
+          // Emitir evento para obter o número de chats não lidos
+          socket.emit("getUnreadChatsCount");
+        }
+      });
+
+      // Listener para o evento unreadChatsCount
+      socket.on("unreadChatsCount", async (data) => {
+        if (isMobile) {
+          await Preferences.set({
+            key: "unread_chat_messages",
+            value: data.count.toString(),
+          });
+        } else {
+          localStorage.setItem("unread_chat_messages", data.count.toString());
+        }
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off("newMessage");
+        socket.off("unreadChatsCount");
+      }
+    };
+  }, [socket, isMobile, setUnreadChatsCount, profileId]);
+
+  if (!unreadChatsCount || unreadChatsCount <= 0) {
     return null;
   }
 
   return (
-    <div
-      className={`absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-xs ${className}`}
-      style={{
-        transition: "transform 0.3s ease-in-out",
-        transform: "rotate(270deg)",
-      }}
-    >
-      {messagesCount ? messagesCount : isMenuOpen ? unreadChatMessages : ""}
+    <div className="absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-xs rotate-270">
+      {unreadChatsCount}
     </div>
   );
 };

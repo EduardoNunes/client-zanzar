@@ -1,26 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import {
-  LogOut,
-  Home,
-  PlusSquare,
-  User,
-  MessageSquare,
-  /* ShoppingBag, */
-  Shield,
-  LogIn,
-  StickyNote,
-  Send,
-} from "lucide-react";
-import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-import AdModal from "./AdModal";
-import { NotificationIndicator } from "../indicators/NotificationIndicator";
-import { MessageIndicator } from "../indicators/MessageIndicator";
-import { InvitesIndicator } from "../indicators/InvitesIndicator";
+import {
+  Home,
+  LogIn,
+  LogOut,
+  MessageSquare,
+  PlusSquare,
+  Send,
+  Shield,
+  StickyNote,
+  User,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import LogoZanzar from "../assets/logo-zanzar-indigo-clean-40.png";
 import { useGlobalContext } from "../context/globalContext";
-import { Preferences } from "@capacitor/preferences";
+import { InvitesIndicator } from "../indicators/InvitesIndicator";
+import { MessageIndicator } from "../indicators/MessageIndicator";
+import { NotificationIndicator } from "../indicators/NotificationIndicator";
+import { logOut } from "../utils/logout";
+import AdModal from "./AdModal";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { token, autentication, userName, totalUnread } = useGlobalContext();
@@ -28,10 +26,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hasAuthenticated, setHasAuthenticated] = useState(false);
+  const [unreadChatsCount, setUnreadChatsCount] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [unreadInvites, setUnreadInvites] = useState(0);
 
   useEffect(() => {
-    autentication();
+    const authenticate = async () => {
+      await autentication();
+      setHasAuthenticated(true);
+    };
 
+    if (!hasAuthenticated) {
+      authenticate();
+    }
+  }, [hasAuthenticated]);
+
+  useEffect(() => {
     if (token) {
       const decoded: any = jwtDecode(token);
       const isAdmin = decoded.role === "admin";
@@ -39,25 +50,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [token]);
 
-  const handleLogout = async () => {
-    navigate("/login");
+  const handleOpenMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
-    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-      Preferences.remove({ key: "access_token" });
-      Preferences.remove({ key: "profile_id" });
-      Preferences.remove({ key: "user_name" });
-      Preferences.remove({ key: "unread_notifications" });
-      Preferences.remove({ key: "unread_chat_messages" });
-      Preferences.remove({ key: "invites" });
-    } else {
-      Cookies.remove("access_token");
-      Cookies.remove("profile_id");
-      Cookies.remove("user_name");
-      Cookies.remove("unread_notifications");
-      Cookies.remove("unread_chat_messages");
-      Cookies.remove("invites");
-    }
+  const handleLogout = async () => {
+    await logOut();
   };
 
   const menuItems = [
@@ -73,7 +71,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             icon: <StickyNote className="w-8 h-8" />,
             label: "Notifications",
             path: "/notifications",
-            onClick: () => userName && navigate(`/notifications`),
+            onClick: () => {
+              userName && navigate(`/notifications`);
+            },
           },
           {
             icon: <User className="w-8 h-8" />,
@@ -91,19 +91,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             icon: <MessageSquare className="w-8 h-8" />,
             label: "Messages",
             path: "/messages",
-            onClick: () => navigate("/messages"),
+            onClick: () => {
+              navigate("/messages");
+            },
           },
-          /*         {
-          icon: <ShoppingBag className="w-8 h-8" />,
-          label: "Store",
-          path: "/store",
-          onClick: () => navigate("/store"),
-        }, */
           {
             icon: <Send className="w-8 h-8" />,
             label: "Invites",
             path: "/invites",
-            onClick: () => navigate("/invites"),
+            onClick: () => {
+              navigate("/invites");
+            },
           },
           ...(isAdmin
             ? [
@@ -155,12 +153,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 >
                   {item.icon}
                   <span>{item.label}</span>
+                  {item.label === "Notifications" && <NotificationIndicator />}
+                  {item.label === "Messages" && <MessageIndicator />}
+                  {item.label === "Invites" && <InvitesIndicator />}
                 </button>
               ))}
             </div>
             {/* Mobile Menu Button */}
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => handleOpenMenu()}
               className="md:hidden p-2 rounded-md hover:bg-gray-100"
               style={{
                 position: "fixed",
@@ -180,7 +181,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             >
               {totalUnread > 0 && (
                 <div className="absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-xs rotate-270">
-                  {isMenuOpen ? totalUnread : ""}
+                  {isMenuOpen
+                    ? (unreadInvites ?? 0) +
+                      (unreadChatsCount ?? 0) +
+                      (unreadNotifications ?? 0)
+                    : ""}
                 </div>
               )}
             </button>
@@ -231,15 +236,27 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       transform: "rotate(90deg)",
                     }}
                   >
-                    {item.label === "Notifications" ? (
-                      <NotificationIndicator isMenuOpen={isMenuOpen} />
-                    ) : null}
-                    {item.label === "Messages" ? (
-                      <MessageIndicator isMenuOpen={isMenuOpen} />
-                    ) : null}
-                    {item.label === "Invites" ? (
-                      <InvitesIndicator isMenuOpen={isMenuOpen} />
-                    ) : null}
+                    {item.label === "Notifications" && (
+                      <NotificationIndicator
+                        isMenuOpen={isMenuOpen}
+                        unreadNotifications={unreadNotifications}
+                        setUnreadNotifications={setUnreadNotifications}
+                      />
+                    )}
+                    {item.label === "Messages" && (
+                      <MessageIndicator
+                        isMenuOpen={isMenuOpen}
+                        unreadChatsCount={unreadChatsCount}
+                        setUnreadChatsCount={setUnreadChatsCount}
+                      />
+                    )}
+                    {item.label === "Invites" && (
+                      <InvitesIndicator
+                        isMenuOpen={isMenuOpen}
+                        unreadInvites={unreadInvites}
+                        setUnreadInvites={setUnreadInvites}
+                      />
+                    )}
                   </div>
                   <span className="text-xs">{item.label}</span>
                 </button>

@@ -11,16 +11,19 @@ import { useGlobalContext } from "../context/globalContext";
 interface SinglePostModalProps {
   postId: string;
   onClose: () => void;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
 }
 
 export default function SinglePostModal({
   postId,
   onClose,
+  loading,
+  setLoading,
 }: SinglePostModalProps) {
   const { token, profileId } = useGlobalContext();
   const navigate = useNavigate();
   const [post, setPost] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
   const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
   const [fullscreenImage, setFullscreenImage] = useState<any | null>(null);
   const [selectedPost, setSelectedPost] = useState<any | null>(null);

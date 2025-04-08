@@ -1,20 +1,41 @@
-import React from "react";
-import { useGlobalContext } from "../context/globalContext";
+import { Preferences } from "@capacitor/preferences";
+import React, { useEffect } from "react";
 
 interface InvitesIndicatorProps {
   className?: string;
   isMenuOpen?: boolean;
-  invitesCount?: number;
+  unreadInvites?: number;
+  setUnreadInvites?: (unreadInvites: number) => void;
 }
 
 export const InvitesIndicator: React.FC<InvitesIndicatorProps> = ({
   className,
   isMenuOpen,
-  invitesCount,
+  unreadInvites,
+  setUnreadInvites,
 }) => {
-  const { invites } = useGlobalContext();
+  useEffect(() => {
+    const fetchUnreadInvites = async () => {
+      let invitesStorage;
 
-  if (!invites || invites <= 0) {
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        const result = await Preferences.get({ key: "invites" });
+        invitesStorage = result.value;
+      } else {
+        invitesStorage = localStorage.getItem("invites");
+      }
+
+      if (setUnreadInvites) {
+        const parsedValue = invitesStorage ? parseInt(invitesStorage, 10) : 0;
+        setUnreadInvites(parsedValue);
+      }
+    };
+
+    fetchUnreadInvites();
+  }, [isMenuOpen, setUnreadInvites]);
+
+  if (!unreadInvites || unreadInvites <= 0) {
     return null;
   }
 
@@ -26,7 +47,7 @@ export const InvitesIndicator: React.FC<InvitesIndicatorProps> = ({
         transform: "rotate(270deg)",
       }}
     >
-      {invitesCount ? invitesCount : isMenuOpen ? invites : ""}
+      {unreadInvites}
     </div>
   );
 };

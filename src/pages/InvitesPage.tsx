@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { getInvitesReq, sendInvitesReq } from "../requests/invitesRequests";
 import { useGlobalContext } from "../context/globalContext";
 import { useNavigate } from "react-router-dom";
+import { Preferences } from "@capacitor/preferences";
 
 interface Invite {
   id: string;
@@ -12,8 +13,7 @@ interface Invite {
 }
 
 export default function InvitesPage() {
-  const { invites, setInvites, token, isLoadingToken, profileId } =
-    useGlobalContext();
+  const { token, isLoadingToken, profileId } = useGlobalContext();
   const navigate = useNavigate();
   const [invitesSended, setInvitesSended] = useState<Invite[]>([]);
   const [email, setEmail] = useState("");
@@ -65,7 +65,21 @@ export default function InvitesPage() {
     try {
       await sendInvitesReq(email.toLowerCase(), token);
       await fetchInvites();
-      setInvites(invites ? invites - 1 : 0);
+
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      console.log("INVITES", invitesAvaliable);
+      if (isMobile) {
+        await Preferences.set({
+          key: "invites",
+          value: (invitesAvaliable ? invitesAvaliable - 1 : 0).toString(),
+        });
+      } else {
+        localStorage.setItem(
+          "invites",
+          (invitesAvaliable ? invitesAvaliable - 1 : 0).toString()
+        );
+      }
+
       setEmail("");
       toast.success("Invite sent successfully!");
     } catch (error) {
