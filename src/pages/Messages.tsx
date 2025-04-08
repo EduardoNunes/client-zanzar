@@ -1,15 +1,15 @@
+import { Preferences } from "@capacitor/preferences";
 import { CircleUserRound, MessagesSquare, Search, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import ChatModal from "../components/ChatModal";
+import { useGlobalContext } from "../context/globalContext";
 import {
   createChatReq,
   getFollowedUsersReq,
   getUserChatsReq,
 } from "../requests/chatRequests";
-import { MessageIndicator } from "../indicators/MessageIndicator";
-import { useGlobalContext } from "../context/globalContext";
-import { toast } from "react-toastify";
 
 interface FollowedUser {
   avatarUrl: any;
@@ -38,8 +38,7 @@ interface UserChats {
 }
 
 export default function Messages() {
-  const { profileId, token, isLoadingToken, setUnreadChatMessages } =
-    useGlobalContext();
+  const { profileId, token, isLoadingToken } = useGlobalContext();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentUser, setCurrentUser] = useState<string | null>(null);
@@ -48,6 +47,7 @@ export default function Messages() {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [userChats, setUserChats] = useState<UserChats[]>([]);
   const [usersTemp, setUsersTemp] = useState<FollowedUser[]>([]);
+  const [unreadChatMessages, setUnreadChatMessages] = useState<number>(0);
 
   useEffect(() => {
     if (!isLoadingToken && !profileId) {
@@ -182,7 +182,19 @@ export default function Messages() {
       0
     );
 
-    // Atualiza o contador de mensagens não lidas
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      await Preferences.set({
+        key: "unreadChatMessages",
+        value: remainingUnreadMessages.toString(),
+      });
+    } else {
+      localStorage.setItem(
+        "unreadChatMessages",
+        remainingUnreadMessages.toString()
+      );
+    }
+
     setUnreadChatMessages(remainingUnreadMessages);
   };
 
@@ -234,9 +246,7 @@ export default function Messages() {
                         className="absolute top-[-8px] left-[-24px] z-50"
                         style={{ transform: "rotate(90deg)" }}
                       >
-                        <MessageIndicator
-                          messagesCount={userChat.messagesCount}
-                        />
+                        {unreadChatMessages}
                       </div>
                     ) : (
                       ""
