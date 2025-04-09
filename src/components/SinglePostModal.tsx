@@ -201,7 +201,7 @@ export default function SinglePostModal({
             <LikeButton
               postId={post.id}
               initialLikeCount={post.likeCount}
-              userLikes={userLikes}
+              likedByLoggedInUser={post.likedByLoggedInUser}
               setUserLikes={setUserLikes}
               updatePostInFeed={updatePostInFeed}
             />

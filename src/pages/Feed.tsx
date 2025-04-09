@@ -135,14 +135,13 @@ export default function Feed() {
       );
 
       setVideoLoading(initialVideoLoadingState);
-
       setPosts(processedPosts || []);
+
       const likesMap = processedPosts.reduce(
         (acc: Record<string, boolean>, post: Post) => {
           acc[post.id] = post.likedByLoggedInUser || false;
           return acc;
-        },
-        {}
+        }
       );
 
       setUserLikes(likesMap);
@@ -232,13 +231,34 @@ export default function Feed() {
     navigate(`/profile/${username}`);
   };
 
-  const updatePostInFeed = (postId: string, newPost: any) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId ? { ...post, likeCount: newPost.likesCount } : post
-      )
-    );
-  };
+  const updatePostInFeed = useCallback(
+    (postId: string, newPost: any) => {
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                likeCount: newPost.likesCount,
+                likedByLoggedInUser: newPost.likedByLoggedInUser,
+              }
+            : post
+        )
+      );
+
+      if (fullscreenImage?.id === postId) {
+        setFullscreenImage((prev) =>
+          prev
+            ? {
+                ...prev,
+                likeCount: newPost.likesCount,
+                likedByLoggedInUser: newPost.likedByLoggedInUser,
+              }
+            : null
+        );
+      }
+    },
+    [fullscreenImage]
+  );
 
   const updateCommentCountInPost = (
     postId: string,
@@ -384,7 +404,7 @@ export default function Feed() {
                 <LikeButton
                   postId={post.id}
                   initialLikeCount={post.likeCount}
-                  userLikes={userLikes}
+                  likedByLoggedInUser={post.likedByLoggedInUser}
                   setUserLikes={setUserLikes}
                   updatePostInFeed={updatePostInFeed}
                 />

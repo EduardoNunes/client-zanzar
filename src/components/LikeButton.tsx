@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
-import { handleLikeReq } from "../requests/feedRequests";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGlobalContext } from "../context/globalContext";
-import { toast } from "react-toastify";
+import { handleLikeReq } from "../requests/feedRequests";
 
 interface LikeButtonProps {
   postId: string;
   initialLikeCount: number;
-  userLikes: Record<string, boolean>;
+  likedByLoggedInUser: boolean;
   setUserLikes: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   updatePostInFeed: (postId: string, newPost: any) => void;
 }
@@ -16,13 +15,13 @@ interface LikeButtonProps {
 export default function LikeButton({
   postId,
   initialLikeCount,
-  userLikes,
+  likedByLoggedInUser,
   setUserLikes,
   updatePostInFeed,
 }: LikeButtonProps) {
   const { token, profileId } = useGlobalContext();
   const [likeCount, setLikeCount] = useState(initialLikeCount);
-  const [isLiked, setIsLiked] = useState(userLikes[postId] || false);
+  const [isLiked, setIsLiked] = useState(likedByLoggedInUser);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,8 +29,8 @@ export default function LikeButton({
   }, [initialLikeCount]);
 
   useEffect(() => {
-    setIsLiked(userLikes[postId]);
-  }, [userLikes[postId]]);
+    setIsLiked(likedByLoggedInUser);
+  }, [likedByLoggedInUser]);
 
   const handleLike = async (
     e: React.MouseEvent<HTMLButtonElement>,
@@ -44,29 +43,22 @@ export default function LikeButton({
       return;
     }
 
-    const newIsLiked = !isLiked;
-    setIsLiked(newIsLiked);
-    setLikeCount((prevLikeCount) =>
-      newIsLiked ? (prevLikeCount ?? 0) + 1 : (prevLikeCount ?? 0) - 1
-    );
-
-    setUserLikes((prev) => ({ ...prev, [postId]: newIsLiked }));
-
     try {
       const response = await handleLikeReq(postId, profileId, token);
+      if (response) {
+        const newLikeState = !isLiked;
+        setIsLiked(newLikeState);
+        setLikeCount(response.likesCount);
+        setUserLikes((prev) => ({ ...prev, [postId]: newLikeState }));
 
-      if (response && response.likeCount !== undefined) {
-        updatePostInFeed(postId, response);
-        setLikeCount(response.likeCount);
+        // Atualiza o estado no Feed e ImageViewer
+        updatePostInFeed(postId, {
+          likesCount: response.likesCount,
+          likedByLoggedInUser: newLikeState,
+        });
       }
     } catch (error) {
-      console.error("Error processing like:", error);
-      toast.error("Error processing like");
-      setIsLiked(!newIsLiked);
-      setLikeCount((prevLikeCount) =>
-        !newIsLiked ? (prevLikeCount ?? 0) + 1 : (prevLikeCount ?? 0) - 1
-      );
-      setUserLikes((prev) => ({ ...prev, [postId]: !newIsLiked }));
+      console.error("Erro ao processar like:", error);
     }
   };
 

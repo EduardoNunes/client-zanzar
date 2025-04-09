@@ -20,7 +20,6 @@ export default function ImageViewer({
   post,
   onClose,
   setSelectedPost,
-  userLikes,
   setUserLikes,
   updatePostInFeed,
   commentsCount,
@@ -154,7 +153,7 @@ export default function ImageViewer({
             <LikeButton
               postId={post.id}
               initialLikeCount={post.likeCount}
-              userLikes={userLikes}
+              likedByLoggedInUser={post.likedByLoggedInUser}
               setUserLikes={setUserLikes}
               updatePostInFeed={updatePostInFeed}
             />
