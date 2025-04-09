@@ -49,7 +49,7 @@ export const MessageIndicator: React.FC<MessageIndicatorProps> = ({
       newSocket.on("connect", () => {});
 
       newSocket.on("connect_error", (error) => {
-        console.error("Erro na conexão do socket:", error);
+        console.error("ERRO NA CONEXÃO DO SOCKET:", error);
       });
 
       setSocket(newSocket);
@@ -74,17 +74,19 @@ export const MessageIndicator: React.FC<MessageIndicatorProps> = ({
 
       // Listener para o evento unreadChatsCount
       socket.on("unreadChatsCount", async (data) => {
-        if (isMobile) {
-          await Preferences.set({
-            key: "unread_chat_messages",
-            value: data.count.toString(),
-          });
-        } else {
-          localStorage.setItem("unread_chat_messages", data.count.toString());
+        if (setUnreadChatsCount) {
+          setUnreadChatsCount(data.count);
+          if (isMobile) {
+            await Preferences.set({
+              key: "unread_chat_messages",
+              value: data.count.toString(),
+            });
+          } else {
+            localStorage.setItem("unread_chat_messages", data.count.toString());
+          }
         }
       });
     }
-
     return () => {
       if (socket) {
         socket.off("newMessage");

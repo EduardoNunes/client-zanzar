@@ -47,7 +47,6 @@ export default function Messages() {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [userChats, setUserChats] = useState<UserChats[]>([]);
   const [usersTemp, setUsersTemp] = useState<FollowedUser[]>([]);
-  const [unreadChatMessages, setUnreadChatMessages] = useState<number>(0);
 
   useEffect(() => {
     if (!isLoadingToken && !profileId) {
@@ -95,7 +94,6 @@ export default function Messages() {
       participants: item.participants,
       messagesCount: item.messagesCount,
     }));
-
     setUserChats(chats);
   };
 
@@ -185,17 +183,15 @@ export default function Messages() {
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
     if (isMobile) {
       await Preferences.set({
-        key: "unreadChatMessages",
+        key: "unread_chat_messages",
         value: remainingUnreadMessages.toString(),
       });
     } else {
       localStorage.setItem(
-        "unreadChatMessages",
+        "unread_chat_messages",
         remainingUnreadMessages.toString()
       );
     }
-
-    setUnreadChatMessages(remainingUnreadMessages);
   };
 
   return (
@@ -242,15 +238,10 @@ export default function Messages() {
                     className="relative w-full px-3 py-1 text-left hover:bg-gray-50 rounded-lg flex items-center space-x-3 transition-colors disabled:opacity-50"
                   >
                     {userChat.messagesCount > 0 ? (
-                      <div
-                        className="absolute top-[-8px] left-[-24px] z-50"
-                        style={{ transform: "rotate(90deg)" }}
-                      >
-                        {unreadChatMessages}
+                      <div className="absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex justify-center pb-[2px] items-center text-center text-xs z-10">
+                        {userChat.messagesCount}
                       </div>
-                    ) : (
-                      ""
-                    )}
+                    ) : null}
                     {/* Avatares dos participantes */}
                     <div className="flex -space-x-2">
                       {userChat.participants?.map((participant, index) => (
