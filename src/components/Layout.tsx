@@ -55,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const handleLogout = async () => {
-    await logOut();
+    await logOut(navigate);
   };
 
   const menuItems = [

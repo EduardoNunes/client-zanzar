@@ -1,7 +1,8 @@
 import { Preferences } from "@capacitor/preferences";
 import Cookies from "js-cookie";
+import { NavigateFunction } from "react-router-dom";
 
-export const logOut = async () => {
+export const logOut = async (navigate: NavigateFunction) => {
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
   if (isMobile) {
@@ -21,6 +22,6 @@ export const logOut = async () => {
     Cookies.remove("unread_chat_messages", { path: "/" });
     Cookies.remove("invites", { path: "/" });
   }
-  
-  window.location.href = "/login";
+
+  navigate("/login", { replace: true });
 };
