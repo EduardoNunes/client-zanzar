@@ -47,7 +47,9 @@ export default function Feed() {
   const [videoLoading, setVideoLoading] = useState<{ [key: number]: boolean }>(
     {}
   );
-  const [commentsCount, setCommentsCount] = useState<number>(0);
+  const [commentsCount, setCommentsCount] = useState<Record<string, number>>(
+    {}
+  );
 
   // Refs para os elementos de vídeo
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -276,7 +278,10 @@ export default function Feed() {
     postId: string,
     newCommentCount: number
   ) => {
-    setCommentsCount(newCommentCount);
+    setCommentsCount((prev) => ({
+      ...prev,
+      [postId]: newCommentCount,
+    }));
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
         post.id === postId ? { ...post, commentCount: newCommentCount } : post
