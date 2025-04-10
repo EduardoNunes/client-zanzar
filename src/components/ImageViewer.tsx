@@ -23,6 +23,7 @@ interface ImageViewerProps {
   setCommentsCount?: React.Dispatch<
     React.SetStateAction<Record<string, number>>
   >;
+  isFullscreen?: boolean;
 }
 
 export default function ImageViewer({
@@ -33,6 +34,7 @@ export default function ImageViewer({
   updatePostInFeed,
   commentsCount,
   setCommentsCount,
+  isFullscreen,
 }: ImageViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -114,7 +116,7 @@ export default function ImageViewer({
         onTouchEnd={handleTouchEnd}
       >
         {post.mediaType === "video" ? (
-          <div className="relative w-full h-full">
+          <div className="relative w-full h-full flex items-center justify-center">
             {videoLoading && (
               <div className="absolute inset-0 z-20 flex justify-center items-center bg-gray-100/50">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
@@ -123,17 +125,14 @@ export default function ImageViewer({
             <video
               ref={videoRef}
               src={post.mediaUrl}
+              className={`w-full h-full object-contain ${
+                isFullscreen ? "object-cover" : ""
+              }`}
+              controls={isFullscreen}
               autoPlay
-              muted
               loop
+              muted
               playsInline
-              className="max-w-full max-h-[95vh] w-auto h-auto object-contain touch-pinch-zoom"
-              style={{
-                WebkitUserSelect: "none",
-                userSelect: "none",
-                transform: `scale(${scale})`,
-                transition: "transform 0.1s",
-              }}
               onLoadedData={() => {
                 setVideoLoading(false);
               }}
