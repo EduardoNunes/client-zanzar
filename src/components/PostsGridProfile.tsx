@@ -48,7 +48,9 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
   const [videoLoading, setVideoLoading] = useState<{ [key: number]: boolean }>(
     {}
   );
-  const [commentsCount, setCommentsCount] = useState<number>(0);
+  const [commentsCount, setCommentsCount] = useState<Record<string, number>>(
+    {}
+  );
 
   // Refs para os elementos de vídeo
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -412,19 +414,75 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
     );
   };
 
-  const updatePostInFeed = (postId: string, newPost: any) => {
+  const updatePostInFeed = useCallback((postId: string, newPost: any) => {
+    // Atualiza allPosts
     setAllPosts((prevPosts) =>
       prevPosts.map((post) =>
-        post.id === postId ? { ...post, likeCount: newPost.likesCount } : post
+        post.id === postId
+          ? {
+              ...post,
+              likeCount: newPost.likesCount,
+              likedByLoggedInUser: newPost.likedByLoggedInUser,
+            }
+          : post
       )
     );
-  };
+
+    // Atualiza postsByCategory
+    setPostsByCategory((prevPostsByCategory) => {
+      const updatedPostsByCategory = { ...prevPostsByCategory };
+      for (const category in updatedPostsByCategory) {
+        updatedPostsByCategory[category] = updatedPostsByCategory[category].map(
+          (post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  likeCount: newPost.likesCount,
+                  likedByLoggedInUser: newPost.likedByLoggedInUser,
+                }
+              : post
+        );
+      }
+      return updatedPostsByCategory;
+    });
+
+    // Atualiza fullscreenImage se estiver aberto
+    setFullscreenImage((prevImage) =>
+      prevImage && prevImage.id === postId
+        ? {
+            ...prevImage,
+            likeCount: newPost.likesCount,
+            likedByLoggedInUser: newPost.likedByLoggedInUser,
+          }
+        : prevImage
+    );
+
+    // Atualiza selectedPost se estiver aberto
+    setSelectedPost((prevPost) =>
+      prevPost && prevPost.id === postId
+        ? {
+            ...prevPost,
+            likeCount: newPost.likesCount,
+            likedByLoggedInUser: newPost.likedByLoggedInUser,
+          }
+        : prevPost
+    );
+
+    // Atualiza userLikes
+    setUserLikes((prevLikes) => ({
+      ...prevLikes,
+      [postId]: newPost.likedByLoggedInUser,
+    }));
+  }, []);
 
   const updateCommentCountInPost = (
     postId: string,
     newCommentCount: number
   ) => {
-    setCommentsCount(newCommentCount);
+    setCommentsCount((prev) => ({
+      ...prev,
+      [postId]: newCommentCount,
+    }));
     setAllPosts((prevPosts) =>
       prevPosts.map((post) =>
         post.id === postId ? { ...post, commentCount: newCommentCount } : post
@@ -477,17 +535,25 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
         </div>
       )}
 
-      {fullscreenImage && (
+      {fullscreenImage && fullscreenImage.mediaUrl && (
         <ImageViewer
-          post={fullscreenImage}
-          commentsCount={commentsCount}
-          setCommentsCount={setCommentsCount}
+          post={{
+            id: fullscreenImage.id,
+            mediaUrl: fullscreenImage.mediaUrl,
+            mediaType: fullscreenImage.mediaType,
+            caption: fullscreenImage.caption || "",
+            likeCount: fullscreenImage.likeCount,
+            likedByLoggedInUser: userLikes[fullscreenImage.id] || false,
+            commentCount: commentsCount[fullscreenImage.id] || 0,
+          }}
           onClose={() => setFullscreenImage(null)}
+          selectedPost={selectedPost}
+          setSelectedPost={setSelectedPost}
           userLikes={userLikes}
           setUserLikes={setUserLikes}
           updatePostInFeed={updatePostInFeed}
-          setSelectedPost={setSelectedPost}
-          selectedPost={selectedPost}
+          commentsCount={commentsCount}
+          setCommentsCount={setCommentsCount}
         />
       )}
 

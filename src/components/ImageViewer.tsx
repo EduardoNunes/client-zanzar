@@ -4,16 +4,25 @@ import LikeButton from "./LikeButton";
 import VideoProgressBar from "./VideoProgressBar";
 
 interface ImageViewerProps {
-  post: any;
-  imageUrl?: string;
+  post: {
+    id: string;
+    mediaUrl: string;
+    mediaType?: "image" | "video";
+    caption: string;
+    likeCount: number;
+    likedByLoggedInUser: boolean;
+    commentCount: number;
+  };
   onClose: () => void;
   selectedPost: any;
   setSelectedPost: (post: any) => void;
-  userLikes: any;
+  userLikes: Record<string, boolean>;
   setUserLikes: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   updatePostInFeed: (postId: string, newPost: any) => void;
-  commentsCount?: number;
-  setCommentsCount?: React.Dispatch<React.SetStateAction<number>>;
+  commentsCount?: Record<string, number>;
+  setCommentsCount?: React.Dispatch<
+    React.SetStateAction<Record<string, number>>
+  >;
 }
 
 export default function ImageViewer({
@@ -83,7 +92,7 @@ export default function ImageViewer({
 
   const handleClose = () => {
     if (setCommentsCount) {
-      setCommentsCount(0);
+      setCommentsCount({});
     }
     onClose();
   };
@@ -163,7 +172,9 @@ export default function ImageViewer({
             >
               <MessageCircle className="w-6 h-6" />
               <span>
-                {commentsCount === 0 ? post.commentCount : commentsCount}
+                {commentsCount === undefined
+                  ? post.commentCount
+                  : commentsCount[post.id] || 0}
               </span>
             </button>
           </div>
