@@ -21,5 +21,6 @@ export const logOut = async () => {
     Cookies.remove("unread_chat_messages", { path: "/" });
     Cookies.remove("invites", { path: "/" });
   }
+  
   window.location.href = "/login";
 };
