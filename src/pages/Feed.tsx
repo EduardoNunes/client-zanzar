@@ -256,8 +256,20 @@ export default function Feed() {
             : null
         );
       }
+
+      if (selectedPost?.id === postId) {
+        setSelectedPost((prev) =>
+          prev
+            ? {
+                ...prev,
+                likeCount: newPost.likesCount,
+                likedByLoggedInUser: newPost.likedByLoggedInUser,
+              }
+            : null
+        );
+      }
     },
-    [fullscreenImage]
+    [fullscreenImage, selectedPost]
   );
 
   const updateCommentCountInPost = (
