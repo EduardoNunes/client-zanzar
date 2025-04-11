@@ -1,19 +1,24 @@
 import { Preferences } from "@capacitor/preferences";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
+import { io } from "socket.io-client";
+import { useGlobalContext } from "../context/globalContext";
+import { SOCKET_URL } from "../server/socket";
 
 interface InvitesIndicatorProps {
   className?: string;
   isMenuOpen?: boolean;
   unreadInvites?: number;
-  setUnreadInvites?: (unreadInvites: number) => void;
+  setUnreadInvites?: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const InvitesIndicator: React.FC<InvitesIndicatorProps> = ({
+export function InvitesIndicator({
   className,
   isMenuOpen,
-  unreadInvites,
+  unreadInvites = 0,
   setUnreadInvites,
-}) => {
+}: InvitesIndicatorProps) {
+  const { profileId, token } = useGlobalContext();
+
   useEffect(() => {
     const fetchUnreadInvites = async () => {
       let invitesStorage;
@@ -35,9 +40,58 @@ export const InvitesIndicator: React.FC<InvitesIndicatorProps> = ({
     fetchUnreadInvites();
   }, [isMenuOpen, setUnreadInvites]);
 
-  if (!unreadInvites || unreadInvites <= 0) {
-    return null;
-  }
+  useEffect(() => {
+    if (!token || !profileId) return;
+
+    // Inicializar socket
+    const newSocket = io(SOCKET_URL, {
+      query: { userId: profileId },
+    });
+
+    // Ouvir novas convites
+    newSocket.on("get-unread-invites", async () => {
+      const newUnreadCount = (unreadInvites ?? 0) + 1;
+      console.log("NEW SOCKET", newSocket);
+      if (setUnreadInvites) {
+        setUnreadInvites(newUnreadCount);
+      }
+
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        await Preferences.set({
+          key: "invites",
+          value: newUnreadCount.toString(),
+        });
+      } else {
+        localStorage.setItem("invites", newUnreadCount.toString());
+      }
+    });
+
+    // Ouvir resposta da contagem de convites não lidos
+    newSocket.on("unread-invites-count", async (data: { invites: number }) => {
+      if (setUnreadInvites) {
+        setUnreadInvites(data.invites);
+      }
+      console.log("DATA", data.invites);
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        await Preferences.set({
+          key: "invites",
+          value: data.invites.toString(),
+        });
+      } else {
+        localStorage.setItem("invites", data.invites.toString());
+      }
+    });
+
+    newSocket.emit("get-unread-invites", profileId);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [token, profileId, setUnreadInvites, isMenuOpen]);
+
+  if (unreadInvites === 0) return null;
 
   return (
     <div
@@ -50,4 +104,4 @@ export const InvitesIndicator: React.FC<InvitesIndicatorProps> = ({
       {unreadInvites}
     </div>
   );
-};
+}
