@@ -52,13 +52,13 @@ export const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
       });
 
       // Listener para novas notificações
-      newSocket.on("newNotification", async () => {       
+      newSocket.on("newNotification", async () => {
         const newUnreadCount = (unreadNotifications ?? 0) + 1;
-       
+
         if (setUnreadNotifications) {
           setUnreadNotifications(newUnreadCount);
         }
-       
+
         const isMobile = /Mobi|Android/i.test(navigator.userAgent);
         if (isMobile) {
           await Preferences.set({
