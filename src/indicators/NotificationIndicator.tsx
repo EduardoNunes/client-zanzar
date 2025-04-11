@@ -107,7 +107,7 @@ export const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
         newSocket.disconnect();
       };
     }
-  }, [profileId, setUnreadNotifications, unreadNotifications]);
+  }, [profileId, setUnreadNotifications, unreadNotifications, isMenuOpen]);
 
   // Listener para leitura de notificações
   useEffect(() => {
