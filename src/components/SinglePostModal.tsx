@@ -1,13 +1,13 @@
 import { formatDistanceToNow } from "date-fns";
 import { CircleUserRound, Loader2, LogIn, MessageCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSinglePostReq } from "../requests/SinglePostRequests";
 import CommentModal from "./CommentsModal";
 import ImageViewer from "./ImageViewer";
 import LikeButton from "./LikeButton";
 import { useGlobalContext } from "../context/globalContext";
-
+import Sound from "./Sound";
 interface SinglePostModalProps {
   postId: string;
   onClose: () => void;
@@ -29,6 +29,8 @@ export default function SinglePostModal({
   const [selectedPost, setSelectedPost] = useState<any | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
   const [videoLoading, setVideoLoading] = useState(true);
+  const [isVideoMuted, setIsVideoMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     fetchPost();
@@ -167,6 +169,7 @@ export default function SinglePostModal({
                 </div>
               )}
               <video
+                ref={videoRef}
                 src={post.mediaUrl}
                 autoPlay
                 muted
@@ -176,6 +179,13 @@ export default function SinglePostModal({
                 onClick={() => setFullscreenImage(post)}
                 onLoadedData={() => setVideoLoading(false)}
               />
+              <div className="absolute bottom-0 right-0 p-2 z-[70]rounded-tr-lg">
+                <Sound
+                  isVideoMuted={isVideoMuted}
+                  setIsVideoMuted={setIsVideoMuted}
+                  videoRef={videoRef}
+                />
+              </div>
             </div>
           ) : (
             <>
