@@ -1,12 +1,7 @@
-import {
-  ChevronLeft,
-  MessageCircle,
-  Volume1,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
+import { ChevronLeft, MessageCircle } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import LikeButton from "./LikeButton";
+import Sound from "./Sound";
 import VideoProgressBar from "./VideoProgressBar";
 
 interface ImageViewerProps {
@@ -105,33 +100,6 @@ export default function ImageViewer({
     onClose();
   };
 
-  const toggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const video = videoRef.current;
-
-    if (!video) return;
-
-    if (video.muted) {
-      video.muted = false;
-      video.volume = 1;
-      setIsVideoMuted(false);
-    } else {
-      video.muted = true;
-      setIsVideoMuted(true);
-    }
-  };
-
-  const getVolumeIcon = () => {
-    if (!videoRef.current) return <VolumeX size={24} />;
-
-    if (isVideoMuted) return <VolumeX size={24} />;
-
-    const volume = videoRef.current.volume;
-    if (volume === 0) return <VolumeX size={24} />;
-    if (volume < 0.5) return <Volume1 size={24} />;
-    return <Volume2 size={24} />;
-  };
-
   return (
     <div
       ref={containerRef}
@@ -189,7 +157,7 @@ export default function ImageViewer({
           />
         )}
 
-        <div className="absolute bottom-0 left-0 p-4 z-[70] bg-black/60 rounded-tr-lg">
+        <div className="absolute bottom-0 w-full left-0 p-4 z-[70] bg-black/60 rounded-tr-lg">
           <div className="flex items-center space-x-4 mb-4">
             <LikeButton
               postId={post.id}
@@ -218,12 +186,11 @@ export default function ImageViewer({
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <button
-              className="bg-black/50 text-white p-2 rounded-full z-10"
-              onClick={toggleMute}
-            >
-              {getVolumeIcon()}
-            </button>
+            <Sound
+              isVideoMuted={isVideoMuted}
+              setIsVideoMuted={setIsVideoMuted}
+              videoRef={videoRef}
+            />
           </div>
         </div>
       </div>
