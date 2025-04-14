@@ -9,6 +9,7 @@ import LikeButton from "../components/LikeButton";
 import VideoProgressBar from "../components/VideoProgressBar";
 import { useGlobalContext } from "../context/globalContext";
 import { getFeedReq } from "../requests/feedRequests";
+import Sound from "../components/Sound";
 
 interface Post {
   commentCount: number;
@@ -50,6 +51,7 @@ export default function Feed() {
   const [commentsCount, setCommentsCount] = useState<Record<string, number>>(
     {}
   );
+  const [activeVideoIndex, setActiveVideoIndex] = useState<number | null>(null);
 
   // Refs para os elementos de vídeo
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -362,23 +364,23 @@ export default function Feed() {
                       <video
                         ref={(el) => {
                           videoRefs.current[index] = el;
-
                           if (el) {
-                            el.muted = true;
-                            el.volume = 0;
+                            el.muted = index !== activeVideoIndex;
+                            el.volume = index === activeVideoIndex ? 1 : 0;
                             el.dataset.feedVideoIndex = String(index);
 
                             el.addEventListener("loadedmetadata", () => {
                               setVideoRefsState((prev) => ({
                                 ...prev,
                                 [index]: el,
-                              })); // Atualiza o estado para re-renderizar o componente
+                              })); // Atualiza o estado para re-renderizar o componente com botão fullscreen
                             });
+
                             el.addEventListener("loadeddata", () => {
                               setVideoLoading((prev) => ({
                                 ...prev,
                                 [index]: false,
-                              })); // Atualiza o estado para re-renderizar o componente
+                              })); // Atualiza o estado para tirar o loading
                             });
 
                             el.play().catch((error) => {
@@ -394,6 +396,22 @@ export default function Feed() {
                         playsInline
                         className="w-full h-full object-cover"
                       />
+
+                      <div className="absolute bottom-12 right-0 p-2 z-30 rounded-tr-lg">
+                        {videoRefs.current[index] && (
+                          <Sound
+                            isVideoMuted={index !== activeVideoIndex}
+                            setIsVideoMuted={(muted) => {
+                              if (muted) {
+                                setActiveVideoIndex(null);
+                              } else {
+                                setActiveVideoIndex(index);
+                              }
+                            }}
+                            videoRef={{ current: videoRefs.current[index] }}
+                          />
+                        )}
+                      </div>
                       <VideoProgressBar
                         videoElement={videoRefsState[index]}
                         onFullscreen={() => setFullscreenImage(post)}
