@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from "react";
-import { Volume2, VolumeX, Maximize2, Volume1, Play } from "lucide-react";
+import { Maximize2, Play } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface VideoProgressBarProps {
   videoElement?: HTMLVideoElement | null;
@@ -12,7 +12,6 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
 }) => {
   const progressRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
-  const [isVideoMuted, setIsVideoMuted] = useState(true);
   const [isControlsVisible, setIsControlsVisible] = useState(true);
   const [isVideoPaused, setIsVideoPaused] = useState(true);
 
@@ -76,33 +75,6 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
     }
   };
 
-  const toggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const video = videoElement;
-
-    if (!video) return;
-
-    if (video.muted) {
-      video.muted = false;
-      video.volume = 1;
-      setIsVideoMuted(false);
-    } else {
-      video.muted = true;
-      setIsVideoMuted(true);
-    }
-  };
-
-  const getVolumeIcon = () => {
-    if (!videoElement) return <VolumeX size={24} />;
-
-    if (isVideoMuted) return <VolumeX size={24} />;
-
-    const volume = videoElement.volume;
-    if (volume === 0) return <VolumeX size={24} />;
-    if (volume < 0.5) return <Volume1 size={24} />;
-    return <Volume2 size={24} />;
-  };
-
   const handleFullscreen = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onFullscreen) {
@@ -132,12 +104,6 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
       </div>
 
       <div className="absolute bottom-2 right-2 flex flex-col space-y-2">
-        <button
-          onClick={toggleMute}
-          className="bg-black/50 text-white p-2 rounded-full"
-        >
-          {getVolumeIcon()}
-        </button>
         {onFullscreen && (
           <button
             onClick={handleFullscreen}

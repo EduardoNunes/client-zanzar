@@ -1,4 +1,10 @@
-import { ChevronLeft, MessageCircle } from "lucide-react";
+import {
+  ChevronLeft,
+  MessageCircle,
+  Volume1,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import LikeButton from "./LikeButton";
 import VideoProgressBar from "./VideoProgressBar";
@@ -42,6 +48,7 @@ export default function ImageViewer({
   const [scale, setScale] = useState(1);
   const [initialDistance, setInitialDistance] = useState<number | null>(null);
   const [videoLoading, setVideoLoading] = useState(true);
+  const [isVideoMuted, setIsVideoMuted] = useState(true);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -97,6 +104,33 @@ export default function ImageViewer({
       setCommentsCount({});
     }
     onClose();
+  };
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    if (video.muted) {
+      video.muted = false;
+      video.volume = 1;
+      setIsVideoMuted(false);
+    } else {
+      video.muted = true;
+      setIsVideoMuted(true);
+    }
+  };
+
+  const getVolumeIcon = () => {
+    if (!videoRef.current) return <VolumeX size={24} />;
+
+    if (isVideoMuted) return <VolumeX size={24} />;
+
+    const volume = videoRef.current.volume;
+    if (volume === 0) return <VolumeX size={24} />;
+    if (volume < 0.5) return <Volume1 size={24} />;
+    return <Volume2 size={24} />;
   };
 
   return (
@@ -178,10 +212,18 @@ export default function ImageViewer({
             </button>
           </div>
           <p className="text-white">{post.caption}</p>
-          <ChevronLeft
-            className="w-6 h-6 z-[80] mt-2 text-white"
-            onClick={handleClose}
-          />
+          <div className="flex items-center justify-between">
+            <ChevronLeft
+              className="w-6 h-6 z-[80] text-white"
+              onClick={handleClose}
+            />
+            <button
+              onClick={toggleMute}
+              className="bg-black/50 text-white p-2 rounded-full z-10"
+            >
+              {getVolumeIcon()}
+            </button>
+          </div>
         </div>
       </div>
     </div>
