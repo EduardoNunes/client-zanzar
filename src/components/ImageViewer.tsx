@@ -48,7 +48,7 @@ export default function ImageViewer({
   const [scale, setScale] = useState(1);
   const [initialDistance, setInitialDistance] = useState<number | null>(null);
   const [videoLoading, setVideoLoading] = useState(true);
-  const [isVideoMuted, setIsVideoMuted] = useState(true);
+  const [isVideoMuted, setIsVideoMuted] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -60,8 +60,7 @@ export default function ImageViewer({
   useEffect(() => {
     if (post.mediaType === "video" && videoRef.current) {
       const video = videoRef.current;
-      video.muted = true;
-      video.volume = 0;
+      video.muted = false;
       video.play().catch((error) => {
         console.warn("Autoplay prevented", error);
       });
@@ -165,7 +164,7 @@ export default function ImageViewer({
               controls={isFullscreen}
               autoPlay
               loop
-              muted
+              muted={isVideoMuted}
               playsInline
               onLoadedData={() => {
                 setVideoLoading(false);
@@ -213,13 +212,15 @@ export default function ImageViewer({
           </div>
           <p className="text-white">{post.caption}</p>
           <div className="flex items-center justify-between">
-            <ChevronLeft
-              className="w-6 h-6 z-[80] text-white"
-              onClick={handleClose}
-            />
             <button
-              onClick={toggleMute}
+              className="text-white hover:text-gray-300 transition-colors z-[80]"
+              onClick={handleClose}
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
               className="bg-black/50 text-white p-2 rounded-full z-10"
+              onClick={toggleMute}
             >
               {getVolumeIcon()}
             </button>
