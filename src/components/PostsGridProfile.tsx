@@ -413,7 +413,6 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
         <div className="relative w-full aspect-[9/14] flex items-center justify-center">
           <div className="flex flex-col items-center justify-center gap-2 opacity-30 text-gray-500 text-center">
             <FileImage size={36} />
-            Adicionar midia
           </div>
         </div>
       </div>
