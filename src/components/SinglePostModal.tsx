@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSinglePostReq } from "../requests/SinglePostRequests";
 import CommentModal from "./CommentsModal";
-import ImageViewer from "./ImageViewer";
 import LikeButton from "./LikeButton";
 import { useGlobalContext } from "../context/globalContext";
 import Sound from "./Sound";
@@ -24,8 +23,7 @@ export default function SinglePostModal({
   const { token, profileId } = useGlobalContext();
   const navigate = useNavigate();
   const [post, setPost] = useState<any | null>(null);
-  const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
-  const [fullscreenImage, setFullscreenImage] = useState<any | null>(null);
+  const [_, setUserLikes] = useState<Record<string, boolean>>({});
   const [selectedPost, setSelectedPost] = useState<any | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
   const [videoLoading, setVideoLoading] = useState(true);
@@ -44,7 +42,6 @@ export default function SinglePostModal({
     try {
       setLoading(true);
       const data = await getSinglePostReq(postId, profileId, token);
-
       const isVideo =
         data.mediaUrl?.includes("/videos/") ||
         data.mediaUrl?.includes(".mp4") ||
@@ -176,7 +173,6 @@ export default function SinglePostModal({
                 loop
                 playsInline
                 className="w-full max-h-[600px] min-h-[200px] object-cover"
-                onClick={() => setFullscreenImage(post)}
                 onLoadedData={() => setVideoLoading(false)}
               />
               <div className="absolute bottom-0 right-0 p-2 z-[70]rounded-tr-lg">
@@ -193,7 +189,6 @@ export default function SinglePostModal({
                 src={post.mediaUrl}
                 alt="Post content"
                 className="w-full max-h-[600px] min-h-[200px] object-cover"
-                onClick={() => setFullscreenImage(post)}
                 onLoad={() => setImageLoading(false)}
                 onError={() => setImageLoading(false)}
               />
@@ -243,18 +238,6 @@ export default function SinglePostModal({
             />
           </div>
         </div>
-      )}
-
-      {fullscreenImage && (
-        <ImageViewer
-          onClose={() => setFullscreenImage(null)}
-          post={fullscreenImage}
-          selectedPost={selectedPost}
-          setSelectedPost={setSelectedPost}
-          userLikes={userLikes}
-          setUserLikes={setUserLikes}
-          updatePostInFeed={updatePostInFeed}
-        />
       )}
     </div>
   );
