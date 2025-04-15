@@ -87,7 +87,7 @@ export default function ProfileHeader({
               {uploadingAvatar ? (
                 <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-white"></div>
               ) : (
-                <span className="text-white text-sm">Change</span>
+                <span className="text-white text-sm">Trocar</span>
               )}
             </label>
           )}
@@ -102,19 +102,21 @@ export default function ProfileHeader({
               <span className="font-bold text-gray-900 mr-1">
                 {profile?.totalPosts || 0}
               </span>
-              Postagens
+              {profile?.totalPosts && profile?.totalPosts > 1
+                ? "Postagens"
+                : "Postagem"}
             </div>
             <div>
               <span className="font-bold text-gray-900 mr-1">
                 {followStats.followers}
               </span>
-              Seguidores
+              {followStats.followers > 1 ? "Seguidores" : "Seguidor"}
             </div>
             <div>
               <span className="font-bold text-gray-900 mr-1">
                 {followStats.following}
               </span>
-              Seguindo
+              {followStats.following > 1 ? "Seguindo" : "Seguindo"}
             </div>
           </div>
           {!isCurrentUser && profile && (
