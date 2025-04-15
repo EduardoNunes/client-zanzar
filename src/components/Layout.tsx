@@ -7,6 +7,7 @@ import {
   PlusSquare,
   Send,
   Shield,
+  ShoppingBag,
   StickyNote,
   User,
 } from "lucide-react";
@@ -68,24 +69,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     ...(token
       ? [
           {
-            icon: <StickyNote className="w-8 h-8" />,
-            label: "Notificações",
-            path: "/notifications",
-            onClick: () => {
-              userName && navigate(`/notifications`);
-            },
-          },
-          {
             icon: <User className="w-8 h-8" />,
             label: "Perfil",
             path: `/profile/${userName}`,
             onClick: () => userName && navigate(`/profile/${userName}`),
           },
           {
-            icon: <PlusSquare className="w-8 h-8" />,
-            label: "Publicar",
-            path: "/create",
-            onClick: () => navigate("/create"),
+            icon: <ShoppingBag className="w-8 h-8" />,
+            label: "Loja",
+            path: "/store",
+            onClick: () => navigate("/store"),
           },
           {
             icon: <MessageSquare className="w-8 h-8" />,
@@ -96,12 +89,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             },
           },
           {
+            icon: <StickyNote className="w-8 h-8" />,
+            label: "Notificações",
+            path: "/notifications",
+            onClick: () => {
+              userName && navigate(`/notifications`);
+            },
+          },
+          {
             icon: <Send className="w-8 h-8" />,
             label: "Convites",
             path: "/invites",
             onClick: () => {
               navigate("/invites");
             },
+          },
+          {
+            icon: <PlusSquare className="w-8 h-8" />,
+            label: "Publicar",
+            path: "/create",
+            onClick: () => navigate("/create"),
           },
           ...(isAdmin
             ? [
