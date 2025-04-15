@@ -138,7 +138,7 @@ export default function ImageViewer({
                 setVideoLoading(false);
               }}
             />
-            <div className="absolute bottom-0 w-full z-[70]">
+            <div className="absolute w-full h-full z-[70]">
               <VideoProgressBar videoElement={videoRef.current} />
             </div>
           </div>
