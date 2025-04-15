@@ -47,7 +47,7 @@ export default function ProfileHeader({
     <div className="bg-white rounded-lg shadow p-6 mb-8">
       <div className="flex flex-col md:flex-row items-center gap-6">
         <div className="relative group">
-          <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 relative">
+          <div className="flex justify-center items-center w-32 h-32 rounded-full overflow-hidden bg-gray-200 relative">
             {profile?.avatarUrl ? (
               <>
                 <img
@@ -102,19 +102,19 @@ export default function ProfileHeader({
               <span className="font-bold text-gray-900 mr-1">
                 {profile?.totalPosts || 0}
               </span>
-              Posts
+              Postagens
             </div>
             <div>
               <span className="font-bold text-gray-900 mr-1">
                 {followStats.followers}
               </span>
-              Followers
+              Seguidores
             </div>
             <div>
               <span className="font-bold text-gray-900 mr-1">
                 {followStats.following}
               </span>
-              Following
+              Seguindo
             </div>
           </div>
           {!isCurrentUser && profile && (
