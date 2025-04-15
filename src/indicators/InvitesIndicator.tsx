@@ -72,7 +72,7 @@ export function InvitesIndicator({
       if (setUnreadInvites) {
         setUnreadInvites(data.invites);
       }
-      console.log("DATA", data.invites);
+
       const isMobile = /Mobi|Android/i.test(navigator.userAgent);
       if (isMobile) {
         await Preferences.set({

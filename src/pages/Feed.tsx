@@ -107,7 +107,6 @@ export default function Feed() {
 
   async function fetchPosts() {
     if (!profileId) {
-      console.log("NÂO TEM PROFILE ID");
       navigate("/login");
       return;
     }
