@@ -1,10 +1,7 @@
 import api from "../server/axios";
 import { toast } from "react-toastify";
 
-export const getProfileReq = async (
-  username: string,
-  token: string | null
-) => {
+export const getProfileReq = async (username: string, token: string | null) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -29,6 +26,7 @@ export const getPostsReq = async (
   username: string,
   page: number,
   token: string | null,
+  profileId: string
 ) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
@@ -42,6 +40,7 @@ export const getPostsReq = async (
       },
       params: {
         page: page,
+        profileId: profileId,
       },
     });
 

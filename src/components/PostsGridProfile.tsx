@@ -125,8 +125,9 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
 
   const fetchPosts = async () => {
     try {
-      if (username) {
-        const initialPosts = await getPostsReq(username, 1, token);
+      if (username && profileId) {
+        const initialPosts = await getPostsReq(username, 1, token, profileId);
+
         const processedPosts = initialPosts.map((post: Post) => {
           // verificar se a string contém uma substring
           const isVideo =
@@ -184,8 +185,13 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
 
     setLoadingMore(true);
     try {
-      if (username) {
-        const newPosts = await getPostsReq(username, page + 1, token);
+      if (username && profileId) {
+        const newPosts = await getPostsReq(
+          username,
+          page + 1,
+          token,
+          profileId
+        );
 
         // determina se o post é um vídeo
         const processedPosts = newPosts.map((post: Post) => {
