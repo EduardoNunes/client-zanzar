@@ -1,16 +1,16 @@
-import { CircleAlert, CircleCheckBig, Check } from "lucide-react";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { Preferences } from "@capacitor/preferences";
+import { Check, CircleAlert, CircleCheckBig } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import SinglePostModal from "../components/SinglePostModal";
-import { SOCKET_URL } from "../server/socket";
 import { useGlobalContext } from "../context/globalContext";
-import { Preferences } from "@capacitor/preferences";
 import {
   getNotificationsReq,
   markAllNotificationsAsReadReq,
   markNotificationAsReadReq,
 } from "../requests/notificationsRequests";
+import { SOCKET_URL } from "../server/socket";
 
 interface Notification {
   id: string;
@@ -76,7 +76,6 @@ const NotificationsPage = () => {
     }
   }, [profileId]);
 
-  // Função para carregar mais notificações quando o usuário rolar até o final
   const loadMoreNotifications = async () => {
     if (!profileId || loadingMore || !hasMore) return;
 
@@ -88,7 +87,6 @@ const NotificationsPage = () => {
       setNotifications((prev) => [...prev, ...response.data]);
       setPage(nextPage);
       setHasMore(response.meta.hasMore);
-      setTotalUnreadCount(response.meta.unreadCount);
     } catch (error) {
       console.error("Erro ao carregar mais notificações:", error);
     } finally {
@@ -105,17 +103,24 @@ const NotificationsPage = () => {
         observer.current.disconnect();
       }
 
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          loadMoreNotifications();
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore && !loadingMore) {
+            loadMoreNotifications();
+          }
+        },
+        {
+          root: null,
+          rootMargin: "20px",
+          threshold: 0.1,
         }
-      });
+      );
 
       if (node) {
         observer.current.observe(node);
       }
     },
-    [loading, loadingMore, hasMore]
+    [loading, loadingMore, hasMore, page]
   );
 
   useEffect(() => {
@@ -124,9 +129,8 @@ const NotificationsPage = () => {
         query: { userId: profileId },
       });
 
-      // Ouvir novas notificações
+
       newSocket.on("newNotification", async () => {
-        // Resetar para a primeira página e recarregar
         const response = await getNotificationsReq(profileId, 1);
         setNotifications(response.data);
         setPage(1);
@@ -168,7 +172,6 @@ const NotificationsPage = () => {
     setNotifications(updatedNotifications);
 
     try {
-      // Fazer requisição para marcar como lida
       await markNotificationAsReadReq(notification.id);
 
       // Atualizar o contador de não lidas
@@ -232,7 +235,6 @@ const NotificationsPage = () => {
         localStorage.setItem("unread_notifications", "0");
       }
 
-      // Emitir evento para o socket
       if (socket) {
         socket.emit("markAllAsRead", profileId);
       }
