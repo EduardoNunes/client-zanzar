@@ -1,6 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import {
-  Home,
+  Earth,
   LogIn,
   LogOut,
   MessageSquare,
@@ -60,8 +60,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const menuItems = [
     {
-      icon: <Home className="w-8 h-8" />,
-      label: "Home",
+      icon: <Earth className="w-8 h-8" />,
+      label: "Mundo",
       path: "/",
       onClick: () => navigate("/"),
     },
@@ -69,7 +69,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       ? [
           {
             icon: <StickyNote className="w-8 h-8" />,
-            label: "Notifications",
+            label: "Notificações",
             path: "/notifications",
             onClick: () => {
               userName && navigate(`/notifications`);
@@ -77,19 +77,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           },
           {
             icon: <User className="w-8 h-8" />,
-            label: "Profile",
+            label: "Perfil",
             path: `/profile/${userName}`,
             onClick: () => userName && navigate(`/profile/${userName}`),
           },
           {
             icon: <PlusSquare className="w-8 h-8" />,
-            label: "Create Post",
+            label: "Publicar",
             path: "/create",
             onClick: () => navigate("/create"),
           },
           {
             icon: <MessageSquare className="w-8 h-8" />,
-            label: "Messages",
+            label: "Conversas",
             path: "/messages",
             onClick: () => {
               navigate("/messages");
@@ -97,7 +97,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           },
           {
             icon: <Send className="w-8 h-8" />,
-            label: "Invites",
+            label: "Convites",
             path: "/invites",
             onClick: () => {
               navigate("/invites");
@@ -115,7 +115,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             : []),
           {
             icon: <LogOut className="w-8 h-8" />,
-            label: "Logout",
+            label: "Sair",
             className: "text-red-600",
             onClick: handleLogout,
           },
@@ -135,9 +135,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center">
-              <img src={LogoZanzar} alt="Zanzar Logo" className="w-10 h-10" />
-              <span className="ml-2 font-semibold text-lg">Zanzar</span>
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center space-x-2">
+                <img src={LogoZanzar} alt="Zanzar Logo" className="w-10 h-10" />
+                <span className="ml-2 font-semibold text-lg">Zanzar</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <PlusSquare
+                  className="w-8 h-8 text-gray-600"
+                  onClick={() => navigate("/create")}
+                />
+                <div className="relative">
+                  <MessageSquare
+                    className="w-8 h-8 text-gray-600"
+                    onClick={() => navigate("/messages")}
+                  />
+                  <div className="absolute bottom-5 left-[-8px] rotate-90">
+                    <MessageIndicator
+                      isMenuOpen={isMenuOpen}
+                      unreadChatsCount={unreadChatsCount}
+                      setUnreadChatsCount={setUnreadChatsCount}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-4">
@@ -236,21 +257,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       transform: "rotate(90deg)",
                     }}
                   >
-                    {item.label === "Notifications" && (
+                    {item.label === "Notificações" && (
                       <NotificationIndicator
                         isMenuOpen={isMenuOpen}
                         unreadNotifications={unreadNotifications}
                         setUnreadNotifications={setUnreadNotifications}
                       />
                     )}
-                    {item.label === "Messages" && (
+                    {item.label === "Conversas" && (
                       <MessageIndicator
                         isMenuOpen={isMenuOpen}
                         unreadChatsCount={unreadChatsCount}
                         setUnreadChatsCount={setUnreadChatsCount}
                       />
                     )}
-                    {item.label === "Invites" && (
+                    {item.label === "Convites" && (
                       <InvitesIndicator
                         isMenuOpen={isMenuOpen}
                         unreadInvites={unreadInvites}
