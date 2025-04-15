@@ -95,7 +95,7 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
         </div>
       )}
 
-      <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-300">
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-600">
         <div
           ref={progressRef}
           className="h-full bg-white transition-all duration-100 ease-linear"
