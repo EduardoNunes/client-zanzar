@@ -1,6 +1,13 @@
 import api from "../server/axios";
 import { toast } from "react-toastify";
 
+interface ProductFormData {
+  name: string;
+  description: string;
+  price: string;
+  image_url: string;
+}
+
 export const fetchProductsReq = async () => {
   try {
     const response = await api.get("/products");
@@ -13,9 +20,10 @@ export const fetchProductsReq = async () => {
   }
 };
 
-export const createProductReq = async (product: any) => {
+export const createProductReq = async (data: ProductFormData) => {
   try {
-    const response = await api.post("/products", product);
+    const response = await api.post("/products", data);
+    toast.success("Produto criado com sucesso!");
     return response.data;
   } catch (error: any) {
     const errorMessage =
@@ -25,9 +33,10 @@ export const createProductReq = async (product: any) => {
   }
 };
 
-export const updateProductReq = async (id: string, product: any) => {
+export const updateProductReq = async (id: string, data: ProductFormData) => {
   try {
-    const response = await api.put(`/products/${id}`, product);
+    const response = await api.put(`/products/${id}`, data);
+    toast.success("Produto atualizado com sucesso!");
     return response.data;
   } catch (error: any) {
     const errorMessage =
@@ -40,6 +49,7 @@ export const updateProductReq = async (id: string, product: any) => {
 export const deleteProductReq = async (id: string) => {
   try {
     const response = await api.delete(`/products/${id}`);
+    toast.success("Produto deletado com sucesso!");
     return response.data;
   } catch (error: any) {
     const errorMessage =
