@@ -2,6 +2,8 @@ import React from "react";
 import { Camera, ShoppingBag } from "lucide-react";
 import FollowButton from "./handleFollowToggle";
 import { useNavigate } from "react-router-dom";
+import ConfirmModal from "./ConfirmModal";
+import { useGlobalContext } from "../context/globalContext";
 
 interface Profile {
   profileId: string;
@@ -11,6 +13,8 @@ interface Profile {
   totalPosts: number;
   totalFollowers: number;
   totalFollowing: number;
+  hasUserStore: boolean;
+  isOwnProfile: boolean;
 }
 
 interface ProfileHeaderProps {
@@ -44,12 +48,29 @@ export default function ProfileHeader({
   setIsFollowing,
   setFollowStats,
 }: ProfileHeaderProps) {
+  const { isOpen, setIsOpen } = useGlobalContext();
   const navigate = useNavigate();
-  
+
+  const handleClickUserStore = () => {
+    if (profile?.isOwnProfile && profile?.hasUserStore) {
+      navigate(`/user-store`);
+    } else {
+      setIsOpen(true);
+    }
+  };
+
+  const handleCreateStore = () => {
+    
+  }
+
+
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-8">
       <div className="flex flex-col md:flex-row items-center gap-6">
         <div className="relative group">
+          {isOpen && (
+            <ConfirmModal text="Você ainda não tem loja, deseja criar uma?" onConfirm={handleCreateStore} />
+          )}
           <div className="flex justify-center items-center w-32 h-32 rounded-full overflow-hidden bg-gray-200 relative">
             {profile?.avatarUrl ? (
               <>
@@ -132,8 +153,14 @@ export default function ProfileHeader({
               />
             </div>
           )}
-          <div className="mt-2" onClick={() => navigate("/user-store")}>
-            <ShoppingBag className="w-7 h-7 text-gray-600" />
+          <div className="mt-2" onClick={handleClickUserStore}>
+            <ShoppingBag
+              className={`w-7 h-7 ${
+                profile?.hasUserStore === true
+                  ? "text-gray-600"
+                  : "text-gray-300"
+              }`}
+            />
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { Preferences } from "@capacitor/preferences";
 import Cookies from "js-cookie";
-import React, { ReactNode, createContext, useContext } from "react";
+import React, { ReactNode, createContext, useContext, useState } from "react";
 
 interface GlobalContextType {
   autentication: () => Promise<void>;
@@ -18,6 +18,8 @@ interface GlobalContextType {
   setInvites: (invites: number) => void;
   isLoadingToken: boolean;
   totalUnread: number;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 }
 
 const GlobalContext = createContext<GlobalContextType | null>(null);
@@ -40,6 +42,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [isLoadingToken, setIsLoadingToken] = React.useState<boolean>(true);
   const totalUnread =
     (unreadNotifications || 0) + (unreadChatMessages || 0) + (invites || 0);
+  const [isOpen, setIsOpen] = useState(false);
 
   const autentication = async () => {
     setIsLoadingToken(true);
@@ -115,6 +118,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     setInvites,
     isLoadingToken,
     totalUnread,
+    isOpen,
+    setIsOpen,
   };
 
   return (
