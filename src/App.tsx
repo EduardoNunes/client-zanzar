@@ -15,6 +15,7 @@ import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import AdminRoutes from "./routes/AdminRoutes";
 import StorePage from "./pages/Store";
+import UserStorePage from "./pages/UserStore";
 
 export default function App() {
   const [isTokenLoaded, setIsTokenLoaded] = useState(false);
@@ -142,7 +143,16 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
+            <Route
+              path="/user-store"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <UserStorePage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
