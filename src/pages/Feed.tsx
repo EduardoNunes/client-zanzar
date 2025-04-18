@@ -301,7 +301,7 @@ export default function Feed() {
   if (posts.length === 0) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">No posts yet</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Nenhuma publicação encontrada</h2>
         {!token && (
           <div className="mt-4">
             <button
@@ -429,7 +429,7 @@ export default function Feed() {
                 </div>
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">
-                  No media available
+                  Nenhuma publicação encontrada
                 </div>
               )}
             </div>
@@ -461,7 +461,7 @@ export default function Feed() {
         )}
         {!hasMorePosts && (
           <div className="text-center text-gray-500 py-4">
-            No more posts to load.
+            Sem mais publicações para carregar.
           </div>
         )}
       </div>
