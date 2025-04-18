@@ -1,6 +1,7 @@
 import React from "react";
-import { Camera } from "lucide-react";
+import { Camera, ShoppingBag } from "lucide-react";
 import FollowButton from "./handleFollowToggle";
+import { useNavigate } from "react-router-dom";
 
 interface Profile {
   profileId: string;
@@ -43,6 +44,8 @@ export default function ProfileHeader({
   setIsFollowing,
   setFollowStats,
 }: ProfileHeaderProps) {
+  const navigate = useNavigate();
+  
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-8">
       <div className="flex flex-col md:flex-row items-center gap-6">
@@ -129,6 +132,9 @@ export default function ProfileHeader({
               />
             </div>
           )}
+          <div className="mt-2" onClick={() => navigate("/user-store")}>
+            <ShoppingBag className="w-7 h-7 text-gray-600" />
+          </div>
         </div>
       </div>
     </div>
