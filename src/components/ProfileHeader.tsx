@@ -55,12 +55,14 @@ export default function ProfileHeader({
     if (profile?.isOwnProfile && profile?.hasUserStore) {
       navigate(`/user-store`);
     } else {
+      //abre o ConfirmModal
       setIsOpen(true);
     }
   };
 
   const handleCreateStore = () => {
-    
+    navigate("/create-store");
+    setIsOpen(false)
   }
 
 
@@ -155,11 +157,10 @@ export default function ProfileHeader({
           )}
           <div className="mt-2" onClick={handleClickUserStore}>
             <ShoppingBag
-              className={`w-7 h-7 ${
-                profile?.hasUserStore === true
+              className={`w-7 h-7 ${profile?.hasUserStore === true
                   ? "text-gray-600"
                   : "text-gray-300"
-              }`}
+                }`}
             />
           </div>
         </div>
