@@ -15,6 +15,7 @@ interface Profile {
   totalFollowing: number;
   hasUserStore: boolean;
   isOwnProfile: boolean;
+  storeSlug: string | null;
 }
 
 interface ProfileHeaderProps {
@@ -53,7 +54,7 @@ export default function ProfileHeader({
 
   const handleClickUserStore = () => {
     if (profile?.isOwnProfile && profile?.hasUserStore) {
-      navigate(`/user-store`);
+      navigate(`/user-store/${profile?.storeSlug}`);
     } else {
       //abre o ConfirmModal
       setIsOpen(true);
