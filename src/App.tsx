@@ -145,7 +145,7 @@ export default function App() {
               }
             />
             <Route
-              path="/user-store"
+              path="/user-store/:slug"
               element={
                 <ProtectedRoute>
                   <Layout>
