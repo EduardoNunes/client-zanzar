@@ -16,6 +16,8 @@ interface Profile {
   totalPosts: number;
   totalFollowers: number;
   totalFollowing: number;
+  hasUserStore: boolean;
+  isOwnProfile: boolean;
 }
 
 interface FollowStats {
