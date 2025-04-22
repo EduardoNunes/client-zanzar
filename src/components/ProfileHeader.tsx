@@ -53,7 +53,7 @@ export default function ProfileHeader({
   const navigate = useNavigate();
 
   const handleClickUserStore = () => {
-    if (profile?.isOwnProfile && profile?.hasUserStore) {
+    if (profile?.hasUserStore) {
       navigate(`/user-store/${profile?.storeSlug}`);
     } else {
       //abre o ConfirmModal
