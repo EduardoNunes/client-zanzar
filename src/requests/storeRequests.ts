@@ -19,7 +19,6 @@ interface StoreDataProps {
 }
 
 export const createStoreReq = async (data: StoreDataProps, profileId: string, token: string | null) => {
-  console.log("TOKEN", token)
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -63,7 +62,7 @@ export const getUserStoreReq = async (slug: string, token: string | null, profil
         Authorization: `Bearer ${token}`,
       },
       params: {
-        profileId: profileId,
+        profileId,
       },
     });
 
@@ -83,6 +82,109 @@ export const loadStoreProductsReq = async () => {
   } catch (error: any) {
     const errorMessage =
       error.response?.data?.message || "Erro ao buscar produtos da loja.";
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+export const updateBannerReq = async (
+  profileId: string,
+  file: File,
+  token?: string | null,
+  userStoreId?: string
+) => {
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  if (!userStoreId) {
+    toast.error("Vixe, algo deu errado, entre em contato com um adm.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("profileId", profileId);
+  formData.append("banner", file);
+  formData.append("userStoreId", userStoreId);
+
+  try {
+    const response = await api.post("/store/change-banner", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    toast.success("Banner atualizado com sucesso!");
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Erro ao atualizar o banner.";
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+export const updateLogoReq = async (
+  profileId: string,
+  file: File,
+  token?: string | null,
+  userStoreId?: string
+) => {
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  if (!userStoreId) {
+    toast.error("Vixe, algo deu errado, entre em contato com um adm.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("profileId", profileId);
+  formData.append("logo", file);
+  formData.append("userStoreId", userStoreId);
+
+  try {
+    const response = await api.post("/store/change-logo", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    toast.success("Logo atualizado com sucesso!");
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Erro ao atualizar o logo.";
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+export const favoriteStoreReq = async (profileId: string, storeId: string, token: string | null) => {
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  const payload = { profileId, storeId };
+
+  try {
+    const response = await api.post("/store/to-favorite-store", payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    toast.success("Sucesso!");
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Erro ao favoritar loja.";
     toast.error(errorMessage);
     throw new Error(errorMessage);
   }
