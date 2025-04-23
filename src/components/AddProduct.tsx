@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import React, { useState } from "react";
 import { useGlobalContext } from "../context/globalContext";
 import AddProductVariants from "./AddProductVariants";
+import { toast } from "react-toastify";
 
 type Variant = {
   color: string;
@@ -10,6 +11,7 @@ type Variant = {
   price: number;
   priceWithTax: number;
   images: string[];
+  added: boolean;
 };
 
 export default function AddProduct({ productFeePercentage }: { productFeePercentage?: number }) {
@@ -18,15 +20,18 @@ export default function AddProduct({ productFeePercentage }: { productFeePercent
   const [description, setDescription] = useState("");
   const [categoryName, setCategoryName] = useState("");
   const [variants, setVariants] = useState<Variant[]>([
-    { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [] },
+    { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [], added: false },
   ]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const filteredVariants = variants.filter(
-      (v) => v.color || v.size || v.stock || v.price || v.images?.length
-    );
+
+    const filteredVariants = variants.filter((v) => v.added === true);
+
+    if (filteredVariants.length === 0) {
+      toast.info("Pelo menos uma variante deve ser adicionada");
+      return;
+    }
 
     console.log("Salvando produto:", name, description, categoryName, filteredVariants)
   };

@@ -1,4 +1,5 @@
-import { CopyPlus, Trash2 } from "lucide-react";
+import { CopyPlus, Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 type Variant = {
@@ -8,6 +9,7 @@ type Variant = {
   price: number;
   priceWithTax: number;
   images: string[];
+  added: boolean;
 };
 
 export default function AddProductVariants({
@@ -15,7 +17,8 @@ export default function AddProductVariants({
   setVariants,
   productFeePercentage }:
   { variants: Variant[], setVariants: (variants: Variant[]) => void, productFeePercentage?: number }) {
-console.log("VARIANTS", variants)
+  const [isEdit, setIsEdit] = useState(false)
+  console.log("VARIANTS", variants)
 
   const handleChange = (
     index: number,
@@ -35,40 +38,50 @@ console.log("VARIANTS", variants)
 
   const addVariant = () => {
     for (const variant of variants) {
-      if (variant.stock === 0 || variant.price === 0) {  
-        toast.info("Os campos 'Estoque' e 'Preço base' são obrigatórios")
+      if (variant.stock === 0 || variant.price === 0) {
+        toast.info("Os campos 'Estoque' e 'Preço base' são obrigatórios");
         return;
       }
-      
+
       if (variant.images.length === 0) {
-        toast.info("Adicione pelo menos uma imagem")
+        toast.info("Adicione pelo menos uma imagem");
         return;
       }
     }
 
-    setVariants([
-      ...variants,
-      { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [] },
-    ]);
-  };
+    // Marca a última variante como adicionada
+    const updatedVariants = variants.map((v, idx) => {
+      if (idx === variants.length - 1) {
+        return { ...v, added: true };
+      }
+      return v;
+    });
 
-  const removeVariant = (index: number) => {
-    const updated = variants.filter((_, i) => i !== index);
-    setVariants(updated);
+    setVariants([
+      ...updatedVariants,
+      { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [], added: false },
+    ]);
   };
 
   const CopyVariant = (index: number) => {
     const variantToCopy = variants[index];
-
+  
     const updatedVariants = [...variants];
     const lastIndex = updatedVariants.length - 1;
-
+  
     updatedVariants[lastIndex] = {
       ...variantToCopy,
       images: [...variantToCopy.images], // garante cópia independente
+      added: false, // força o campo added a ser false
     };
-
+  
     setVariants(updatedVariants);
+  };
+  
+
+  const removeVariant = (index: number) => {
+    const updated = variants.filter((_, i) => i !== index);
+    setVariants(updated);
   };
 
   const removeImage = (variantIndex: number, imageIndex: number) => {
@@ -220,16 +233,70 @@ console.log("VARIANTS", variants)
                     />
                   </div>
                 )}
-                <p><strong>Cor:</strong> {variant.color}</p>
-                <p><strong>Tamanho:</strong> {variant.size}</p>
-                <p><strong>Estoque:</strong> {variant.stock}</p>
-                <p><strong>Preço base:</strong> {formatCurrency(priceInReais)}</p>
-                <p><strong>Preço com taxa ({productFeePercentage}%):</strong> {formatCurrency(priceWithTaxInReais)}</p>
+                {isEdit ? (
+                  <>
+                    <div className="mb-2">
+                      <label><strong>Cor:</strong></label>
+                      <input
+                        type="text"
+                        value={variant.color}
+                        onChange={(e) => handleChange(index, 'color', e.target.value)}
+                        className="border rounded px-2 py-1 w-full"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <label><strong>Tamanho:</strong></label>
+                      <input
+                        type="text"
+                        value={variant.size}
+                        onChange={(e) => handleChange(index, 'size', e.target.value)}
+                        className="border rounded px-2 py-1 w-full"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <label><strong>Estoque:</strong></label>
+                      <input
+                        type="number"
+                        value={variant.stock}
+                        onChange={(e) => handleChange(index, 'stock', Number(e.target.value))}
+                        className="border rounded px-2 py-1 w-full"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <label><strong>Preço base:</strong></label>
+                      <input
+                        type="number"
+                        value={variant.price}
+                        onChange={(e) => handleChange(index, 'price', Number(e.target.value))}
+                        className="border rounded px-2 py-1 w-full"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <p><strong>Preço com taxa ({productFeePercentage}%):</strong> {formatCurrency(priceWithTaxInReais)}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsEdit(false)}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    >
+                      Salvar
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p><strong>Cor:</strong> {variant.color}</p>
+                    <p><strong>Tamanho:</strong> {variant.size}</p>
+                    <p><strong>Estoque:</strong> {variant.stock}</p>
+                    <p><strong>Preço base:</strong> {formatCurrency(priceInReais)}</p>
+                    <p><strong>Preço com taxa ({productFeePercentage}%):</strong> {formatCurrency(priceWithTaxInReais)}</p>
+                  </>
+                )}
               </div>
             )}
 
             {variants.length > 1 && !isLast && (
               <button
+                type="button"
                 onClick={() => removeVariant(index)}
                 className="absolute top-2 right-4 text-red-500 font-medium mt-2"
               >
@@ -243,9 +310,18 @@ console.log("VARIANTS", variants)
                   e.stopPropagation();
                   CopyVariant(index);
                 }}
-                className="absolute top-12 right-4 font-medium mt-2"
+                className="absolute top-2 right-14 font-medium mt-2"
               >
                 <CopyPlus size={24} />
+              </button>
+            )}
+            {variants.length > 1 && !isLast && (
+              <button
+                type="button"
+                onClick={() => setIsEdit(true)}
+                className="absolute top-2 right-24 font-medium mt-2"
+              >
+                <Pencil size={24} />
               </button>
             )}
           </div>
