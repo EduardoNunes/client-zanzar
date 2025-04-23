@@ -1,5 +1,5 @@
 import { CopyPlus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { toast } from "react-toastify";
 
 type Variant = {
   color: string;
@@ -10,10 +10,12 @@ type Variant = {
   images: string[];
 };
 
-export default function AddProductVariants({ productFeePercentage }: { productFeePercentage?: number }) {
-  const [variants, setVariants] = useState<Variant[]>([
-    { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [] },
-  ]);
+export default function AddProductVariants({
+  variants,
+  setVariants,
+  productFeePercentage }:
+  { variants: Variant[], setVariants: (variants: Variant[]) => void, productFeePercentage?: number }) {
+console.log("VARIANTS", variants)
 
   const handleChange = (
     index: number,
@@ -32,6 +34,18 @@ export default function AddProductVariants({ productFeePercentage }: { productFe
   };
 
   const addVariant = () => {
+    for (const variant of variants) {
+      if (variant.stock === 0 || variant.price === 0) {  
+        toast.info("Os campos 'Estoque' e 'Preço base' são obrigatórios")
+        return;
+      }
+      
+      if (variant.images.length === 0) {
+        toast.info("Adicione pelo menos uma imagem")
+        return;
+      }
+    }
+
     setVariants([
       ...variants,
       { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [] },
