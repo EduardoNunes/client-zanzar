@@ -17,22 +17,19 @@ export default function AddProductVariants({
   setVariants,
   productFeePercentage }:
   { variants: Variant[], setVariants: (variants: Variant[]) => void, productFeePercentage?: number }) {
-  const [isEdit, setIsEdit] = useState(false)
+  const [editIndex, setEditIndex] = useState<number | null>(null);
   console.log("VARIANTS", variants)
 
   const handleChange = (
     index: number,
     field: keyof Variant,
-    value: string | number | string[]
+    value: Variant[keyof Variant]
   ) => {
     const updatedVariants = [...variants];
-    if (field === "color" || field === "size") {
-      updatedVariants[index][field] = value as string;
-    } else if (field === "stock" || field === "price" || field === "priceWithTax") {
-      updatedVariants[index][field] = value as number;
-    } else if (field === "images") {
-      updatedVariants[index][field] = value as string[];
-    }
+    updatedVariants[index] = {
+      ...updatedVariants[index],
+      [field]: value,
+    };
     setVariants(updatedVariants);
   };
 
@@ -65,19 +62,18 @@ export default function AddProductVariants({
 
   const CopyVariant = (index: number) => {
     const variantToCopy = variants[index];
-  
+
     const updatedVariants = [...variants];
     const lastIndex = updatedVariants.length - 1;
-  
+
     updatedVariants[lastIndex] = {
       ...variantToCopy,
       images: [...variantToCopy.images], // garante cópia independente
       added: false, // força o campo added a ser false
     };
-  
+
     setVariants(updatedVariants);
   };
-  
 
   const removeVariant = (index: number) => {
     const updated = variants.filter((_, i) => i !== index);
@@ -177,8 +173,8 @@ export default function AddProductVariants({
 
                 {/* Input de imagens */}
                 <div className="flex flex-col w-full">
-                  <label className="mb-2 cursor-pointer inline-block bg-blue-600 text-center text-white px-4 py-2 rounded hover:bg-blue-700">
-                    Selecionar imagens
+                  <label className="mb-2 cursor-pointer inline-block bg-green-700 text-center text-white px-4 py-2 rounded hover:bg-green-800">
+                    Selecionar imagens (max-10Mb)
                     <input
                       type="file"
                       accept="image/*"
@@ -233,7 +229,7 @@ export default function AddProductVariants({
                     />
                   </div>
                 )}
-                {isEdit ? (
+                {editIndex === index ? (
                   <>
                     <div className="mb-2">
                       <label><strong>Cor:</strong></label>
@@ -276,8 +272,8 @@ export default function AddProductVariants({
                     </div>
                     <button
                       type="button"
-                      onClick={() => setIsEdit(false)}
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                      onClick={() => setEditIndex(null)}
+                      className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"
                     >
                       Salvar
                     </button>
@@ -318,8 +314,9 @@ export default function AddProductVariants({
             {variants.length > 1 && !isLast && (
               <button
                 type="button"
-                onClick={() => setIsEdit(true)}
+                onClick={() => setEditIndex(index)}
                 className="absolute top-2 right-24 font-medium mt-2"
+                title="Editar variante"
               >
                 <Pencil size={24} />
               </button>
@@ -331,7 +328,7 @@ export default function AddProductVariants({
       <button
         type="button"
         onClick={addVariant}
-        className="mt-2 mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        className="mt-2 mb-6 px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800"
       >
         Adicionar Variante
       </button>
