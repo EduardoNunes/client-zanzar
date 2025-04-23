@@ -1,19 +1,34 @@
 import { X } from "lucide-react";
 import React, { useState } from "react";
-import { toast } from "react-toastify";
 import { useGlobalContext } from "../context/globalContext";
 import AddProductVariants from "./AddProductVariants";
+
+type Variant = {
+  color: string;
+  size: string;
+  stock: number;
+  price: number;
+  priceWithTax: number;
+  images: string[];
+};
 
 export default function AddProduct({ productFeePercentage }: { productFeePercentage?: number }) {
   const { setIsOpen } = useGlobalContext();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [categoryName, setCategoryName] = useState("");
+  const [variants, setVariants] = useState<Variant[]>([
+    { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [] },
+  ]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Submission logic will be implemented later
-    toast.info("Produto salvo (simulado)");
+    
+    const filteredVariants = variants.filter(
+      (v) => v.color || v.size || v.stock || v.price || v.images?.length
+    );
+
+    console.log("Salvando produto:", name, description, categoryName, filteredVariants)
   };
 
   return (
@@ -54,8 +69,8 @@ export default function AddProduct({ productFeePercentage }: { productFeePercent
         />
       </div>
 
-      <AddProductVariants productFeePercentage={productFeePercentage} />
-      
+      <AddProductVariants variants={variants} setVariants={setVariants} productFeePercentage={productFeePercentage} />
+
       <button
         type="submit"
         className="w-full bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
