@@ -263,9 +263,12 @@ export default function AddProductVariants({
                     <div className="mb-2">
                       <label><strong>Preço base:</strong></label>
                       <input
-                        type="number"
-                        value={variant.price}
-                        onChange={(e) => handleChange(index, 'price', Number(e.target.value))}
+                        type="text"
+                        value={formatCurrency(priceInReais)}
+                        onChange={(e) => {
+                          const raw = parseFloat(e.target.value.replace(/[^\d]/g, ""));
+                          handleChange(index, "price", isNaN(raw) ? 0 : raw);
+                        }}
                         className="border rounded px-2 py-1 w-full"
                       />
                     </div>
