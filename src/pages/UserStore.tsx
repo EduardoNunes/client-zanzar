@@ -23,6 +23,7 @@ interface UserStore {
   totalFavoriters: number;
   isFavorited: boolean;
   isOwnStore: boolean;
+  productFeePercentage?: number;
 }
 
 export default function UserStore() {
@@ -126,7 +127,7 @@ export default function UserStore() {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto">
+      <div className="relative max-w-4xl mx-auto">
         {userStore && (
           <UserStoreHeader
             userStore={userStore}
@@ -140,8 +141,9 @@ export default function UserStore() {
             uploadingBanner={uploadingBanner}
             handleBannerChange={handleBannerChange}
           />
-        )}
-        <UserStoreGrid username={slug} />
+        )
+        }
+        <UserStoreGrid username={slug} productFeePercentage={userStore?.productFeePercentage} />
       </div>
     </>
   );
