@@ -1,8 +1,8 @@
 import { X } from "lucide-react";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import { useGlobalContext } from "../context/globalContext";
 import AddProductVariants from "./AddProductVariants";
-import { toast } from "react-toastify";
 
 type Variant = {
   color: string;
@@ -37,52 +37,60 @@ export default function AddProduct({ productFeePercentage }: { productFeePercent
   };
 
   return (
-    <form className="absolute top-0 left-0 max-w-2xl mx-auto bg-white p-6 rounded-lg shadow" onSubmit={handleSubmit}>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Adicionar Produto</h1>
-        <button type="button" onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-gray-700">
-          <X className="w-6 h-6" />
-        </button>
-      </div>
-      <div className="mb-4">
-        <label className="block text-gray-700 font-semibold mb-1">Nome</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          required
-        />
-      </div>
-      <div className="mb-2">
-        <label className="block text-gray-700 font-semibold mb-1">Descrição</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block text-gray-700 font-semibold mb-1">Categoria</label>
-        <input
-          type="text"
-          value={categoryName}
-          onChange={(e) => setCategoryName(e.target.value)}
-          className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          required
-        />
-      </div>
-
-      <AddProductVariants variants={variants} setVariants={setVariants} productFeePercentage={productFeePercentage} />
-
-      <button
-        type="submit"
-        className="w-full bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+    <div className="fixed inset-0 z-50 flex justify-center items-start bg-black/30 p-4">
+      <form
+        className="max-w-2xl w-full bg-white p-6 rounded-lg shadow mt-10 h-[90vh] overflow-y-auto"
+        onSubmit={handleSubmit}
       >
-        Salvar Produto
-      </button>
-    </form>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Adicionar Produto</h1>
+          <button type="button" onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-gray-700">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-1">Nome</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            required
+          />
+        </div>
+
+        <div className="mb-2">
+          <label className="block text-gray-700 font-semibold mb-1">Descrição</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            required
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-1">Categoria</label>
+          <input
+            type="text"
+            value={categoryName}
+            onChange={(e) => setCategoryName(e.target.value)}
+            className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            required
+          />
+        </div>
+
+        <AddProductVariants variants={variants} setVariants={setVariants} productFeePercentage={productFeePercentage} />
+
+        <button
+          type="submit"
+          className="w-full bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        >
+          Salvar Produto
+        </button>
+      </form>
+    </div>
   );
 }
 
