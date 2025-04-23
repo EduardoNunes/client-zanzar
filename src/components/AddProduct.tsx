@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { useGlobalContext } from "../context/globalContext";
 import AddProductVariants from "./AddProductVariants";
+import { addProductReq } from "../requests/productRequests";
 
 type Variant = {
   color: string;
@@ -10,11 +11,12 @@ type Variant = {
   stock: number;
   price: number;
   priceWithTax: number;
-  images: string[];
+  images: File[];
   added: boolean;
 };
 
-export default function AddProduct({ productFeePercentage }: { productFeePercentage?: number }) {
+export default function AddProduct({ productFeePercentage, userStoreId }: { productFeePercentage?: number; userStoreId?: string }) {
+  const { token, profileId } = useGlobalContext();
   const { setIsOpen } = useGlobalContext();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -23,7 +25,7 @@ export default function AddProduct({ productFeePercentage }: { productFeePercent
     { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [], added: false },
   ]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const filteredVariants = variants.filter((v) => v.added === true);
@@ -34,6 +36,15 @@ export default function AddProduct({ productFeePercentage }: { productFeePercent
     }
 
     console.log("Salvando produto:", name, description, categoryName, filteredVariants)
+
+    const addProductResponse = await addProductReq(name, description, categoryName, filteredVariants, token, profileId, userStoreId);
+
+    if (addProductResponse.success) {
+      toast.success("Produto salvo com sucesso");
+      setIsOpen(false);
+    } else {
+      toast.error("Erro ao salvar produto");
+    }
   };
 
   return (
