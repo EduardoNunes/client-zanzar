@@ -1,9 +1,9 @@
 import { X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useGlobalContext } from "../context/globalContext";
 import AddProductVariants from "./AddProductVariants";
-import { addProductReq } from "../requests/productRequests";
+import { addProductReq, loadCategoriesReq, loadSubCategoriesReq, createCategoryReq, createSubCategoryReq } from "../requests/productRequests";
 
 type Variant = {
   color: string;
@@ -20,13 +20,83 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
   const { setIsOpen } = useGlobalContext();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [categoryName, setCategoryName] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [newSubCategory, setNewSubCategory] = useState("");
+  const [subCategories, setSubCategories] = useState<any[]>([]);
+  const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [variants, setVariants] = useState<Variant[]>([
     { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [], added: false },
   ]);
 
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    profileId &&
+      loadCategoriesReq(profileId, token).then((res: any) => {
+        setCategories(res);
+      });
+  };
+
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    fetchSubCategories(categoryId);
+  }
+
+  const handleCreateCategory = async (newCategory: string) => {
+    if (!newCategory) {
+      toast.info("Por favor, insira uma nova categoria.");
+      return;
+    }
+    profileId &&
+      createCategoryReq(newCategory, profileId, token).then(() => {
+        fetchCategories();
+        toast.success("Categoria criada com sucesso!");
+        setNewCategory("");
+      });
+  };
+
+  const fetchSubCategories = async (categoryId: string) => {
+    profileId &&
+      loadSubCategoriesReq(profileId, token, categoryId).then((res: any) => {
+        setSubCategories(res);
+      });
+  };
+
+  const handleCreateSubCategory = async (newSubCategory: string) => {
+    if (!newSubCategory) {
+      toast.info("Por favor, insira uma nova subcategoria.");
+      return;
+    }
+
+    profileId &&
+      createSubCategoryReq(newSubCategory, selectedCategory, profileId, token).then(() => {
+        fetchSubCategories(selectedCategory);
+        toast.success("Subcategoria criada com sucesso!");
+        setNewSubCategory("");
+      });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!name || !description) {
+      toast.info("Por favor, informa o nome e a descrição do produto");
+      return;
+    }
+
+    if (!selectedCategory) {
+      toast.info("Por favor, selecione uma categoria");
+      return;
+    }
+
+    if (!selectedSubCategory) {
+      toast.info("Por favor, selecione uma subcategoria");
+      return;
+    }
 
     const filteredVariants = variants.filter((v) => v.added === true);
 
@@ -35,16 +105,16 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
       return;
     }
 
-    console.log("Salvando produto:", name, description, categoryName, filteredVariants)
-
-    const addProductResponse = await addProductReq(name, description, categoryName, filteredVariants, token, profileId, userStoreId);
-
-    if (addProductResponse.success) {
-      toast.success("Produto salvo com sucesso");
-      setIsOpen(false);
-    } else {
-      toast.error("Erro ao salvar produto");
-    }
+    await addProductReq(
+      name,
+      description,
+      selectedCategory,
+      selectedSubCategory,
+      filteredVariants,
+      token,
+      profileId,
+      userStoreId
+    );
   };
 
   return (
@@ -61,14 +131,126 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-1">Nome</label>
+          <label className="block text-gray-700 font-semibold mb-1">Produto</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent h-[40px]"
             required
           />
+        </div>
+
+        <div>
+          <label className="block text-gray-700 text-sm font-semibold mb-2">
+            Selecionar categoria
+          </label>
+          <select
+            value={selectedCategory}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            className="w-full px-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent h-[40px]"
+          >
+            <option
+              value=""
+              disabled
+              className="text-gray-700 text-sm font-semibold"
+            >
+              Selecione uma categoria
+            </option>
+            {categories.length > 0 ? (
+              categories.map((category) => (
+                <option
+                  key={category.id}
+                  value={category.id}
+                  className="text-gray-700 text-sm font-semibold hover:bg-gray-50"
+                >
+                  {category.name}
+                </option>
+              ))
+            ) : (
+              <option
+                value=""
+                disabled
+                className="text-gray-700 text-sm font-semibold"
+              >
+                Nenhuma categoria encontrada
+              </option>
+            )}
+          </select>
+        </div>
+        <div className="flex flex-col items-end">
+          <label className="block w-full text-gray-700 text-sm font-semibold my-2">
+            Criar categoria
+          </label>
+          <input
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="Nova categoria"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent h-[40px]"
+          />
+          <button
+            type="button"
+            onClick={() => handleCreateCategory(newCategory)}
+            className="flex-1 w-1/2 h-10 bg-green-700 my-4 text-white px-4 py-2 rounded-lg hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Criar categoria
+          </button>
+        </div>
+
+        <div>
+          <label className="block text-gray-700 text-sm font-semibold mb-2">
+            Selecionar subcategoria
+          </label>
+          <select
+            value={selectedSubCategory}
+            onChange={(e) => setSelectedSubCategory(e.target.value)}
+            className="w-full px-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent h-[40px]"
+          >
+            <option
+              value=""
+              disabled
+              className="text-gray-700 text-sm font-semibold"
+            >
+              Selecione uma subcategoria
+            </option>
+            {subCategories.length > 0 ? (
+              subCategories.map((subCategory) => (
+                <option
+                  key={subCategory.id}
+                  value={subCategory.id}
+                  className="text-gray-700 text-sm font-semibold hover:bg-gray-50"
+                >
+                  {subCategory.name}
+                </option>
+              ))
+            ) : (
+              <option
+                value=""
+                disabled
+                className="text-gray-700 text-sm font-semibold"
+              >
+                Nenhuma subcategoria encontrada
+              </option>
+            )}
+          </select>
+        </div>
+        <div className="flex flex-col items-end">
+          <label className="block w-full text-gray-700 text-sm font-semibold my-2">
+            Criar subcategoria
+          </label>
+          <input
+            value={newSubCategory}
+            onChange={(e) => setNewSubCategory(e.target.value)}
+            placeholder="Nova subcategoria"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent h-[40px]"
+          />
+          <button
+            type="button"
+            onClick={() => handleCreateSubCategory(newSubCategory)}
+            className="flex-1 w-1/2 h-10 bg-green-700 my-4 text-white px-4 py-2 rounded-lg hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Criar subcategoria
+          </button>
         </div>
 
         <div className="mb-2">
@@ -76,17 +258,6 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            required
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-1">Categoria</label>
-          <input
-            type="text"
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
             className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             required
           />
