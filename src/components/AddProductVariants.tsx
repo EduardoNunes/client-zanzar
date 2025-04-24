@@ -230,7 +230,6 @@ export default function AddProductVariants({
                       src={preview[index][0]}
                       alt="Variante"
                       className="w-20 h-20 rounded object-cover border cursor-pointer"
-                      onClick={() => window.open(preview[index][0], "_blank")}
                     />
                   </div>
                 )}
