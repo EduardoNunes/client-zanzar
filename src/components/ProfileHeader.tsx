@@ -106,7 +106,7 @@ export default function ProfileHeader({
             <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
               <input
                 type="file"
-                accept="image/*"
+                accept="image/png, image/jpg, image/jpeg"
                 onChange={handleAvatarChange}
                 className="hidden"
                 disabled={uploadingAvatar}

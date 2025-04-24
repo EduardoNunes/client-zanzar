@@ -311,7 +311,7 @@ export const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
             <div className="flex items-center space-x-4">
               <input
                 type="file"
-                accept="image/*,video/*"
+                accept="image/*, video/*"
                 onChange={handleFileUpload}
                 className="hidden"
                 id="fileUpload"
