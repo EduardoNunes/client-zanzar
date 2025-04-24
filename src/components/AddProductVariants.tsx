@@ -275,13 +275,15 @@ export default function AddProductVariants({
                     <div className="mb-2">
                       <p><strong>Preço com taxa ({productFeePercentage}%):</strong> {formatCurrency(priceWithTaxInReais)}</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setEditIndex(null)}
-                      className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"
-                    >
-                      Salvar
-                    </button>
+                    <div className="flex justify-end w-full">
+                      <button
+                        type="button"
+                        onClick={() => setEditIndex(null)}
+                        className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"
+                      >
+                        Salvar
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <>
