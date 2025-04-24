@@ -14,22 +14,26 @@ type FilteredVariants = {
 export const addProductReq = async (
   name: string | null,
   description: string | null,
-  categoryName: string,
+  selectedCategory: string,
+  selectedSubCategory: string,
   filteredVariants: FilteredVariants[],
   token: string | null,
   profileId: string | null,
   userStoreId: string | undefined
 ) => {
-  if (!token) {
-    toast.error("Access token not found.");
+  if (!userStoreId) {
+    toast.error("Ops, algo deu errado, entre em contato com um adm.");
     return null;
   }
+
+  const productLoadingToast = toast.loading("Criando produto, aguarde...");
 
   const formData = new FormData();
 
   formData.append("name", name || "");
   formData.append("description", description || "");
-  formData.append("categoryName", categoryName);
+  formData.append("selectedCategory", selectedCategory || "");
+  formData.append("selectedSubCategory", selectedSubCategory || "");
   formData.append("profileId", profileId || "");
   formData.append("userStoreId", userStoreId || "");
 
@@ -58,6 +62,7 @@ export const addProductReq = async (
       },
     });
 
+    toast.success("Produto criado com sucesso!");
     return response.data;
   } catch (error: any) {
     console.error("Error sending product data:", error);
@@ -65,6 +70,129 @@ export const addProductReq = async (
       error.response?.data?.message || "Error sending product information"
     );
     return null;
+  } finally {
+    toast.dismiss(productLoadingToast);
+  }
+};
+
+export const loadCategoriesReq = async (
+  profileId: string,
+  token: string | null
+) => {
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.get("/product/load-categories", {
+      params: { profileId },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      "Erro ao carregar categorias. Tente novamente.";
+
+    console.error("Error:", error);
+    throw new Error(errorMessage);
+  }
+};
+
+export const createCategoryReq = async (
+  newCategory: string,
+  profileId: string,
+  token: string | null
+) => {
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.post(
+      "/product/create-category",
+      { newCategory, profileId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      "Erro ao criar categoria. Tente novamente.";
+    toast.error(errorMessage);
+    console.error("Error:", error);
+    throw new Error(errorMessage);
+  }
+};
+
+export const loadSubCategoriesReq = async (
+  profileId: string,
+  token: string | null,
+  categoryId: string
+) => {
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.get("/product/load-sub-categories", {
+      params: { profileId, categoryId },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      "Erro ao carregar subcategorias. Tente novamente.";
+
+    console.error("Error:", error);
+    throw new Error(errorMessage);
+  }
+};
+
+export const createSubCategoryReq = async (
+  newSubCategory: string,
+  categoryId: string,
+  profileId: string,
+  token: string | null,
+) => {
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.post(
+      "/product/create-sub-category",
+      { newSubCategory, categoryId, profileId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      "Erro ao criar a subcategoria. Tente novamente.";
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
   }
 };
 
