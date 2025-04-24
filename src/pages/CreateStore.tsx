@@ -38,22 +38,19 @@ export default function CreateStore() {
     } else {
       setLogo(null);
       setLogoPreview("");
-      toast.info("O logo deve ser um arquivo PNG com tamanho máximo de 10MB.");
+      toast.info("O logo deve ser um arquivo PNG, JPG ou JPEG com tamanho máximo de 10MB.");
     }
   };
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (
-      file &&
-      ["image/png", "image/jpg", "image/jpeg"].includes(file.type) &&
-      file.size <= MAX_IMAGE_SIZE
-    ) {
+    if (file && ["image/png", "image/jpg", "image/jpeg"].includes(file.type) && file.size <= MAX_IMAGE_SIZE) {
       setBanner(file);
       setBannerPreview(URL.createObjectURL(file));
     } else {
       setBanner(null);
-      toast.info("O banner deve ser PNG, JPG ou JPEG.");
+      setBannerPreview("");
+      toast.info("O banner deve ser PNG, JPG ou JPEG com até 10MB.");
     }
   };
 
@@ -109,7 +106,7 @@ export default function CreateStore() {
   };
 
   return (
-    <div className="flex justify-center items-center bg-gray-50">
+    <div className="flex justify-center items-center bg-gray-50 min-h-screen">
       <form
         className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg"
         onSubmit={handleSubmit}
@@ -117,6 +114,7 @@ export default function CreateStore() {
         <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
           Criando Loja
         </h2>
+
         <div className="mb-4">
           <label className="block text-gray-700 font-semibold mb-2">Nome</label>
           <input
@@ -127,6 +125,7 @@ export default function CreateStore() {
             required
           />
         </div>
+
         <div className="mb-4">
           <label className="block text-gray-700 font-semibold mb-2">Descrição</label>
           <textarea
@@ -137,6 +136,8 @@ export default function CreateStore() {
             required
           />
         </div>
+
+        {/* Endereço */}
         <div className="mb-4 mt-8">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
@@ -174,44 +175,27 @@ export default function CreateStore() {
           )}
         </div>
 
+        {/* Logo */}
         <div className="flex flex-col items-center justify-center w-full mb-4">
           <h1 className="block w-full text-gray-700 font-semibold mb-2">Logo da loja</h1>
-          <label
-            className={`w-48 h-48 border-2 border-dashed rounded-lg cursor-pointer
-                ${logoPreview
-                ? "border-transparent"
-                : "border-gray-300 hover:border-indigo-400"
-              }
-                transition-colors duration-200 ease-in-out
-                flex flex-col items-center justify-center relative overflow-hidden`}
-          >
+          <label className={`w-48 h-48 border-2 border-dashed rounded-lg cursor-pointer ${logoPreview ? "border-transparent" : "border-gray-300 hover:border-indigo-400"} transition-colors duration-200 ease-in-out flex flex-col items-center justify-center relative overflow-hidden`}>
             {logoPreview ? (
-              <img
-                src={logoPreview}
-                alt="Preview"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
+              <img src={logoPreview} alt="Preview do Logo" className="absolute inset-0 w-full h-full object-cover" />
             ) : (
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <Upload className="w-12 h-12 text-gray-400 mb-3" />
                 <p className="mb-2 text-sm text-gray-500">
-                  <span className="font-semibold">
-                    Clique para fazer upload
-                  </span>
+                  <span className="font-semibold">Clique para fazer upload</span>
                 </p>
-                <p className="text-xs text-gray-500">
-                  PNG, JPG ou JPEG (Máx. 10MB)
-                </p>
+                <p className="text-xs text-gray-500">PNG, JPG ou JPEG (Máx. 10MB)</p>
               </div>
             )}
-
             <input
               type="file"
               accept="image/png, image/jpg, image/jpeg"
               onChange={handleLogoChange}
-              className="hidden"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
-
             {logoPreview && (
               <button
                 type="button"
@@ -226,47 +210,29 @@ export default function CreateStore() {
             )}
           </label>
         </div>
+
+        {/* Banner */}
         <div className="flex flex-col items-center justify-center w-full mb-4">
           <h1 className="block w-full text-gray-700 font-semibold mb-2">Banner da loja</h1>
-          <label
-            className={`w-full h-48 border-2 border-dashed rounded-lg cursor-pointer
-                ${bannerPreview
-                ? "border-transparent"
-                : "border-gray-300 hover:border-indigo-400"
-              }
-                transition-colors duration-200 ease-in-out
-                flex flex-col items-center justify-center relative overflow-hidden`}
-          >
+          <label className={`w-full h-48 border-2 border-dashed rounded-lg cursor-pointer ${bannerPreview ? "border-transparent" : "border-gray-300 hover:border-indigo-400"} transition-colors duration-200 ease-in-out flex flex-col items-center justify-center relative overflow-hidden`}>
             {bannerPreview ? (
-              <img
-                src={bannerPreview}
-                alt="Preview"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
+              <img src={bannerPreview} alt="Preview do Banner" className="absolute inset-0 w-full h-full object-cover" />
             ) : (
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <Upload className="w-12 h-12 text-gray-400 mb-3" />
                 <p className="mb-2 text-sm text-gray-500">
-                  <span className="font-semibold">
-                    Clique para fazer upload
-                  </span>
+                  <span className="font-semibold">Clique para fazer upload</span>
                 </p>
-                <p className="text-xs text-gray-500">
-                  PNG, JPG ou JPEG (Máx. 10MB)
-                </p>
-                <p className="text-xs text-gray-500">
-                  Formato ideal da imagem é 16:9
-                </p>
+                <p className="text-xs text-gray-500">PNG, JPG ou JPEG (Máx. 10MB)</p>
+                <p className="text-xs text-gray-500">Formato ideal da imagem é 16:9</p>
               </div>
             )}
-
             <input
               type="file"
               accept="image/png, image/jpg, image/jpeg"
               onChange={handleBannerChange}
-              className="hidden"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
-
             {bannerPreview && (
               <button
                 type="button"
@@ -281,6 +247,8 @@ export default function CreateStore() {
             )}
           </label>
         </div>
+
+        {/* Botão */}
         <button
           type="submit"
           className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition-colors"
