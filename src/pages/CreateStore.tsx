@@ -13,8 +13,8 @@ export default function CreateStore() {
   const [description, setDescription] = useState("");
   const [logo, setLogo] = useState<File | null>(null);
   const [banner, setBanner] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string>("");
-  const [bannerPreview, setBannerPreview] = useState<string>("");
+  let logoPreview = ""
+  let bannerPreview = ""
   const [hasAddress, setHasAddress] = useState(false);
   const [address, setAddress] = useState({
     street: "",
@@ -34,15 +34,11 @@ export default function CreateStore() {
     const file = e.target.files?.[0];
     if (file && ["image/png", "image/jpg", "image/jpeg"].includes(file.type) && file.size <= MAX_IMAGE_SIZE) {
       setLogo(file);
-  
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      const imageURL = URL.createObjectURL(file);
+      logoPreview = imageURL;
     } else {
       setLogo(null);
-      setLogoPreview("");
+      logoPreview = "";
       toast.info("O logo deve ser um arquivo PNG, JPG ou JPEG com tamanho máximo de 10MB.");
     }
   };
@@ -51,15 +47,11 @@ export default function CreateStore() {
     const file = e.target.files?.[0];
     if (file && ["image/png", "image/jpg", "image/jpeg"].includes(file.type) && file.size <= MAX_IMAGE_SIZE) {
       setBanner(file);
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setBannerPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      const imageURL = URL.createObjectURL(file);
+      bannerPreview = imageURL;
     } else {
       setBanner(null);
-      setBannerPreview("");
+      bannerPreview = "";
       toast.info("O banner deve ser PNG, JPG ou JPEG com até 10MB.");
     }
   };
@@ -211,7 +203,7 @@ export default function CreateStore() {
                 type="button"
                 onClick={() => {
                   setLogo(null);
-                  setLogoPreview("");
+                  logoPreview = "";
                 }}
                 className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 z-20"
               >
@@ -248,7 +240,7 @@ export default function CreateStore() {
                 type="button"
                 onClick={() => {
                   setBanner(null);
-                  setBannerPreview("");
+                  bannerPreview = "";
                 }}
                 className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 z-20"
               >
