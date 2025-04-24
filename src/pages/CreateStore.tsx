@@ -33,10 +33,13 @@ export default function CreateStore() {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && ["image/png", "image/jpg", "image/jpeg"].includes(file.type) && file.size <= MAX_IMAGE_SIZE) {
-      if (logoPreview) URL.revokeObjectURL(logoPreview); // Limpa anterior
-      const imageURL = URL.createObjectURL(file);
       setLogo(file);
-      setLogoPreview(imageURL);
+  
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     } else {
       setLogo(null);
       setLogoPreview("");
@@ -47,10 +50,13 @@ export default function CreateStore() {
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && ["image/png", "image/jpg", "image/jpeg"].includes(file.type) && file.size <= MAX_IMAGE_SIZE) {
-      if (bannerPreview) URL.revokeObjectURL(bannerPreview); // Limpa anterior
-      const imageURL = URL.createObjectURL(file);
       setBanner(file);
-      setBannerPreview(imageURL);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBannerPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     } else {
       setBanner(null);
       setBannerPreview("");
