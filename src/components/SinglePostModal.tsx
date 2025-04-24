@@ -2,7 +2,7 @@ import { formatDistanceToNow } from "date-fns";
 import { CircleUserRound, Loader2, LogIn, MessageCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getSinglePostReq } from "../requests/SinglePostRequests";
+import { getSinglePostReq } from "../requests/singlePostRequests";
 import CommentModal from "./CommentsModal";
 import LikeButton from "./LikeButton";
 import { useGlobalContext } from "../context/globalContext";
