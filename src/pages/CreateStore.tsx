@@ -34,7 +34,8 @@ export default function CreateStore() {
     const file = e.target.files?.[0];
     if (file && ["image/png", "image/jpg", "image/jpeg"].includes(file.type) && file.size <= MAX_IMAGE_SIZE) {
       setLogo(file);
-      setLogoPreview(URL.createObjectURL(file));
+      const imageURL = URL.createObjectURL(file);
+      setLogoPreview(imageURL);
     } else {
       setLogo(null);
       setLogoPreview("");
@@ -46,7 +47,8 @@ export default function CreateStore() {
     const file = e.target.files?.[0];
     if (file && ["image/png", "image/jpg", "image/jpeg"].includes(file.type) && file.size <= MAX_IMAGE_SIZE) {
       setBanner(file);
-      setBannerPreview(URL.createObjectURL(file));
+      const imageURL = URL.createObjectURL(file);
+      setBannerPreview(imageURL);
     } else {
       setBanner(null);
       setBannerPreview("");
