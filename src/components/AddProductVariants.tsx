@@ -46,6 +46,16 @@ export default function AddProductVariants({
         toast.info("Adicione pelo menos uma imagem");
         return;
       }
+
+      const hasLargeImage = variant.images.some((img) => {
+        if (typeof img === "string") return false; // ignora imagens que já são URLs
+        return img.size > MAX_IMAGE_SIZE;
+      });
+
+      if (hasLargeImage) {
+        toast.info("Uma ou mais imagens excedem o tamanho máximo de 10MB.");
+        return;
+      }
     }
 
     // Marca a última variante como adicionada
@@ -177,8 +187,6 @@ export default function AddProductVariants({
                 <div className="flex flex-col w-full">
                   <label className="mb-2 cursor-pointer inline-block bg-green-700 text-center text-white px-4 py-2 rounded hover:bg-green-800">
                     Selecionar imagens (max-10Mb)
-                    const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
-
                     <input
                       type="file"
                       accept="image/png, image/jpg, image/jpeg"
@@ -187,16 +195,7 @@ export default function AddProductVariants({
                         const files = e.target.files;
                         if (!files) return;
 
-                        const newFiles = Array.from(files)
-                          .filter((file) => {
-                            if (file.size > MAX_IMAGE_SIZE) {
-                              toast.info(`A imagem ${file.name} excede o tamanho máximo de 10MB.`);
-                              return false;
-                            }
-                            return true;
-                          })
-                          .slice(0, 3); // limite de 3 imagens
-
+                        const newFiles = Array.from(files).slice(0, 3); // limite de 3 imagens
                         const currentImages = variant.images || [];
                         const updatedImages = [...currentImages, ...newFiles].slice(0, 3);
 
@@ -212,6 +211,7 @@ export default function AddProductVariants({
                       className="hidden"
                     />
                   </label>
+
                   <div className="flex gap-2 mt-2 flex-wrap">
                     {(preview[index] || []).map((imageUrl, i) => (
                       <div key={i} className="relative">
