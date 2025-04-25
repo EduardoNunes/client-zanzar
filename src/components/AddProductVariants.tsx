@@ -65,27 +65,17 @@ export default function AddProductVariants({
     const variantToCopy = variants[index];
   
     const updatedVariants = [...variants];
-    const lastIndex = updatedVariants.length - 1;  
-    
-    const newBlobImages = variantToCopy.images.map(image => {
-      if (typeof image !== 'string') {
-        return URL.createObjectURL(image); 
-      }
-      return image; 
-    });
-
-    console.log("NEWBLOBS", newBlobImages)
+    const lastIndex = updatedVariants.length - 1;
   
     updatedVariants[lastIndex] = {
       ...variantToCopy,
-      images: [...variantToCopy.images], // garante cópia independente das imagens
-      blobImages: newBlobImages, // gera novos blobs para as imagens
+      images: [...variantToCopy.images],
+      blobImages: [...variantToCopy.blobImages],
       added: false, // força o campo added a ser false
     };
   
     setVariants(updatedVariants);
   };
-  
   
 
   const removeVariant = (index: number) => {
@@ -224,11 +214,12 @@ export default function AddProductVariants({
 
                   <div className="flex gap-2 mt-2 flex-wrap">
                     {(variant.blobImages || []).map((blob, i) => {
-                      console.log("BLOB", blob)
+                      const imageUrl = blob;
+
                       return (
                         <div key={i} className="relative">
                           <img
-                            src={blob}
+                            src={imageUrl}
                             alt={`preview-${i}`}
                             className="w-16 h-16 object-cover rounded border"
                           />
