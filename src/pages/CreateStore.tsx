@@ -15,29 +15,6 @@ export default function CreateStore() {
   const [banner, setBanner] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>("");
   const [bannerPreview, setBannerPreview] = useState<string>("");
-
-  // Robust preview logic for logo
-  useEffect(() => {
-    if (!logo) {
-      setLogoPreview("");
-      return;
-    }
-    const objectUrl = URL.createObjectURL(logo);
-    setLogoPreview(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [logo]);
-
-  // Robust preview logic for banner
-  useEffect(() => {
-    if (!banner) {
-      setBannerPreview("");
-      return;
-    }
-    const objectUrl = URL.createObjectURL(banner);
-    setBannerPreview(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [banner]);
-
   const [hasAddress, setHasAddress] = useState(false);
   const [address, setAddress] = useState({
     street: "",
@@ -56,9 +33,12 @@ export default function CreateStore() {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && ["image/png", "image/jpg", "image/jpeg"].includes(file.type) && file.size <= MAX_IMAGE_SIZE) {
-      setLogo(file);
+      const objectURL = URL.createObjectURL(file);
+      setLogoPreview(objectURL);
+      setLogo(file);      
     } else {
       setLogo(null);
+      setLogoPreview("");
       toast.info("O logo deve ser um arquivo PNG, JPG ou JPEG com tamanho máximo de 10MB.");
     }
   };
@@ -66,9 +46,12 @@ export default function CreateStore() {
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && ["image/png", "image/jpg", "image/jpeg"].includes(file.type) && file.size <= MAX_IMAGE_SIZE) {
-      setBanner(file);
+      const objectURL = URL.createObjectURL(file);
+      setBannerPreview(objectURL);
+      setBanner(file);      
     } else {
       setBanner(null);
+      setBannerPreview("");
       toast.info("O banner deve ser PNG, JPG ou JPEG com até 10MB.");
     }
   };
@@ -197,11 +180,11 @@ export default function CreateStore() {
         {/* Logo */}
         <div className="flex flex-col items-center justify-center w-full mb-4">
           <h1 className="block w-full text-gray-700 font-semibold mb-2">Logo da loja</h1>
-          <div className="relative w-48 h-48 border-2 border-dashed rounded-lg transition-colors duration-200 ease-in-out flex flex-col items-center justify-center overflow-hidden" style={{ borderColor: logoPreview ? 'transparent' : undefined }}>
+          <label className={`w-48 h-48 border-2 border-dashed rounded-lg cursor-pointer ${logoPreview ? "border-transparent" : "border-gray-300 hover:border-indigo-400"} transition-colors duration-200 ease-in-out flex flex-col items-center justify-center relative overflow-hidden`}>
             {logoPreview ? (
-              <img src={logoPreview} alt="Preview do Logo" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
+              <img src={logoPreview} alt="Preview do Logo" className="absolute inset-0 w-full h-full object-cover" />
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center pt-5 pb-6">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <Upload className="w-12 h-12 text-gray-400 mb-3" />
                 <p className="mb-2 text-sm text-gray-500">
                   <span className="font-semibold">Clique para fazer upload</span>
@@ -213,8 +196,7 @@ export default function CreateStore() {
               type="file"
               accept="image/png, image/jpg, image/jpeg"
               onChange={handleLogoChange}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              style={{ zIndex: 10 }}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
             {logoPreview && (
               <button
@@ -228,17 +210,17 @@ export default function CreateStore() {
                 <Trash2 className="w-5 h-5" />
               </button>
             )}
-          </div>
+          </label>
         </div>
 
         {/* Banner */}
         <div className="flex flex-col items-center justify-center w-full mb-4">
           <h1 className="block w-full text-gray-700 font-semibold mb-2">Banner da loja</h1>
-          <div className="relative w-full h-48 border-2 border-dashed rounded-lg transition-colors duration-200 ease-in-out flex flex-col items-center justify-center overflow-hidden" style={{ borderColor: bannerPreview ? 'transparent' : undefined }}>
+          <label className={`w-full h-48 border-2 border-dashed rounded-lg cursor-pointer ${bannerPreview ? "border-transparent" : "border-gray-300 hover:border-indigo-400"} transition-colors duration-200 ease-in-out flex flex-col items-center justify-center relative overflow-hidden`}>
             {bannerPreview ? (
-              <img src={bannerPreview} alt="Preview do Banner" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
+              <img src={bannerPreview} alt="Preview do Banner" className="absolute inset-0 w-full h-full object-cover" />
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center pt-5 pb-6">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <Upload className="w-12 h-12 text-gray-400 mb-3" />
                 <p className="mb-2 text-sm text-gray-500">
                   <span className="font-semibold">Clique para fazer upload</span>
@@ -251,8 +233,7 @@ export default function CreateStore() {
               type="file"
               accept="image/png, image/jpg, image/jpeg"
               onChange={handleBannerChange}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              style={{ zIndex: 10 }}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
             {bannerPreview && (
               <button
@@ -266,7 +247,7 @@ export default function CreateStore() {
                 <Trash2 className="w-5 h-5" />
               </button>
             )}
-          </div>
+          </label>
         </div>
 
         {/* Botão */}
