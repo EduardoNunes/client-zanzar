@@ -62,24 +62,29 @@ export default function AddProductVariants({
 
   const CopyVariant = (index: number) => {
     const variantToCopy = variants[index];
-
+  
     const updatedVariants = [...variants];
     const lastIndex = updatedVariants.length - 1;
-
+  
     updatedVariants[lastIndex] = {
       ...variantToCopy,
-      images: [...variantToCopy.images], // garante cópia independente
-      added: false, // força o campo added a ser false
+      images: [...variantToCopy.images],
+      added: false,
     };
-
-    setVariants(updatedVariants);
-
-    // Atualiza o preview das imagens para o novo variant copiado
-    const previews = (variantToCopy.images || []).map((file) =>
+  
+    // Garante que preview será gerado corretamente, independente do tipo (File ou string)
+    const newPreview = variantToCopy.images.map((file) =>
       typeof file === "string" ? file : URL.createObjectURL(file)
     );
-    setPreview((prev) => ({ ...prev, [lastIndex]: previews }));
+  
+    setPreview((prev) => ({
+      ...prev,
+      [lastIndex]: newPreview,
+    }));
+  
+    setVariants(updatedVariants);
   };
+  
 
   const removeVariant = (index: number) => {
     const updated = variants.filter((_, i) => i !== index);
