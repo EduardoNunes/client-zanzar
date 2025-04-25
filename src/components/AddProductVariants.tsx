@@ -1,5 +1,5 @@
 import { CopyPlus, Pencil, Trash2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 type Variant = {
@@ -19,18 +19,6 @@ export default function AddProductVariants({
   { variants: Variant[], setVariants: (variants: Variant[]) => void, productFeePercentage?: number }) {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [preview, setPreview] = useState<{ [index: number]: string[] }>({});
-
-  // Sempre sincroniza o preview com as imagens das variantes
-  useEffect(() => {
-    const newPreview: { [index: number]: string[] } = {};
-    variants.forEach((variant, idx) => {
-      newPreview[idx] = (variant.images || []).map((file) =>
-        typeof file === "string" ? file : URL.createObjectURL(file)
-      );
-    });
-    setPreview(newPreview);
-    // Opcional: aqui poderíamos revogar os URLs antigos para evitar memory leak
-  }, [variants]);
 
   const handleChange = (
     index: number,
@@ -85,9 +73,13 @@ export default function AddProductVariants({
     };
 
     setVariants(updatedVariants);
-    // Não precisa mais atualizar setPreview aqui, pois o useEffect vai cuidar disso
-  };
 
+    // Atualiza o preview das imagens para o novo variant copiado
+    const previews = (variantToCopy.images || []).map((file) =>
+      typeof file === "string" ? file : URL.createObjectURL(file)
+    );
+    setPreview((prev) => ({ ...prev, [lastIndex]: previews }));
+  };
 
   const removeVariant = (index: number) => {
     const updated = variants.filter((_, i) => i !== index);
