@@ -97,6 +97,13 @@ export default function AddProductVariants({
       (_, i) => i !== imageIndex
     );
     setVariants(updatedVariants);
+
+    // Atualiza o preview para este variant
+    const updatedImages = updatedVariants[variantIndex].images;
+    const newPreview = updatedImages.map((file) =>
+      typeof file === "string" ? file : URL.createObjectURL(file)
+    );
+    setPreview((prev) => ({ ...prev, [variantIndex]: newPreview }));
   };
 
   return (
