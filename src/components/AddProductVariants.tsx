@@ -1,5 +1,5 @@
 import { CopyPlus, Pencil, Trash2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 type Variant = {
@@ -18,18 +18,6 @@ export default function AddProductVariants({
   productFeePercentage }:
   { variants: Variant[], setVariants: (variants: Variant[]) => void, productFeePercentage?: number }) {
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [preview, setPreview] = useState<{ [index: number]: string[] }>({});
-
-  // Sempre sincroniza o preview com as imagens das variantes
-  useEffect(() => {
-    const newPreview: { [index: number]: string[] } = {};
-    variants.forEach((variant, idx) => {
-      newPreview[idx] = (variant.images || []).map((file) =>
-        typeof file === "string" ? file : URL.createObjectURL(file)
-      );
-    });
-    setPreview(newPreview);
-  }, [variants]);
 
   const handleChange = (
     index: number,
@@ -73,19 +61,18 @@ export default function AddProductVariants({
 
   const CopyVariant = (index: number) => {
     const variantToCopy = variants[index];
-  
+
     const updatedVariants = [...variants];
     const lastIndex = updatedVariants.length - 1;
-  
+
     updatedVariants[lastIndex] = {
       ...variantToCopy,
-      images: [...variantToCopy.images],
-      added: false,
+      images: [...variantToCopy.images], // garante cópia independente
+      added: false, // força o campo added a ser false
     };
-  
+
     setVariants(updatedVariants);
   };
-  
 
   const removeVariant = (index: number) => {
     const updated = variants.filter((_, i) => i !== index);
@@ -196,10 +183,10 @@ export default function AddProductVariants({
                         if (!files) return;
 
                         const newFiles = Array.from(files).slice(0, 3); // limite de 3 imagens
+
                         const currentImages = variant.images || [];
                         const updatedImages = [...currentImages, ...newFiles].slice(0, 3);
 
-                        // Atualiza imagens do variant
                         handleChange(index, "images", updatedImages);
                       }}
                       className="hidden"
@@ -207,39 +194,43 @@ export default function AddProductVariants({
                   </label>
 
                   <div className="flex gap-2 mt-2 flex-wrap">
-                    {(preview[index] || []).map((imageUrl, i) => (
-                      <div key={i} className="relative">
-                        <img
-                          src={imageUrl}
-                          alt={`preview-${i}`}
-                          className="w-16 h-16 object-cover rounded border"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index, i)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                          title="Remover imagem"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+                    {(variant.images || []).map((file, i) => {
+                      const imageUrl = typeof file === "string" ? file : URL.createObjectURL(file);
+
+                      return (
+                        <div key={i} className="relative">
+                          <img
+                            src={imageUrl}
+                            alt={`preview-${i}`}
+                            className="w-16 h-16 object-cover rounded border"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index, i)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                            title="Remover imagem"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </>
             ) : (
               <div className="w-full text-sm space-y-2">
                 {/* Miniatura clicável da primeira imagem */}
-                {preview[index]?.[0] && (
+                {variant.images?.[0] && (
                   <div className="mb-2">
                     <img
-                      src={preview[index][0]}
+                      src={URL.createObjectURL(variant.images[0])}
                       alt="Variante"
                       className="w-20 h-20 rounded object-cover border cursor-pointer"
+                      onClick={() => window.open(URL.createObjectURL(variant.images[0]), "_blank")}
                     />
                   </div>
                 )}
-
                 {editIndex === index ? (
                   <>
                     <div className="mb-2">
