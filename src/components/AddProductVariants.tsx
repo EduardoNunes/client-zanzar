@@ -73,6 +73,12 @@ export default function AddProductVariants({
     };
 
     setVariants(updatedVariants);
+
+    // Atualiza o preview das imagens para o novo variant copiado
+    const previews = (variantToCopy.images || []).map((file) =>
+      typeof file === "string" ? file : URL.createObjectURL(file)
+    );
+    setPreview((prev) => ({ ...prev, [lastIndex]: previews }));
   };
 
   const removeVariant = (index: number) => {
