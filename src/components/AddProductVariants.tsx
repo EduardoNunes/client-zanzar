@@ -67,10 +67,15 @@ export default function AddProductVariants({
     const updatedVariants = [...variants];
     const lastIndex = updatedVariants.length - 1;
   
+    // Gere novos blobs para as imagens ao copiar
+    const newBlobImages = variantToCopy.images.map(file => 
+      typeof file !== 'string' ? URL.createObjectURL(file) : file
+    );
+  
     updatedVariants[lastIndex] = {
       ...variantToCopy,
-      images: [...variantToCopy.images],
-      blobImages: [...variantToCopy.blobImages],
+      images: [...variantToCopy.images], // garante cópia independente das imagens
+      blobImages: newBlobImages, // cria novos blobs
       added: false, // força o campo added a ser false
     };
   
@@ -125,7 +130,7 @@ export default function AddProductVariants({
             className="relative flex flex-col gap-4 w-full border p-4 mb-4 rounded-lg bg-gray-50"
           >
             {isLast ? (
-              // Inputs para edição
+              // Inputs para criação
               <>
                 <div className="flex w-full gap-4">
                   <div className="flex flex-col w-1/2">
