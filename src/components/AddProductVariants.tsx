@@ -29,7 +29,6 @@ export default function AddProductVariants({
       );
     });
     setPreview(newPreview);
-    // Opcional: aqui poderíamos revogar os URLs antigos para evitar memory leak
   }, [variants]);
 
   const handleChange = (
@@ -99,13 +98,6 @@ export default function AddProductVariants({
       (_, i) => i !== imageIndex
     );
     setVariants(updatedVariants);
-
-    // Atualiza o preview para este variant
-    const updatedImages = updatedVariants[variantIndex].images;
-    const newPreview = updatedImages.map((file) =>
-      typeof file === "string" ? file : URL.createObjectURL(file)
-    );
-    setPreview((prev) => ({ ...prev, [variantIndex]: newPreview }));
   };
 
   return (
