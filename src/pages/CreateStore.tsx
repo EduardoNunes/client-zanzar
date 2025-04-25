@@ -1,11 +1,11 @@
 import { Trash2, Upload } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import AddressForm from "../components/AddressForm";
-import { toast } from "react-toastify";
-import { createStoreReq } from "../requests/storeRequests";
-import { useGlobalContext } from "../context/globalContext";
-import { logOut } from "../utils/logout";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import AddressForm from "../components/AddressForm";
+import { useGlobalContext } from "../context/globalContext";
+import { createStoreReq } from "../requests/storeRequests";
+import { logOut } from "../utils/logout";
 
 export default function CreateStore() {
   const { token, profileId } = useGlobalContext();
