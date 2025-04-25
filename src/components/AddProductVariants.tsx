@@ -65,17 +65,25 @@ export default function AddProductVariants({
     const variantToCopy = variants[index];
   
     const updatedVariants = [...variants];
-    const lastIndex = updatedVariants.length - 1;
+    const lastIndex = updatedVariants.length - 1;  
+    
+    const newBlobImages = variantToCopy.images.map(image => {
+      if (typeof image !== 'string') {
+        return URL.createObjectURL(image); 
+      }
+      return image; 
+    });
   
     updatedVariants[lastIndex] = {
       ...variantToCopy,
       images: [...variantToCopy.images], // garante cópia independente das imagens
-      blobImages: [...variantToCopy.blobImages], // garante cópia independente dos blobs
+      blobImages: newBlobImages, // gera novos blobs para as imagens
       added: false, // força o campo added a ser false
     };
   
     setVariants(updatedVariants);
   };
+  
   
 
   const removeVariant = (index: number) => {
