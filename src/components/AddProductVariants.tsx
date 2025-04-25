@@ -73,6 +73,8 @@ export default function AddProductVariants({
       }
       return image; 
     });
+
+    console.log("NEWBLOBS", newBlobImages)
   
     updatedVariants[lastIndex] = {
       ...variantToCopy,
@@ -222,12 +224,11 @@ export default function AddProductVariants({
 
                   <div className="flex gap-2 mt-2 flex-wrap">
                     {(variant.blobImages || []).map((blob, i) => {
-                      const imageUrl = blob;
-
+                      console.log("BLOB", blob)
                       return (
                         <div key={i} className="relative">
                           <img
-                            src={imageUrl}
+                            src={blob}
                             alt={`preview-${i}`}
                             className="w-16 h-16 object-cover rounded border"
                           />
