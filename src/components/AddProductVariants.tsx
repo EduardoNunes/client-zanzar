@@ -90,10 +90,6 @@ export default function AddProductVariants({
       (_, i) => i !== imageIndex
     );
   
-/*     if (updatedVariants[variantIndex].blobImages && updatedVariants[variantIndex].blobImages[imageIndex]) {
-      URL.revokeObjectURL(updatedVariants[variantIndex].blobImages[imageIndex]);
-    } */
-  
     updatedVariants[variantIndex].blobImages = updatedVariants[variantIndex].blobImages.filter(
       (_, i) => i !== imageIndex
     );
@@ -197,14 +193,14 @@ export default function AddProductVariants({
                         const files = e.target.files;
                         if (!files) return;
 
-                        const newFiles = Array.from(files).slice(0, 3); // limite de 3 imagens
+                        const newFiles = Array.from(files).slice(0, 2); // limite de 2 imagens
 
                         const currentImages = variant.images || [];
-                        const updatedImages = [...currentImages, ...newFiles].slice(0, 3);
+                        const updatedImages = [...currentImages, ...newFiles].slice(0, 2);
 
                         variant.blobImages = updatedImages
                           .map(file => typeof file === "string" ? file : URL.createObjectURL(file))
-                          .slice(-3);
+                          .slice(-2);
 
                         handleChange(index, "images", updatedImages);
                       }}
@@ -297,7 +293,7 @@ export default function AddProductVariants({
                       <button
                         type="button"
                         onClick={() => setEditIndex(null)}
-                        className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"
+                        className="w-1/2 bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"
                       >
                         Salvar
                       </button>
