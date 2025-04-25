@@ -20,8 +20,6 @@ export default function AddProductVariants({
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [preview, setPreview] = useState<{ [index: number]: string[] }>({});
 
-  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
-
   const handleChange = (
     index: number,
     field: keyof Variant,
@@ -41,23 +39,13 @@ export default function AddProductVariants({
         toast.info("Os campos 'Estoque' e 'Preço base' são obrigatórios");
         return;
       }
-  
+
       if (variant.images.length === 0) {
         toast.info("Adicione pelo menos uma imagem");
         return;
       }
-  
-      const hasLargeImage = variant.images.some((img) => {
-        if (typeof img === "string") return false; // ignora imagens que já são URLs
-        return img.size > MAX_IMAGE_SIZE;
-      });
-  
-      if (hasLargeImage) {
-        toast.info("Uma ou mais imagens excedem o tamanho máximo de 10MB.");
-        return;
-      }
     }
-  
+
     // Marca a última variante como adicionada
     const updatedVariants = variants.map((v, idx) => {
       if (idx === variants.length - 1) {
@@ -65,18 +53,10 @@ export default function AddProductVariants({
       }
       return v;
     });
-  
+
     setVariants([
       ...updatedVariants,
-      {
-        color: "",
-        size: "",
-        stock: 0,
-        price: 0,
-        priceWithTax: 0,
-        images: [],
-        added: false,
-      },
+      { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [], added: false },
     ]);
   };
 
