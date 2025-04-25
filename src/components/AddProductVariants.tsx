@@ -18,6 +18,7 @@ export default function AddProductVariants({
   productFeePercentage }:
   { variants: Variant[], setVariants: (variants: Variant[]) => void, productFeePercentage?: number }) {
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [imagesPreview, setImagesPreview] = useState<string[]>([]);
 
   const handleChange = (
     index: number,
@@ -196,6 +197,7 @@ export default function AddProductVariants({
                   <div className="flex gap-2 mt-2 flex-wrap">
                     {(variant.images || []).map((file, i) => {
                       const imageUrl = typeof file === "string" ? file : URL.createObjectURL(file);
+                      setImagesPreview(prev => [...prev, imageUrl]);
 
                       return (
                         <div key={i} className="relative">
@@ -221,10 +223,10 @@ export default function AddProductVariants({
             ) : (
               <div className="w-full text-sm space-y-2">
                 {/* Miniatura da primeira imagem */}
-                {variant.images?.[0] && (
+                {variant.images && (
                   <div className="mb-2">
                     <img
-                      src={typeof variant.images[0] === "string" ? variant.images[0] : URL.createObjectURL(variant.images[0])}
+                      src={imagesPreview[0]}
                       alt="Variante"
                       className="w-20 h-20 rounded object-cover border cursor-pointer"
                     />
