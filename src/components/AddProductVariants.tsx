@@ -20,6 +20,8 @@ export default function AddProductVariants({
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [preview, setPreview] = useState<{ [index: number]: string[] }>({});
 
+  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+
   const handleChange = (
     index: number,
     field: keyof Variant,
@@ -183,7 +185,16 @@ export default function AddProductVariants({
                         const files = e.target.files;
                         if (!files) return;
 
-                        const newFiles = Array.from(files).slice(0, 3); // limite de 3 imagens
+                        const newFiles = Array.from(files)
+                          .filter((file) => {
+                            if (file.size > MAX_IMAGE_SIZE) {
+                              toast.info(`A imagem ${file.name} excede o tamanho máximo de 10MB.`);
+                              return false;
+                            }
+                            return true;
+                          })
+                          .slice(0, 3); // limite de 3 imagens
+
                         const currentImages = variant.images || [];
                         const updatedImages = [...currentImages, ...newFiles].slice(0, 3);
 
@@ -198,27 +209,26 @@ export default function AddProductVariants({
                       }}
                       className="hidden"
                     />
-                  </label>
 
-                  <div className="flex gap-2 mt-2 flex-wrap">
-                    {(preview[index] || []).map((imageUrl, i) => (
-                      <div key={i} className="relative">
-                        <img
-                          src={imageUrl}
-                          alt={`preview-${i}`}
-                          className="w-16 h-16 object-cover rounded border"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index, i)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                          title="Remover imagem"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                    <div className="flex gap-2 mt-2 flex-wrap">
+                      {(preview[index] || []).map((imageUrl, i) => (
+                        <div key={i} className="relative">
+                          <img
+                            src={imageUrl}
+                            alt={`preview-${i}`}
+                            className="w-16 h-16 object-cover rounded border"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index, i)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                            title="Remover imagem"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                 </div>
               </>
             ) : (
