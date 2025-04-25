@@ -10,6 +10,7 @@ type Variant = {
   priceWithTax: number;
   images: File[];
   added: boolean;
+  blobImages: string[];
 };
 
 export default function AddProductVariants({
@@ -18,13 +19,13 @@ export default function AddProductVariants({
   productFeePercentage }:
   { variants: Variant[], setVariants: (variants: Variant[]) => void, productFeePercentage?: number }) {
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [imagesPreview, setImagesPreview] = useState<string[]>([]);
 
   const handleChange = (
     index: number,
     field: keyof Variant,
     value: Variant[keyof Variant]
   ) => {
+
     const updatedVariants = [...variants];
     updatedVariants[index] = {
       ...updatedVariants[index],
@@ -32,7 +33,7 @@ export default function AddProductVariants({
     };
     setVariants(updatedVariants);
   };
-
+  console.log("VARIANTS", variants)
   const addVariant = () => {
     for (const variant of variants) {
       if (variant.stock === 0 || variant.price === 0) {
@@ -56,24 +57,26 @@ export default function AddProductVariants({
 
     setVariants([
       ...updatedVariants,
-      { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [], added: false },
+      { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [], added: false, blobImages: [] },
     ]);
   };
 
   const CopyVariant = (index: number) => {
     const variantToCopy = variants[index];
-
+  
     const updatedVariants = [...variants];
     const lastIndex = updatedVariants.length - 1;
-
+  
     updatedVariants[lastIndex] = {
       ...variantToCopy,
-      images: [...variantToCopy.images], // garante cópia independente
+      images: [...variantToCopy.images], // garante cópia independente das imagens
+      blobImages: [...variantToCopy.blobImages], // garante cópia independente dos blobs
       added: false, // força o campo added a ser false
     };
-
+  
     setVariants(updatedVariants);
   };
+  
 
   const removeVariant = (index: number) => {
     const updated = variants.filter((_, i) => i !== index);
@@ -82,11 +85,22 @@ export default function AddProductVariants({
 
   const removeImage = (variantIndex: number, imageIndex: number) => {
     const updatedVariants = [...variants];
+  
     updatedVariants[variantIndex].images = updatedVariants[variantIndex].images.filter(
       (_, i) => i !== imageIndex
     );
+  
+    if (updatedVariants[variantIndex].blobImages && updatedVariants[variantIndex].blobImages[imageIndex]) {
+      URL.revokeObjectURL(updatedVariants[variantIndex].blobImages[imageIndex]);
+    }
+  
+    updatedVariants[variantIndex].blobImages = updatedVariants[variantIndex].blobImages.filter(
+      (_, i) => i !== imageIndex
+    );
+  
     setVariants(updatedVariants);
   };
+  
 
   return (
     <div className="w-full mt-6">
@@ -184,9 +198,13 @@ export default function AddProductVariants({
                         if (!files) return;
 
                         const newFiles = Array.from(files).slice(0, 3); // limite de 3 imagens
-                        setImagesPreview(prev => [...prev, ...newFiles.map(file => URL.createObjectURL(file))]);
+
                         const currentImages = variant.images || [];
                         const updatedImages = [...currentImages, ...newFiles].slice(0, 3);
+
+                        variant.blobImages = updatedImages
+                          .map(file => typeof file === "string" ? file : URL.createObjectURL(file))
+                          .slice(-3);
 
                         handleChange(index, "images", updatedImages);
                       }}
@@ -195,8 +213,8 @@ export default function AddProductVariants({
                   </label>
 
                   <div className="flex gap-2 mt-2 flex-wrap">
-                    {(variant.images || []).map((file, i) => {
-                      const imageUrl = typeof file === "string" ? file : URL.createObjectURL(file);                      
+                    {(variant.blobImages || []).map((blob, i) => {
+                      const imageUrl = blob;
 
                       return (
                         <div key={i} className="relative">
@@ -222,10 +240,10 @@ export default function AddProductVariants({
             ) : (
               <div className="w-full text-sm space-y-2">
                 {/* Miniatura da primeira imagem */}
-                {variant.images && (
+                {variant.blobImages?.[0] && (
                   <div className="mb-2">
                     <img
-                      src={imagesPreview[0]}
+                      src={variant.blobImages[0]}
                       alt="Variante"
                       className="w-20 h-20 rounded object-cover border cursor-pointer"
                     />

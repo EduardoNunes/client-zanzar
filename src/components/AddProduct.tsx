@@ -13,6 +13,7 @@ type Variant = {
   priceWithTax: number;
   images: File[];
   added: boolean;
+  blobImages: string[];
 };
 
 export default function AddProduct({ productFeePercentage, userStoreId }: { productFeePercentage?: number; userStoreId?: string }) {
@@ -27,7 +28,7 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [variants, setVariants] = useState<Variant[]>([
-    { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [], added: false },
+    { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [], added: false, blobImages: [] },
   ]);
 
   useEffect(() => {
