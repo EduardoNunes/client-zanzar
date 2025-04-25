@@ -177,6 +177,8 @@ export default function AddProductVariants({
                 <div className="flex flex-col w-full">
                   <label className="mb-2 cursor-pointer inline-block bg-green-700 text-center text-white px-4 py-2 rounded hover:bg-green-800">
                     Selecionar imagens (max-10Mb)
+                    const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+
                     <input
                       type="file"
                       accept="image/png, image/jpg, image/jpeg"
@@ -209,26 +211,26 @@ export default function AddProductVariants({
                       }}
                       className="hidden"
                     />
-
-                    <div className="flex gap-2 mt-2 flex-wrap">
-                      {(preview[index] || []).map((imageUrl, i) => (
-                        <div key={i} className="relative">
-                          <img
-                            src={imageUrl}
-                            alt={`preview-${i}`}
-                            className="w-16 h-16 object-cover rounded border"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index, i)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                            title="Remover imagem"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+                  </label>
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {(preview[index] || []).map((imageUrl, i) => (
+                      <div key={i} className="relative">
+                        <img
+                          src={imageUrl}
+                          alt={`preview-${i}`}
+                          className="w-16 h-16 object-cover rounded border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index, i)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                          title="Remover imagem"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </>
             ) : (
