@@ -33,7 +33,7 @@ export default function AddProductVariants({
     };
     setVariants(updatedVariants);
   };
-  console.log("VARIANTS", variants)
+
   const addVariant = () => {
     for (const variant of variants) {
       if (variant.stock === 0 || variant.price === 0) {
@@ -67,18 +67,13 @@ export default function AddProductVariants({
     const updatedVariants = [...variants];
     const lastIndex = updatedVariants.length - 1;
   
-    // Gere novos blobs para as imagens ao copiar
-    const newBlobImages = variantToCopy.images.map(file => 
-      typeof file !== 'string' ? URL.createObjectURL(file) : file
-    );
-  
     updatedVariants[lastIndex] = {
       ...variantToCopy,
-      images: [...variantToCopy.images], // garante cópia independente das imagens
-      blobImages: newBlobImages, // cria novos blobs
-      added: false, // força o campo added a ser false
+      images: [...variantToCopy.images],
+      blobImages: [...variantToCopy.blobImages],
+      added: false,
     };
-  
+
     setVariants(updatedVariants);
   };
   
@@ -95,9 +90,9 @@ export default function AddProductVariants({
       (_, i) => i !== imageIndex
     );
   
-    if (updatedVariants[variantIndex].blobImages && updatedVariants[variantIndex].blobImages[imageIndex]) {
+/*     if (updatedVariants[variantIndex].blobImages && updatedVariants[variantIndex].blobImages[imageIndex]) {
       URL.revokeObjectURL(updatedVariants[variantIndex].blobImages[imageIndex]);
-    }
+    } */
   
     updatedVariants[variantIndex].blobImages = updatedVariants[variantIndex].blobImages.filter(
       (_, i) => i !== imageIndex
