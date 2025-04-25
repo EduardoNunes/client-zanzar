@@ -112,7 +112,7 @@ export default function CreateStore() {
   return (
     <div className="flex justify-center items-center bg-gray-50 min-h-screen">
       <form
-        className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg"
+        className="bg-white rounded-lg shadow-lg py-8 px-4 w-full max-w-lg"
         onSubmit={handleSubmit}
       >
         <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
@@ -142,9 +142,9 @@ export default function CreateStore() {
         </div>
 
         {/* Endereço */}
-        <div className="mb-4 mt-8">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
+        <div className="m-8">
+          <div className="flex flex-col gap-2">
+            <div className="flex space-x-2">
               <input
                 type="radio"
                 id="hasAddress"
@@ -157,7 +157,7 @@ export default function CreateStore() {
                 Preencher endereço
               </label>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex space-x-2">
               <input
                 type="radio"
                 id="noAddress"
@@ -255,7 +255,7 @@ export default function CreateStore() {
         {/* Botão */}
         <button
           type="submit"
-          className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition-colors"
+          className="w-full bg-indigo-600 text-white font-bold py-3 my-4 rounded-lg hover:bg-indigo-700 transition-colors"
         >
           Criar Loja
         </button>
