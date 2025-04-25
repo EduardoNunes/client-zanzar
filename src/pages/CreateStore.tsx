@@ -32,7 +32,8 @@ export default function CreateStore() {
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && ["image/png", "image/jpg", "image/jpeg"].includes(file.type) && file.size <= MAX_IMAGE_SIZE) {
+
+    if (file && file.type.startsWith("image/") && file.size <= MAX_IMAGE_SIZE) {
       const objectURL = URL.createObjectURL(file);
       setLogoPreview(objectURL);
       setLogo(file);      
@@ -45,7 +46,8 @@ export default function CreateStore() {
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && ["image/png", "image/jpg", "image/jpeg"].includes(file.type) && file.size <= MAX_IMAGE_SIZE) {
+    
+    if (file && file.type.startsWith("image/") && file.size <= MAX_IMAGE_SIZE) {
       const objectURL = URL.createObjectURL(file);
       setBannerPreview(objectURL);
       setBanner(file);      
