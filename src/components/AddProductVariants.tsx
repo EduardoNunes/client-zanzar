@@ -184,7 +184,7 @@ export default function AddProductVariants({
                         if (!files) return;
 
                         const newFiles = Array.from(files).slice(0, 3); // limite de 3 imagens
-
+                        setImagesPreview(prev => [...prev, ...newFiles.map(file => URL.createObjectURL(file))]);
                         const currentImages = variant.images || [];
                         const updatedImages = [...currentImages, ...newFiles].slice(0, 3);
 
@@ -196,8 +196,7 @@ export default function AddProductVariants({
 
                   <div className="flex gap-2 mt-2 flex-wrap">
                     {(variant.images || []).map((file, i) => {
-                      const imageUrl = typeof file === "string" ? file : URL.createObjectURL(file);
-                      setImagesPreview(prev => [...prev, imageUrl]);
+                      const imageUrl = typeof file === "string" ? file : URL.createObjectURL(file);                      
 
                       return (
                         <div key={i} className="relative">
