@@ -1,5 +1,5 @@
 import { CopyPlus, Pencil, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 type Variant = {
@@ -8,48 +8,16 @@ type Variant = {
   stock: number;
   price: number;
   priceWithTax: number;
-  images: (File | string)[];
+  images: File[];
   added: boolean;
-};
-
-const toDataURL = (file: File): Promise<string> => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.readAsDataURL(file);
-  });
 };
 
 export default function AddProductVariants({
   variants,
   setVariants,
-  productFeePercentage,
-}: {
-  variants: Variant[];
-  setVariants: (variants: Variant[]) => void;
-  productFeePercentage?: number;
-}) {
+  productFeePercentage }:
+  { variants: Variant[], setVariants: (variants: Variant[]) => void, productFeePercentage?: number }) {
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [previewUrls, setPreviewUrls] = useState<Record<number, string[]>>({});
-
-  useEffect(() => {
-    const generatePreviews = async () => {
-      const allPreviews: Record<number, string[]> = {};
-      await Promise.all(
-        variants.map(async (variant, variantIndex) => {
-          allPreviews[variantIndex] = await Promise.all(
-            (variant.images || []).map(async (file) => {
-              if (typeof file === "string") return file;
-              return await toDataURL(file);
-            })
-          );
-        })
-      );
-      setPreviewUrls(allPreviews);
-    };
-
-    generatePreviews();
-  }, [variants]);
 
   const handleChange = (
     index: number,
@@ -77,6 +45,7 @@ export default function AddProductVariants({
       }
     }
 
+    // Marca a última variante como adicionada
     const updatedVariants = variants.map((v, idx) => {
       if (idx === variants.length - 1) {
         return { ...v, added: true };
@@ -86,27 +55,20 @@ export default function AddProductVariants({
 
     setVariants([
       ...updatedVariants,
-      {
-        color: "",
-        size: "",
-        stock: 0,
-        price: 0,
-        priceWithTax: 0,
-        images: [],
-        added: false,
-      },
+      { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [], added: false },
     ]);
   };
 
   const CopyVariant = (index: number) => {
     const variantToCopy = variants[index];
+
     const updatedVariants = [...variants];
     const lastIndex = updatedVariants.length - 1;
 
     updatedVariants[lastIndex] = {
       ...variantToCopy,
-      images: [...variantToCopy.images],
-      added: false,
+      images: [...variantToCopy.images], // garante cópia independente
+      added: false, // força o campo added a ser false
     };
 
     setVariants(updatedVariants);
@@ -119,17 +81,11 @@ export default function AddProductVariants({
 
   const removeImage = (variantIndex: number, imageIndex: number) => {
     const updatedVariants = [...variants];
-    updatedVariants[variantIndex].images = updatedVariants[
-      variantIndex
-    ].images.filter((_, i) => i !== imageIndex);
+    updatedVariants[variantIndex].images = updatedVariants[variantIndex].images.filter(
+      (_, i) => i !== imageIndex
+    );
     setVariants(updatedVariants);
   };
-
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
 
   return (
     <div className="w-full mt-6">
@@ -139,10 +95,14 @@ export default function AddProductVariants({
         const isLast = index === variants.length - 1;
 
         const priceInReais = variant.price / 100;
-        const rawPriceWithTaxInCents = Math.floor(
-          variant.price * (1 + (productFeePercentage || 0) / 100)
-        );
+        const rawPriceWithTaxInCents = Math.floor(variant.price * (1 + (productFeePercentage || 0) / 100));
         const priceWithTaxInReais = rawPriceWithTaxInCents / 100;
+
+        const formatCurrency = (value: number) =>
+          new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+          }).format(value);
 
         return (
           <div
@@ -150,15 +110,14 @@ export default function AddProductVariants({
             className="relative flex flex-col gap-4 w-full border p-4 mb-4 rounded-lg bg-gray-50"
           >
             {isLast ? (
+              // Inputs para edição
               <>
                 <div className="flex w-full gap-4">
                   <div className="flex flex-col w-1/2">
                     <label className="font-medium mb-1">Cor:</label>
                     <input
                       value={variant.color}
-                      onChange={(e) =>
-                        handleChange(index, "color", e.target.value)
-                      }
+                      onChange={(e) => handleChange(index, "color", e.target.value)}
                       className="border p-2 rounded w-full"
                     />
                   </div>
@@ -166,9 +125,7 @@ export default function AddProductVariants({
                     <label className="font-medium mb-1">Tamanho:</label>
                     <input
                       value={variant.size}
-                      onChange={(e) =>
-                        handleChange(index, "size", e.target.value)
-                      }
+                      onChange={(e) => handleChange(index, "size", e.target.value)}
                       className="border p-2 rounded w-full"
                     />
                   </div>
@@ -180,9 +137,7 @@ export default function AddProductVariants({
                     <input
                       type="number"
                       value={variant.stock}
-                      onChange={(e) =>
-                        handleChange(index, "stock", e.target.value)
-                      }
+                      onChange={(e) => handleChange(index, "stock", e.target.value)}
                       className="border p-2 rounded w-full"
                     />
                   </div>
@@ -192,9 +147,7 @@ export default function AddProductVariants({
                       type="text"
                       value={formatCurrency(priceInReais)}
                       onChange={(e) => {
-                        const raw = parseFloat(
-                          e.target.value.replace(/[^\d]/g, "")
-                        );
+                        const raw = parseFloat(e.target.value.replace(/[^\d]/g, ""));
                         handleChange(index, "price", isNaN(raw) ? 0 : raw);
                       }}
                       className="border p-2 rounded w-full"
@@ -204,9 +157,7 @@ export default function AddProductVariants({
 
                 <div className="flex w-full gap-4">
                   <div className="flex flex-col w-1/2">
-                    <label className="font-medium mb-1">
-                      Preço com taxa: {productFeePercentage}%
-                    </label>
+                    <label className="font-medium mb-1">Preço com taxa: {productFeePercentage}%</label>
                     <input
                       type="text"
                       value={formatCurrency(priceWithTaxInReais)}
@@ -215,13 +166,11 @@ export default function AddProductVariants({
                     />
                   </div>
                   <div className="flex flex-col items-center w-1/2">
-                    <span className="text-gray-600 text-sm">
-                      A taxa padrão é de 5%. Para negociação, entre em contato
-                      com o suporte
-                    </span>
+                    <span className="text-gray-600 text-sm">A taxa padrão é de 5%. Para negociação, entre em contato com o suporte</span>
                   </div>
                 </div>
 
+                {/* Input de imagens */}
                 <div className="flex flex-col w-full">
                   <label className="mb-2 cursor-pointer inline-block bg-green-700 text-center text-white px-4 py-2 rounded hover:bg-green-800">
                     Selecionar imagens (max-10Mb)
@@ -233,9 +182,11 @@ export default function AddProductVariants({
                         const files = e.target.files;
                         if (!files) return;
 
-                        const newFiles = Array.from(files).slice(0, 3);
+                        const newFiles = Array.from(files).slice(0, 3); // limite de 3 imagens
+
                         const currentImages = variant.images || [];
                         const updatedImages = [...currentImages, ...newFiles].slice(0, 3);
+
                         handleChange(index, "images", updatedImages);
                       }}
                       className="hidden"
@@ -243,32 +194,37 @@ export default function AddProductVariants({
                   </label>
 
                   <div className="flex gap-2 mt-2 flex-wrap">
-                    {(previewUrls[index] || []).map((src, i) => (
-                      <div key={i} className="relative">
-                        <img
-                          src={src}
-                          alt={`preview-${i}`}
-                          className="w-16 h-16 object-cover rounded border"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index, i)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                          title="Remover imagem"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+                    {(variant.images || []).map((file, i) => {
+                      const imageUrl = typeof file === "string" ? file : URL.createObjectURL(file);
+
+                      return (
+                        <div key={i} className="relative">
+                          <img
+                            src={imageUrl}
+                            alt={`preview-${i}`}
+                            className="w-16 h-16 object-cover rounded border"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index, i)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                            title="Remover imagem"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </>
             ) : (
               <div className="w-full text-sm space-y-2">
-                {previewUrls[index]?.[0] && (
+                {/* Miniatura da primeira imagem */}
+                {variant.images?.[0] && (
                   <div className="mb-2">
                     <img
-                      src={previewUrls[index][0]}
+                      src={typeof variant.images[0] === "string" ? variant.images[0] : URL.createObjectURL(variant.images[0])}
                       alt="Variante"
                       className="w-20 h-20 rounded object-cover border cursor-pointer"
                     />
@@ -277,65 +233,46 @@ export default function AddProductVariants({
                 {editIndex === index ? (
                   <>
                     <div className="mb-2">
-                      <label>
-                        <strong>Cor:</strong>
-                      </label>
+                      <label><strong>Cor:</strong></label>
                       <input
                         type="text"
                         value={variant.color}
-                        onChange={(e) =>
-                          handleChange(index, "color", e.target.value)
-                        }
+                        onChange={(e) => handleChange(index, 'color', e.target.value)}
                         className="border rounded px-2 py-1 w-full"
                       />
                     </div>
                     <div className="mb-2">
-                      <label>
-                        <strong>Tamanho:</strong>
-                      </label>
+                      <label><strong>Tamanho:</strong></label>
                       <input
                         type="text"
                         value={variant.size}
-                        onChange={(e) =>
-                          handleChange(index, "size", e.target.value)
-                        }
+                        onChange={(e) => handleChange(index, 'size', e.target.value)}
                         className="border rounded px-2 py-1 w-full"
                       />
                     </div>
                     <div className="mb-2">
-                      <label>
-                        <strong>Estoque:</strong>
-                      </label>
+                      <label><strong>Estoque:</strong></label>
                       <input
                         type="number"
                         value={variant.stock}
-                        onChange={(e) =>
-                          handleChange(index, "stock", Number(e.target.value))
-                        }
+                        onChange={(e) => handleChange(index, 'stock', Number(e.target.value))}
                         className="border rounded px-2 py-1 w-full"
                       />
                     </div>
                     <div className="mb-2">
-                      <label>
-                        <strong>Preço base:</strong>
-                      </label>
+                      <label><strong>Preço base:</strong></label>
                       <input
                         type="text"
                         value={formatCurrency(priceInReais)}
                         onChange={(e) => {
-                          const raw = parseFloat(
-                            e.target.value.replace(/[^\d]/g, "")
-                          );
+                          const raw = parseFloat(e.target.value.replace(/[^\d]/g, ""));
                           handleChange(index, "price", isNaN(raw) ? 0 : raw);
                         }}
                         className="border rounded px-2 py-1 w-full"
                       />
                     </div>
                     <div className="mb-2">
-                      <p>
-                        <strong>Preço com taxa ({productFeePercentage}%):</strong>{" "}
-                        {formatCurrency(priceWithTaxInReais)}
-                      </p>
+                      <p><strong>Preço com taxa ({productFeePercentage}%):</strong> {formatCurrency(priceWithTaxInReais)}</p>
                     </div>
                     <div className="flex justify-end w-full">
                       <button
@@ -349,56 +286,46 @@ export default function AddProductVariants({
                   </>
                 ) : (
                   <>
-                    <p>
-                      <strong>Cor:</strong> {variant.color}
-                    </p>
-                    <p>
-                      <strong>Tamanho:</strong> {variant.size}
-                    </p>
-                    <p>
-                      <strong>Estoque:</strong> {variant.stock}
-                    </p>
-                    <p>
-                      <strong>Preço base:</strong>{" "}
-                      {formatCurrency(priceInReais)}
-                    </p>
-                    <p>
-                      <strong>Preço com taxa ({productFeePercentage}%):</strong>{" "}
-                      {formatCurrency(priceWithTaxInReais)}
-                    </p>
+                    <p><strong>Cor:</strong> {variant.color}</p>
+                    <p><strong>Tamanho:</strong> {variant.size}</p>
+                    <p><strong>Estoque:</strong> {variant.stock}</p>
+                    <p><strong>Preço base:</strong> {formatCurrency(priceInReais)}</p>
+                    <p><strong>Preço com taxa ({productFeePercentage}%):</strong> {formatCurrency(priceWithTaxInReais)}</p>
                   </>
                 )}
               </div>
             )}
 
             {variants.length > 1 && !isLast && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => removeVariant(index)}
-                  className="absolute top-2 right-4 text-red-500 font-medium mt-2"
-                >
-                  <Trash2 size={24} />
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    CopyVariant(index);
-                  }}
-                  className="absolute top-2 right-14 font-medium mt-2"
-                >
-                  <CopyPlus size={24} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditIndex(index)}
-                  className="absolute top-2 right-24 font-medium mt-2"
-                  title="Editar variante"
-                >
-                  <Pencil size={24} />
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={() => removeVariant(index)}
+                className="absolute top-2 right-4 text-red-500 font-medium mt-2"
+              >
+                <Trash2 size={24} />
+              </button>
+            )}
+            {variants.length > 1 && !isLast && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  CopyVariant(index);
+                }}
+                className="absolute top-2 right-14 font-medium mt-2"
+              >
+                <CopyPlus size={24} />
+              </button>
+            )}
+            {variants.length > 1 && !isLast && (
+              <button
+                type="button"
+                onClick={() => setEditIndex(index)}
+                className="absolute top-2 right-24 font-medium mt-2"
+                title="Editar variante"
+              >
+                <Pencil size={24} />
+              </button>
             )}
           </div>
         );

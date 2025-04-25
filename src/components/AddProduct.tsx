@@ -11,7 +11,7 @@ type Variant = {
   stock: number;
   price: number;
   priceWithTax: number;
-  images: (File | string)[];
+  images: File[];
   added: boolean;
 };
 
@@ -98,12 +98,7 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
       return;
     }
 
-    const filteredVariants = variants
-      .filter((v) => v.added === true)
-      .map((variant) => ({
-        ...variant,
-        images: (variant.images || []).filter((img): img is File => typeof img !== "string"),
-      }));
+    const filteredVariants = variants.filter((v) => v.added === true);
 
     if (filteredVariants.length === 0) {
       toast.info("Pelo menos uma variante deve ser adicionada");
