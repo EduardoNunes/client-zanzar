@@ -11,7 +11,7 @@ type Variant = {
   stock: number;
   price: number;
   priceWithTax: number;
-  images: File[];
+  images: (File | string)[];
   added: boolean;
 };
 
@@ -98,7 +98,12 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
       return;
     }
 
-    const filteredVariants = variants.filter((v) => v.added === true);
+    const filteredVariants = variants
+      .filter((v) => v.added === true)
+      .map((variant) => ({
+        ...variant,
+        images: (variant.images || []).filter((img): img is File => typeof img !== "string"),
+      }));
 
     if (filteredVariants.length === 0) {
       toast.info("Pelo menos uma variante deve ser adicionada");
@@ -191,7 +196,7 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
           <button
             type="button"
             onClick={() => handleCreateCategory(newCategory)}
-            className="flex-1 w-1/2 h-10 bg-green-700 my-4 text-white px-4 py-2 rounded-lg hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 w-2/3 h-10 bg-green-700 my-4 text-white px-4 py-2 rounded-lg hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Criar categoria
           </button>
@@ -247,7 +252,7 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
           <button
             type="button"
             onClick={() => handleCreateSubCategory(newSubCategory)}
-            className="flex-1 w-1/2 h-10 bg-green-700 my-4 text-white px-4 py-2 rounded-lg hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 w-2/3 h-10 bg-green-700 my-4 text-white px-4 py-2 rounded-lg hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Criar subcategoria
           </button>
