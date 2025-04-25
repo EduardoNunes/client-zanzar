@@ -18,6 +18,7 @@ export default function AddProductVariants({
   productFeePercentage }:
   { variants: Variant[], setVariants: (variants: Variant[]) => void, productFeePercentage?: number }) {
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [variantImage, _] = useState<string[]>([]);
 
   const handleChange = (
     index: number,
@@ -71,6 +72,7 @@ export default function AddProductVariants({
       added: false, // força o campo added a ser false
     };
 
+    variantImage.push(...variantToCopy.images.map(file => typeof file === 'string' ? file : URL.createObjectURL(file)));
     setVariants(updatedVariants);
   };
 
@@ -84,6 +86,7 @@ export default function AddProductVariants({
     updatedVariants[variantIndex].images = updatedVariants[variantIndex].images.filter(
       (_, i) => i !== imageIndex
     );
+    variantImage.splice(variantIndex, 1);
     setVariants(updatedVariants);
   };
 
@@ -196,7 +199,6 @@ export default function AddProductVariants({
                   <div className="flex gap-2 mt-2 flex-wrap">
                     {(variant.images || []).map((file, i) => {
                       const imageUrl = typeof file === "string" ? file : URL.createObjectURL(file);
-
                       return (
                         <div key={i} className="relative">
                           <img
