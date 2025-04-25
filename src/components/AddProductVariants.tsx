@@ -1,5 +1,5 @@
 import { CopyPlus, Pencil, Trash2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 type Variant = {
@@ -19,17 +19,6 @@ export default function AddProductVariants({
   { variants: Variant[], setVariants: (variants: Variant[]) => void, productFeePercentage?: number }) {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [preview, setPreview] = useState<{ [index: number]: string[] }>({});
-
-  // Sempre sincroniza o preview com as imagens das variantes
-  useEffect(() => {
-    const newPreview: { [index: number]: string[] } = {};
-    variants.forEach((variant, idx) => {
-      newPreview[idx] = (variant.images || []).map((file) =>
-        typeof file === "string" ? file : URL.createObjectURL(file)
-      );
-    });
-    setPreview(newPreview);
-  }, [variants]);
 
   const handleChange = (
     index: number,
@@ -82,6 +71,16 @@ export default function AddProductVariants({
       images: [...variantToCopy.images],
       added: false,
     };
+  
+    // Garante que preview será gerado corretamente, independente do tipo (File ou string)
+    const newPreview = variantToCopy.images.map((file) =>
+      typeof file === "string" ? file : URL.createObjectURL(file)
+    );
+  
+    setPreview((prev) => ({
+      ...prev,
+      [lastIndex]: newPreview,
+    }));
   
     setVariants(updatedVariants);
   };
