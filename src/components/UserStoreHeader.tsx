@@ -48,7 +48,7 @@ export default function UserStoreHeader({
   handleBannerChange,
 }: UserStoreHeaderProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-6 mb-8">
+    <div className="bg-white rounded-lg shadow p-6">
       <div className="flex flex-col md:flex-row gap-6">
         <div className="relative group w-full">
           <div className="flex justify-center items-center w-full aspect-video rounded-[8px] overflow-hidden bg-gray-200 relative">
@@ -98,7 +98,7 @@ export default function UserStoreHeader({
         </div>
 
         <div className="flex justify-between">
-          <div className="flex flex-col">
+          <div className="flex flex-col pr-2">
             <div className="flex items-center w-full gap-2">
               <div className="flex justify-center items-center h-10 w-10 overflow-hidden bg-transparent relative">
                 {userStore?.logoUrl ? (
@@ -148,7 +148,7 @@ export default function UserStoreHeader({
                 {userStore?.name}
               </h1>
             </div>
-            <h2 className="text-md text-gray-900 mb-2">
+            <h2 className="text-md text-gray-900 my-2">
               {userStore?.description}
             </h2>
           </div>
