@@ -50,10 +50,6 @@ export const addProductReq = async (
     }
   });
 
-  for (const pair of formData.entries()) {
-    console.log(pair[0], pair[1]);
-  }
-
   try {
     const response = await api.post("/product/add-product", formData, {
       headers: {
@@ -74,6 +70,39 @@ export const addProductReq = async (
     toast.dismiss(productLoadingToast);
   }
 };
+
+export const loadProductsReq = async (
+  userStoreId: string,
+  page: number,
+  token: string | null,
+  profileId: string
+) => {
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.get("/product/load-products", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        userStoreId,
+        page,
+        profileId,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      "Erro ao carregar produtos. Tente novamente.";
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+}
 
 export const loadCategoriesReq = async (
   profileId: string,
