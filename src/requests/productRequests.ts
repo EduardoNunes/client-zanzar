@@ -1,22 +1,13 @@
 import { toast } from "react-toastify";
 import api from "../server/axios";
-
-type FilteredVariants = {
-  color: string;
-  size: string;
-  stock: number;
-  price: number;
-  priceWithTax: number;
-  images: File[];
-  added: boolean;
-};
+import { ProductVariantProps } from "../types/ProductVariant";
 
 export const addProductReq = async (
   name: string | null,
   description: string | null,
   selectedCategory: string,
   selectedSubCategory: string,
-  filteredVariants: FilteredVariants[],
+  variants: ProductVariantProps[],
   token: string | null,
   profileId: string | null,
   userStoreId: string | undefined
@@ -25,29 +16,38 @@ export const addProductReq = async (
     toast.error("Ops, algo deu errado, entre em contato com um adm.");
     return null;
   }
-
+console.log("DATA", variants)
   const productLoadingToast = toast.loading("Criando produto, aguarde...");
 
+  // Monta o FormData para envio multipart/form-data
   const formData = new FormData();
 
-  formData.append("name", name || "");
-  formData.append("description", description || "");
-  formData.append("selectedCategory", selectedCategory || "");
-  formData.append("selectedSubCategory", selectedSubCategory || "");
-  formData.append("profileId", profileId || "");
-  formData.append("userStoreId", userStoreId || "");
+  formData.append("name", name ?? '');
+  formData.append("description", description ?? '');
+  formData.append("selectedCategory", selectedCategory);
+  formData.append("selectedSubCategory", selectedSubCategory);
+  formData.append("userStoreId", userStoreId);
+  formData.append("profileId", profileId ?? '');
 
-  filteredVariants.forEach((variant, index) => {
-    formData.append(`variants[${index}][color]`, variant.color);
-    formData.append(`variants[${index}][price]`, variant.price.toString());
-    formData.append(`variants[${index}][size]`, variant.size);
-    formData.append(`variants[${index}][stock]`, variant.stock.toString());
+  variants.forEach((variant, variantIndex) => {
+    formData.append(`variants[${variantIndex}][colorName]`, variant.colorName);
+    formData.append(`variants[${variantIndex}][colorCode]`, variant.colorCode);
 
-    if (variant.images && variant.images.length > 0) {
-      variant.images.forEach((image: File) => {
-        formData.append(`variants[${index}][images][]`, image);
-      });
-    }
+    // Sizes
+    variant.sizes.forEach((size, sizeIndex) => {
+      formData.append(`variants[${variantIndex}][sizes][${sizeIndex}][size]`, size.size);
+      formData.append(`variants[${variantIndex}][sizes][${sizeIndex}][stock]`, size.stock.toString());
+      formData.append(`variants[${variantIndex}][sizes][${sizeIndex}][basePrice]`, size.basePrice.toString());
+      formData.append(`variants[${variantIndex}][sizes][${sizeIndex}][price]`, size.price.toString());
+    });
+
+    // Images
+    variant.images.forEach((image, imageIndex) => {
+      if (image.file) {
+        formData.append(`variants[${variantIndex}][images][${imageIndex}]`, image.file);
+      }
+      formData.append(`variants[${variantIndex}][images][${imageIndex}][position]`, image.position.toString());
+    });
   });
 
   try {
@@ -70,6 +70,7 @@ export const addProductReq = async (
     toast.dismiss(productLoadingToast);
   }
 };
+
 
 export const loadProductsReq = async (
   userStoreId: string,

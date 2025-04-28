@@ -3,18 +3,8 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useGlobalContext } from "../context/globalContext";
 import AddProductVariants from "./AddProductVariants";
+import { ProductVariantProps } from '../types/ProductVariant';
 import { addProductReq, loadCategoriesReq, loadSubCategoriesReq, createCategoryReq, createSubCategoryReq } from "../requests/productRequests";
-
-type Variant = {
-  color: string;
-  size: string;
-  stock: number;
-  price: number;
-  priceWithTax: number;
-  images: File[];
-  added: boolean;
-  blobImages: string[];
-};
 
 export default function AddProduct({ productFeePercentage, userStoreId }: { productFeePercentage?: number; userStoreId?: string }) {
   const { token, profileId } = useGlobalContext();
@@ -27,9 +17,7 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
   const [newSubCategory, setNewSubCategory] = useState("");
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
-  const [variants, setVariants] = useState<Variant[]>([
-    { color: "", size: "", stock: 0, price: 0, priceWithTax: 0, images: [], added: false, blobImages: [] },
-  ]);
+  const [variants, setVariants] = useState<ProductVariantProps[]>([]);
 
   useEffect(() => {
     fetchCategories();
@@ -99,19 +87,12 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
       return;
     }
 
-    const filteredVariants = variants.filter((v) => v.added === true);
-
-    if (filteredVariants.length === 0) {
-      toast.info("Pelo menos uma variante deve ser adicionada");
-      return;
-    }
-
     await addProductReq(
       name,
       description,
       selectedCategory,
       selectedSubCategory,
-      filteredVariants,
+      variants,
       token,
       profileId,
       userStoreId
