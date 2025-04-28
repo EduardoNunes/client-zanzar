@@ -1,19 +1,36 @@
-export interface ProductVariantSizeProps {
-  size: string;
-  stock: number;
-  price: string;
-  basePrice: string;
+export interface ProductProps {
+  product: {
+    id: string;
+    name: string;
+    description: string;
+    totalSold: number;
+    rating: number;
+    ratingCount: number;
+    variations: ProductVariationsProps[];
+  };
+  onClose: () => void;
+  onAddToCart: (productId: string, variation: ProductVariationsProps, quantity: number) => void;
 }
 
-export interface ProductImagesProps {
-  url?: string;
-  position: number;
-  file?: File;
-}
-
-export interface ProductVariantProps {
+export interface ProductVariationsProps {
   colorName: string;
   colorCode: string;
-  images: ProductImagesProps[];
-  sizes: ProductVariantSizeProps[];
+  id: string;
+  images: ProductImageProps[];
+  productId: string;
+  sizes: ProductSizesProps[];
 }
+
+export interface ProductSizesProps {
+  id: string;
+  price: number;
+  basePrice: number;
+  stock: number;
+  size: string;
+}
+
+export interface ProductImageProps {
+  id: string;
+  url: string;
+  position: number;
+  file?: File;}
