@@ -8,10 +8,17 @@ interface ColorPickerWithNameProps {
   index: number;
 }
 
+import { useEffect } from "react";
+
 export default function ColorPickerWithName({ variant, handleChange, index }: ColorPickerWithNameProps) {
-  const [selectedColorName, setSelectedColorName] = useState(variant.color || "");
+  const [selectedColorName, setSelectedColorName] = useState(variant.colorName || "");
   const [query, setQuery] = useState("");
-  const [colorHex, setColorHex] = useState("#facc15");
+  const [colorHex, setColorHex] = useState(variant.colorCode || "#facc15");
+
+  useEffect(() => {
+    setSelectedColorName(variant.colorName || "");
+    setColorHex(variant.colorCode || "#facc15");
+  }, [variant.colorName, variant.colorCode]);
 
   const colorOptions = Object.entries(colorNames).map(([hex, name]) => ({ hex, name }));
 
@@ -68,7 +75,7 @@ export default function ColorPickerWithName({ variant, handleChange, index }: Co
                       }`
                     }
                   >
-                    {({ selected, active }) => (
+                    {({ selected }) => (
                       <>
                         <span
                           className={`absolute left-2 top-2 h-5 w-5 rounded-full`}
