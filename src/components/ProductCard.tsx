@@ -83,16 +83,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <h3 className="text-lg font-bold mb-1 text-gray-900 truncate" title={name}>{name}</h3>
         <div className="w-full">
           <span
-            className="w-full text-gray-700 text-justify text-sm cursor-pointer select-none"
+            className="w-full text-gray-700 text-justify text-sm cursor-pointer select-none line-clamp-2"
+            style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
             onClick={() => setDescExpanded((v) => !v)}
             title={descExpanded ? "Clique para recolher" : "Clique para expandir"}
           >
-            {descExpanded
-              ? description
-              : description.length > 30
-                ? description.substring(0, 30) + "..."
-                : description}
-            {description.length > 30 && (
+            {descExpanded ? description : description}
+            {description.length > 0 && (
               <span className="ml-1 text-indigo-600 underline">
                 {descExpanded ? "menos" : "mais"}
               </span>
