@@ -75,18 +75,6 @@ export const getUserStoreReq = async (slug: string, token: string | null, profil
   }
 };
 
-export const loadStoreProductsReq = async () => {
-  try {
-    const response = await api.get("/products");
-    return response.data;
-  } catch (error: any) {
-    const errorMessage =
-      error.response?.data?.message || "Erro ao buscar produtos da loja.";
-    toast.error(errorMessage);
-    throw new Error(errorMessage);
-  }
-};
-
 export const updateBannerReq = async (
   profileId: string,
   file: File,
