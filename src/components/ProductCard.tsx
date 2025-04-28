@@ -1,8 +1,9 @@
 import { ShoppingCart } from "lucide-react";
 import React, { useState } from "react";
+import formatCurrencyWithSmallCents from "../utils/centsReduct";
 import ProductModal from "./ProductModal";
 import RatingStars from "./RatingStars";
-import formatCurrencyInput from "../utils/formatRealCoin";
+import { ProductVariationsProps } from "../types/ProductVariant";
 
 interface ProductCardProps {
   description: string;
@@ -12,8 +13,7 @@ interface ProductCardProps {
   rating: number;
   ratingCount: number;
   totalSold: number;
-  variations: VariationsProps[];
-  onImageClick: () => void;
+  variations: ProductVariationsProps[];
   onCartClick: () => void;
 }
 
@@ -28,61 +28,25 @@ interface CategoryProps {
   name: string;
 }
 
-interface VariationsProps {
-  colorName: string;
-  colorCode: string;
-  id: string;
-  images: ImageProps[];
-  productId: string;
-  sizes: SizesProps[];
-}
-
-interface SizesProps {
-  id: string;
-  price: number;
-  basePrice: number;
-  stock: number;
-}
-
-interface ImageProps {
-  id: string;
-  url: string;
-  position: number;
-}
-
 const ProductCard: React.FC<ProductCardProps> = ({
   description,
   id,
   name,
-  productSubCategory,
   rating,
   ratingCount,
   totalSold,
   variations,
-  onImageClick,
   onCartClick,
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
-
-  function formatCurrencyWithSmallCents(value: string) {
-    const formatted = formatCurrencyInput(value);
-    const [main, cents] = formatted.split(',');
-    
-    return (
-      <>
-        {main},
-        <span className="text-xs font-normal">{cents}</span>
-      </>
-    );
-  }
 
   return (
     <div
-      onClick={() => setIsModalOpen(true)}
+      onClick={() => setIsProductModalOpen(true)}
       className="bg-white rounded-lg shadow-md p-4 flex flex-col items-center w-full hover:shadow-lg transition-shadow"
     >
-      {isModalOpen &&
+      {isProductModalOpen &&
         <ProductModal
           product={{
             id,
@@ -93,10 +57,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
             ratingCount,
             variations
           }}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => setIsProductModalOpen(false)}
           onAddToCart={(productId, variation, quantity) => {
             // lógica do carrinho
-            setIsModalOpen(false);
+            console.log(productId, variation, quantity);
+            /* setIsProductModalOpen(false); */
           }}
         />
       }
@@ -104,8 +69,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <img
           src={variations[0].images[0].url || "/placeholder.png"}
           alt={name}
-          className="rounded-lg object-cover w-48 h-48 cursor-pointer border"
-          onClick={onImageClick}
+          className="rounded-lg object-cover w-full h-full cursor-pointer border"
         />
         <button
           onClick={onCartClick}
@@ -135,7 +99,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             )}
           </span>
         </div>
-        
+
         <div className="flex items-center mt-2 mb-1">
           <span className="font-semibold text-gray-700 text-sm mr-2">
             {formatCurrencyWithSmallCents(String(variations[0].sizes[0].price))}
