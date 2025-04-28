@@ -1,16 +1,18 @@
 import { Trash } from 'lucide-react';
 import React, { useState } from 'react';
-import { ProductImagesProps, ProductVariantProps } from '../types/ProductVariant';
+import { ProductImageProps, ProductVariationsProps } from '../types/ProductVariant';
 import { colorNames } from '../utils/colorNames';
 import formatCurrencyInput from '../utils/formatRealCoin';
 import ColorPickerWithName from './ColorPickerWithNames';
 
-const initialVariantDraft: ProductVariantProps & {
+const initialVariantDraft: ProductVariationsProps & {
   tempSize?: string;
   tempStock?: string;
   tempBasePrice?: string;
   tempPrice?: string;
 } = {
+  id: "",
+  productId: "",
   colorName: '',
   colorCode: '',
   images: [],
@@ -26,12 +28,12 @@ const ProductForm = ({
   setVariants,
   productFeePercentage
 }: {
-  variants: ProductVariantProps[];
-  setVariants: (variants: ProductVariantProps[]) => void; 
+  variants: ProductVariationsProps[];
+  setVariants: (variants: ProductVariationsProps[]) => void;
   productFeePercentage?: number
 }) => {
 
-  const [variantDraft, setVariantDraft] = useState<ProductVariantProps & {
+  const [variantDraft, setVariantDraft] = useState<ProductVariationsProps & {
     tempSize?: string;
     tempStock?: string;
     tempBasePrice?: string;
@@ -48,6 +50,8 @@ const ProductForm = ({
     setVariants([
       ...variants,
       {
+        id: "",
+        productId: "",
         colorName: variantDraft.colorName,
         colorCode: variantDraft.colorCode,
         images: variantDraft.images,
@@ -62,13 +66,14 @@ const ProductForm = ({
     const files = event.target.files;
     if (files) {
       const fileArr = Array.from(files).slice(0, 3);
-      const newImages: ProductImagesProps[] = [...variantDraft.images];
+      const newImages: ProductImageProps[] = [...variantDraft.images];
       for (let i = 0; i < fileArr.length; i++) {
         if (newImages.length < 3) {
           const file = fileArr[i];
           const reader = new FileReader();
           reader.onloadend = () => {
             newImages.push({
+              id: Date.now().toString() + Math.random().toString(36).substring(2, 8),
               url: reader.result as string,
               file,
               position: newImages.length
@@ -103,10 +108,11 @@ const ProductForm = ({
   const handleAddSizeToDraft = () => {
     setVariantDraft(prev => {
       const newSize = {
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 8),
         size: prev.tempSize || '',
         stock: Number(prev.tempStock) || 0,
-        basePrice: String(prev.tempBasePrice || 'R$ 0,00'),
-        price: String(prev.tempPrice || 'R$ 0,00'),
+        basePrice: Number(prev.tempBasePrice) || 0,
+        price: Number(prev.tempPrice) || 0,
       };
       if (!newSize.size) return prev;
       return {
@@ -205,8 +211,8 @@ const ProductForm = ({
                   <li key={sizeIndex} className="flex gap-4 items-center border-b py-1 text-sm">
                     <span><b>Tamanho:</b> {size.size}</span>
                     <span><b>Estoque:</b> {size.stock}</span>
-                    <span><b>Preço base:</b> {formatCurrencyInput(size.basePrice)}</span>
-                    <span><b>Preço final:</b> {formatCurrencyInput(size.price)}</span>
+                    <span><b>Preço base:</b> {formatCurrencyInput(size.basePrice.toString())}</span>
+                    <span><b>Preço final:</b> {formatCurrencyInput(size.price.toString())}</span>
                   </li>
                 ))}
               </ul>
@@ -328,8 +334,8 @@ const ProductForm = ({
                       <li key={sizeIndex} className="flex gap-4 items-center text-sm">
                         <span><b>Tamanho:</b> {size.size}</span>
                         <span><b>Estoque:</b> {size.stock}</span>
-                        <span><b>Preço base:</b> {formatCurrencyInput(size.basePrice)}</span>
-                        <span><b>Preço final:</b> {formatCurrencyInput(size.price)}</span>
+                        <span><b>Preço base:</b> {formatCurrencyInput(size.basePrice.toString())}</span>
+                        <span><b>Preço final:</b> {formatCurrencyInput(size.price.toString())}</span>
                       </li>
                     ))}
                   </ul>
