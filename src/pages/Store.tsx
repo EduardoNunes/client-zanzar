@@ -8,7 +8,8 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { loadStoreProductsReq } from "../requests/storeRequests";
+import { loadProductsReq } from "../requests/productRequests";
+import { useGlobalContext } from "../context/globalContext";
 
 interface Product {
   id: string;
@@ -24,6 +25,7 @@ interface CartItem {
 }
 
 export default function Store() {
+  const { profileId, token } = useGlobalContext();
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -35,8 +37,10 @@ export default function Store() {
   }, []);
 
   const fetchProducts = async () => {
+    const userStoreId = "";
     try {
-      const data = await loadStoreProductsReq();
+      if (!profileId || !userStoreId || !token) return;
+      const data = await loadProductsReq(userStoreId, 1, token, profileId);
       setProducts(data || []);
     } catch (error) {
       console.error("Error fetching products:", error);
