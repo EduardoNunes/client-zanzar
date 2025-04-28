@@ -132,7 +132,8 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
                       onChange={() => handleSizeSelect(size.size)}
                       className="mr-2"
                     />
-                    {size.size}
+                    <span>{size.size}</span>
+                    <span className="ml-2 text-xs text-gray-500">{formatCurrencyWithSmallCents(String(size.price))}</span>
                   </label>
                 ))}
               </div>
