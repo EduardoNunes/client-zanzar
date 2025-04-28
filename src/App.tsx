@@ -14,7 +14,6 @@ import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import AdminRoutes from "./routes/AdminRoutes";
-import StorePage from "./pages/Store";
 import UserStorePage from "./pages/UserStore";
 import CreateStore from "./pages/CreateStore";
 
@@ -130,16 +129,6 @@ export default function App() {
                 <ProtectedRoute>
                   <Layout>
                     <InvitesPage />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/store"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <StorePage />
                   </Layout>
                 </ProtectedRoute>
               }

@@ -1,4 +1,4 @@
-import {
+/* import {
   Heart,
   Loader2,
   Minus,
@@ -168,7 +168,7 @@ export default function Store() {
         </div>
       )}
 
-      {/* Cart Modal */}
+
       {isCartOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
@@ -284,3 +284,4 @@ export default function Store() {
     </div>
   );
 }
+ */
