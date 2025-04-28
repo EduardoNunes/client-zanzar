@@ -1,5 +1,6 @@
 export const colorNames: { [key: string]: string } = {
     // Neutros
+    "#xxxxxx": "Único",
     "#000000": "Preto",
     "#ffffff": "Branco",
     "#808080": "Cinza",
