@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useGlobalContext } from "../context/globalContext";
 import AddProductVariants from "./AddProductVariants";
-import { ProductVariantProps } from '../types/ProductVariant';
 import { addProductReq, loadCategoriesReq, loadSubCategoriesReq, createCategoryReq, createSubCategoryReq } from "../requests/productRequests";
+import { ProductVariationsProps } from "../types/ProductVariant";
 
 export default function AddProduct({ productFeePercentage, userStoreId }: { productFeePercentage?: number; userStoreId?: string }) {
   const { token, profileId } = useGlobalContext();
@@ -17,7 +17,7 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
   const [newSubCategory, setNewSubCategory] = useState("");
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
-  const [variants, setVariants] = useState<ProductVariantProps[]>([]);
+  const [variants, setVariants] = useState<ProductVariationsProps[]>([]);
 
   useEffect(() => {
     fetchCategories();
