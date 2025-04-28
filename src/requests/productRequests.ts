@@ -1,13 +1,13 @@
 import { toast } from "react-toastify";
 import api from "../server/axios";
-import { ProductVariantProps } from "../types/ProductVariant";
+import { ProductVariationsProps } from "../types/ProductVariant";
 
 export const addProductReq = async (
   name: string | null,
   description: string | null,
   selectedCategory: string,
   selectedSubCategory: string,
-  variants: ProductVariantProps[],
+  variants: ProductVariationsProps[],
   token: string | null,
   profileId: string | null,
   userStoreId: string | undefined
@@ -16,7 +16,7 @@ export const addProductReq = async (
     toast.error("Ops, algo deu errado, entre em contato com um adm.");
     return null;
   }
-console.log("DATA", variants)
+
   const productLoadingToast = toast.loading("Criando produto, aguarde...");
 
   // Monta o FormData para envio multipart/form-data
