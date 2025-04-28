@@ -143,7 +143,10 @@ export default function UserStore() {
           />
         )
         }
-        <UserStoreGrid username={slug} productFeePercentage={userStore?.productFeePercentage} userStoreId={userStore?.id} />
+        <UserStoreGrid
+          productFeePercentage={userStore?.productFeePercentage}
+          userStoreId={userStore?.id}
+        />
       </div>
     </>
   );
