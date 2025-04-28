@@ -84,7 +84,7 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
                 <p className="text-gray-700 text-sm whitespace-pre-line">{product.description}</p>
               </div>
               <div className="text-xl font-bold text-indigo-700 mt-2">
-                {formatCurrencyWithSmallCents(String(variation.sizes[0].price))}
+                {formatCurrencyWithSmallCents(String(variation.sizes.find(s => s.size === selectedSizeId)?.price ?? variation.sizes[0].price))}
               </div>
             </div>
             <div className={`flex flex-col mt-2 items-center ${product.rating === 0 ? 'hidden' : ''}`}>
@@ -121,7 +121,7 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
           {variation.sizes && variation.sizes.length > 0 && (
             <div className="mb-2">
               <label className="block font-medium mb-1">Tamanho:</label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {variation.sizes.map((size, _) => (
                   <label key={size.id} className={`flex items-center cursor-pointer px-2 py-1 border rounded border-gray-300}`}>
                     <input
@@ -133,7 +133,6 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
                       className="mr-2"
                     />
                     <span>{size.size}</span>
-                    <span className="ml-2 text-xs text-gray-500">{formatCurrencyWithSmallCents(String(size.price))}</span>
                   </label>
                 ))}
               </div>
