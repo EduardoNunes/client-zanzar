@@ -5,7 +5,7 @@ import { loadProductsReq } from "../requests/productRequests";
 import AddProduct from "./AddProduct";
 import ProductCard from "./ProductCard";
 import { ProductVariationsProps } from "../types/ProductVariant";
-import LoadSpinner from "./KoadSpinner";
+import LoadSpinner from "./LoadSpinner";
 
 
 interface UserStoreGridProps {

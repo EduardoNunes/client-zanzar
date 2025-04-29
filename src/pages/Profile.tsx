@@ -7,7 +7,7 @@ import {
   updateProfileImageReq,
 } from "../requests/profileRequests";
 import { useGlobalContext } from "../context/globalContext";
-import LoadSpinner from "../components/KoadSpinner";
+import LoadSpinner from "../components/LoadSpinner";
 
 interface Profile {
   profileId: string;
