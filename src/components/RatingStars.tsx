@@ -1,14 +1,15 @@
 import { Star } from "lucide-react";
 
 export default function RatingStars({ rating }: { rating: number }) {
+    const safeRating = typeof rating === "number" && !isNaN(rating) ? rating : 0;
     const stars = [];
   
     for (let i = 1; i <= 5; i++) {
       let fill = "none";
   
-      if (i <= Math.floor(rating)) {
+      if (i <= Math.floor(safeRating)) {
         fill = "#facc15"; 
-      } else if (i - rating <= 1) {        
+      } else if (i - safeRating <= 1) {        
         fill = `url(#grad${i})`;
       }
   
@@ -25,7 +26,8 @@ export default function RatingStars({ rating }: { rating: number }) {
     
     const gradients = [];
     for (let i = 1; i <= 5; i++) {
-      const offset = Math.max(0, Math.min(1, rating - (i - 1))) * 100;
+      const offsetRaw = Math.max(0, Math.min(1, safeRating - (i - 1)));
+      const offset = isNaN(offsetRaw) ? 0 : offsetRaw * 100;
   
       gradients.push(
         <linearGradient id={`grad${i}`} key={`grad${i}`} x1="0" x2="100%" y1="0" y2="0">

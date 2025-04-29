@@ -180,7 +180,7 @@ const ProductForm = ({
   );
 
   return (
-    <form className="max-w-2xl mx-auto my-6 py-4">
+    <div className="max-w-2xl mx-auto my-6 py-4">
       {/* Variantes */}
       <div>
         <h3 className="text-xl font-semibold mb-2">Cadastrar Variante</h3>
@@ -390,7 +390,7 @@ const ProductForm = ({
           )}
         </div>
       </div>
-    </form>
+    </div>
   );
 };
 
