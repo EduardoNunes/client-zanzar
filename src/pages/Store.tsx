@@ -98,7 +98,7 @@ export default function Store() {
     setCheckoutLoading(false);
   };
 
- {loading && <loadSpinner />}
+ if (loading) { return <LoadSpinner /> }
 
   return (
     <div className="max-w-4xl mx-auto">

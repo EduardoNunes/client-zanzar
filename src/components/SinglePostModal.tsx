@@ -85,7 +85,7 @@ export default function SinglePostModal({
     navigate(`/profile/${username}`);
   };
 
-  { loading && <LoadSpinner /> }
+  if (loading) { return <LoadSpinner /> }
 
   if (!post) {
     return (

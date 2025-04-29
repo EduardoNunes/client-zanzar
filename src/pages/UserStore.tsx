@@ -51,7 +51,7 @@ export default function UserStore() {
     try {
       setLoading(true);
       const userStoreData = slug && profileId && (await getUserStoreReq(slug, token, profileId));
-      
+
       if (!userStoreData) return;
 
       userStoreData && setUserStore(userStoreData);
@@ -118,7 +118,7 @@ export default function UserStore() {
     }
   };
 
-  {loading && <LoadSpinner />}
+  if (loading) { return <LoadSpinner /> }
 
   return (
     <>

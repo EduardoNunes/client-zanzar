@@ -125,7 +125,7 @@ export default function Admin() {
     },
   ];
 
-  { loading && <LoadSpinner /> }
+  if (loading) { return <LoadSpinner /> }
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">

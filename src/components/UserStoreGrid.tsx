@@ -77,6 +77,7 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId, onPro
 
   const fetchProducts = async () => {
     setLoading(true);
+
     if (userStoreId && profileId) {
       const initialProducts = await loadProductsReq(userStoreId, 1, token, profileId);
       setAllProducts(initialProducts);
@@ -110,10 +111,11 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId, onPro
     }
   };
 
-
   const handleAddProduct = () => {
     setIsOpen(true);
   }
+
+  if (loading) { return <LoadSpinner /> }
 
   return (
     <div>
@@ -127,7 +129,6 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId, onPro
       <button className="w-9 h-9 my-4" onClick={handleAddProduct}>
         <PackagePlus className="w-full h-full" />
       </button>
-      {loading && <LoadSpinner />}
       <div className="grid grid-cols-2 gap-2">
         {allProducts.length > 0 ? (
           allProducts.map((product, _) => (
