@@ -344,7 +344,7 @@ const ProductForm = ({
           onClick={handleAddVariant}
           className="mt-4 w-full text-lg py-2 font-bold rounded bg-gradient-to-r from-green-600 to-green-800 text-white shadow-lg hover:from-green-700 hover:to-green-900 transition-all border-2 border-green-900"
         >
-          Concluir variante
+          Cadastrar variante
         </button>
 
         {/* Lista de variantes já cadastradas */}

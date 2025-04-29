@@ -57,7 +57,13 @@ interface ImageProps {
   position: number;
 }
 
-export default function UserStoreGrid({ productFeePercentage, userStoreId }: UserStoreGridProps) {
+interface UserStoreGridProps {
+  productFeePercentage?: number;
+  userStoreId?: string;
+  onProductAdded?: () => void;
+}
+
+export default function UserStoreGrid({ productFeePercentage, userStoreId, onProductAdded }: UserStoreGridProps) {
   const { profileId, token, isOpen, setIsOpen } = useGlobalContext();
   const [selectedProduct, setSelectedProduct] = useState<ProductCardProps | null>(null);
   const [allProducts, setAllProducts] = useState<ProductCardProps[]>([]);
@@ -131,7 +137,10 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId }: Use
     <div>
       {
         isOpen &&
-        <AddProduct productFeePercentage={productFeePercentage} userStoreId={userStoreId} />
+        <AddProduct productFeePercentage={productFeePercentage} userStoreId={userStoreId} onProductAdded={async () => {
+          await fetchProducts();
+          if (typeof onProductAdded === 'function') onProductAdded();
+        }} />
       }
       <button className="w-9 h-9 my-4" onClick={handleAddProduct}>
         <PackagePlus className="w-full h-full" />

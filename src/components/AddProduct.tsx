@@ -8,7 +8,13 @@ import { ProductVariationsProps } from "../types/ProductVariant";
 import { addProductSchema } from "../validations/addProductSchema";
 import { ValidationError } from "yup";
 
-export default function AddProduct({ productFeePercentage, userStoreId }: { productFeePercentage?: number; userStoreId?: string }) {
+interface AddProductProps {
+  productFeePercentage?: number;
+  userStoreId?: string;
+  onProductAdded?: () => void;
+}
+
+export default function AddProduct({ productFeePercentage, userStoreId, onProductAdded }: AddProductProps) {
   const { token, profileId } = useGlobalContext();
   const { setIsOpen } = useGlobalContext();
   const [name, setName] = useState("");
@@ -101,6 +107,9 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
       profileId,
       userStoreId
     );
+    if (typeof onProductAdded === 'function') {
+      onProductAdded();
+    }
   };
 
   return (

@@ -146,6 +146,9 @@ export default function UserStore() {
         <UserStoreGrid
           productFeePercentage={userStore?.productFeePercentage}
           userStoreId={userStore?.id}
+          onProductAdded={() => {
+            setUserStore(prev => prev ? { ...prev, totalProducts: (prev.totalProducts || 0) + 1 } : prev);
+          }}
         />
       </div>
     </>
