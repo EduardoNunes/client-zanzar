@@ -4,7 +4,11 @@ import RatingStars from "./RatingStars";
 import formatCurrencyWithSmallCents from "../utils/centsReduct";
 import { ProductProps } from "../types/ProductVariant";
 
-const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart }) => {
+const ProductModal: React.FC<ProductProps> = ({
+  product,
+  onClose,
+  onAddToCart,
+}) => {
   const [selectedVariationIndex, setSelectedVariationIndex] = useState(0);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -13,8 +17,9 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
   const [selectedSizeId, setSelectedSizeId] = useState(
     variation.sizes && variation.sizes.length > 0 ? variation.sizes[0].id : ""
   );
+  const [showFullImage, setShowFullImage] = useState(false);
 
-  console.log("PRODUCT", product)
+  console.log("PRODUCT", product);
 
   const handleColorSelect = (index: number) => {
     setSelectedVariationIndex(index);
@@ -25,7 +30,6 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
   const handleSizeSelect = (sizeId: string) => {
     setSelectedSizeId(sizeId);
   };
-
 
   const handleImageSelect = (index: number) => {
     setSelectedImageIndex(index);
@@ -41,16 +45,21 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
       className="fixed inset-0 w-full h-full z-50 flex items-center justify-center bg-black bg-opacity-80"
     >
       <div
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         className="relative bg-white w-full h-full overflow-y-auto p-6 flex flex-col md:flex-row"
       >
         {/* Imagens/Carrossel */}
         <div className="flex flex-col items-center">
-          <div className="relative w-full flex justify-center mb-4" style={{ aspectRatio: '16/9', maxHeight: '35vh' }}>
+          <div
+            className="relative w-full flex justify-center mb-4"
+            style={{ aspectRatio: "16/9", maxHeight: "35vh" }}
+          >
             <img
               src={images[selectedImageIndex]?.url || "/placeholder.png"}
               alt={product.name}
-              className="object-contain w-full h-full rounded-lg" style={{ aspectRatio: '16/9', maxHeight: '35vh' }}
+              className="object-contain w-full h-full rounded-lg"
+              style={{ aspectRatio: "16/9", maxHeight: "35vh" }}
+              onClick={() => setShowFullImage(true)}
             />
             <button
               onClick={onClose}
@@ -58,6 +67,49 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
             >
               <X size={24} />
             </button>
+            {showFullImage && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+                onClick={() => setShowFullImage(false)}
+              >
+                <button
+                  className="absolute left-4 bg-black/80 text-white rounded-full p-2 hover:bg-black"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImageIndex(
+                      (prevIndex) =>
+                        (prevIndex - 1 + images.length) % images.length
+                    );
+                  }}
+                >
+                  {"<"}
+                </button>
+                <img
+                  src={images[selectedImageIndex]?.url || "/placeholder.png"}
+                  alt={product.name}
+                  className="max-w-full max-h-full rounded-lg shadow-2xl border-4 border-white"
+                  style={{ objectFit: "contain" }}
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <button
+                  className="absolute right-4 bg-black/80 text-white rounded-full p-2 hover:bg-black"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImageIndex(
+                      (prevIndex) => (prevIndex + 1) % images.length
+                    );
+                  }}
+                >
+                  {">"}
+                </button>
+                <button
+                  onClick={() => setShowFullImage(false)}
+                  className="absolute top-4 right-4 bg-black/80 text-white rounded-full p-2 hover:bg-black"
+                >
+                  <X size={32} />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Miniaturas */}
@@ -67,7 +119,11 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
                 key={idx}
                 src={img.url}
                 alt={product.name}
-                className={`w-16 h-16 object-cover rounded-lg border-2 ${selectedImageIndex === idx ? "border-indigo-600" : "border-transparent"}`}
+                className={`w-16 h-16 object-cover rounded-lg border-2 ${
+                  selectedImageIndex === idx
+                    ? "border-indigo-600"
+                    : "border-transparent"
+                }`}
                 onClick={() => handleImageSelect(idx)}
                 style={{ cursor: "pointer" }}
               />
@@ -79,21 +135,39 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
         <div className="flex-1 flex flex-col gap-3 mt-4">
           <div className="flex justify-between">
             <div className="flex flex-col pr-4">
-              <h2 className="text-2xl font-bold text-gray-900">{product.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {product.name}
+              </h2>
               <div className="">
-                <p className="text-gray-700 text-sm whitespace-pre-line">{product.description}</p>
+                <p className="text-gray-700 text-sm whitespace-pre-line">
+                  {product.description}
+                </p>
               </div>
               <div className="text-xl font-bold text-indigo-700 mt-2">
-                {formatCurrencyWithSmallCents(String(variation.sizes.find(s => s.size === selectedSizeId)?.price ?? variation.sizes[0].price))}
+                {formatCurrencyWithSmallCents(
+                  String(
+                    variation.sizes.find((s) => s.size === selectedSizeId)
+                      ?.price ?? variation.sizes[0].price
+                  )
+                )}
               </div>
             </div>
-            <div className={`flex flex-col mt-2 items-center ${product.rating === 0 ? 'hidden' : ''}`}>
+            <div
+              className={`flex flex-col mt-2 items-center ${
+                product.rating === 0 ? "hidden" : ""
+              }`}
+            >
               <div className="flex items-center">
-                <RatingStars rating={product.ratingCount / (product.rating || 1)} />
-                <span className="ml-2 text-gray-500 text-sm">({product.ratingCount})</span>
+                <RatingStars
+                  rating={product.ratingCount / (product.rating || 1)}
+                />
+                <span className="ml-2 text-gray-500 text-sm">
+                  ({product.ratingCount})
+                </span>
               </div>
               <div className="text-gray-600 text-xs mt-2">
-                Total vendidos: <span className="font-bold">{product.totalSold}</span>
+                Total vendidos:{" "}
+                <span className="font-bold">{product.totalSold}</span>
               </div>
             </div>
           </div>
@@ -101,16 +175,24 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
           {/* Seleção de cor */}
           {product.variations.length > 1 && (
             <div className="mb-2">
-              <label className="block font-medium mb-1">Cor: {variation.colorName}</label>
+              <label className="block font-medium mb-1">
+                Cor: {variation.colorName}
+              </label>
               <div className="flex gap-2">
                 {product.variations.map((v, idx) => (
                   <button
                     key={idx}
-                    className={`w-8 h-8 rounded-full border-2 ${selectedVariationIndex === idx ? "border-indigo-600" : "border-gray-300"}`}
+                    className={`w-8 h-8 rounded-full border-2 ${
+                      selectedVariationIndex === idx
+                        ? "border-indigo-600"
+                        : "border-gray-300"
+                    }`}
                     style={{ backgroundColor: v.colorCode || "#fff" }}
                     onClick={() => handleColorSelect(idx)}
                   >
-                    {selectedVariationIndex === idx && <span className="block w-full h-full rounded-full border-2 border-indigo-600"></span>}
+                    {selectedVariationIndex === idx && (
+                      <span className="block w-full h-full rounded-full border-2 border-indigo-600"></span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -123,7 +205,10 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
               <label className="block font-medium mb-1">Tamanho:</label>
               <div className="flex flex-wrap gap-2">
                 {variation.sizes.map((size, _) => (
-                  <label key={size.id} className={`flex items-center cursor-pointer px-2 py-1 border rounded border-gray-300}`}>
+                  <label
+                    key={size.id}
+                    className={`flex items-center cursor-pointer px-2 py-1 border rounded border-gray-300}`}
+                  >
                     <input
                       type="radio"
                       name="product-size"
@@ -141,21 +226,34 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
 
           {/* Seleção de quantidade */}
           <div className="mb-2 flex flex-col items-center justify-center">
-            <div className={`flex flex-col text-center text-red-500 ${(variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? 99) < 10 ? 'block' : 'hidden'}`}>
+            <div
+              className={`flex flex-col text-center text-red-500 ${
+                (variation.sizes.find((s) => s.size === selectedSizeId)
+                  ?.stock ?? 99) < 10
+                  ? "block"
+                  : "hidden"
+              }`}
+            >
               <span className="text-sm font-semibold">ÚLTIMAS UNIDADES</span>
-              <span className="text-xs">Restam apenas {variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock}</span>
+              <span className="text-xs">
+                Restam apenas{" "}
+                {variation.sizes.find((s) => s.size === selectedSizeId)
+                  ?.stock ?? variation.sizes[0].stock}
+              </span>
             </div>
             <div className="flex items-center gap-2 mb-2">
               <label className="block font-medium">Quantidade:</label>
               <span className="flex flex-col items-center text-xs text-gray-500">
-                Estoque: {variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock}
+                Estoque:{" "}
+                {variation.sizes.find((s) => s.size === selectedSizeId)
+                  ?.stock ?? variation.sizes[0].stock}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 className="px-2 py-1 border rounded bg-gray-100 hover:bg-gray-200 text-lg font-bold"
-                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 disabled={quantity <= 1}
               >
                 -
@@ -164,40 +262,57 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
                 type="number"
                 className="border rounded px-2 py-1 w-20 text-center"
                 min={1}
-                max={variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock}
-                value={quantity === 0 ? '' : quantity}
-                onChange={e => {
+                max={
+                  variation.sizes.find((s) => s.size === selectedSizeId)
+                    ?.stock ?? variation.sizes[0].stock
+                }
+                value={quantity === 0 ? "" : quantity}
+                onChange={(e) => {
                   const val = e.target.value;
                   // Permite campo vazio
-                  if (val === '') {
+                  if (val === "") {
                     setQuantity(0);
                   } else {
-                    const maxStock = variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock;
+                    const maxStock =
+                      variation.sizes.find((s) => s.size === selectedSizeId)
+                        ?.stock ?? variation.sizes[0].stock;
                     setQuantity(Math.max(0, Math.min(maxStock, Number(val))));
                   }
                 }}
-                onBlur={e => {
+                onBlur={(e) => {
                   // Se sair do campo vazio ou zero, volta para 1
                   if (!e.target.value || Number(e.target.value) < 1) {
                     setQuantity(1);
                   }
                 }}
-                style={{ MozAppearance: 'textfield' }}
+                style={{ MozAppearance: "textfield" }}
               />
               <button
                 type="button"
                 className="px-2 py-1 border rounded bg-gray-100 hover:bg-gray-200 text-lg font-bold"
                 onClick={() => {
-                  const maxStock = variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock;
-                  setQuantity(q => Math.min(maxStock, q + 1))
+                  const maxStock =
+                    variation.sizes.find((s) => s.size === selectedSizeId)
+                      ?.stock ?? variation.sizes[0].stock;
+                  setQuantity((q) => Math.min(maxStock, q + 1));
                 }}
-                disabled={quantity >= (variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock)}
+                disabled={
+                  quantity >=
+                  (variation.sizes.find((s) => s.size === selectedSizeId)
+                    ?.stock ?? variation.sizes[0].stock)
+                }
               >
                 +
               </button>
             </div>
             <span className="text-indigo-700 font-semibold text-lg mt-1">
-              Total: {formatCurrencyWithSmallCents(String(((variation.sizes.find(s => s.size === selectedSizeId)?.price ?? variation.sizes[0].price) * quantity)))}
+              Total:{" "}
+              {formatCurrencyWithSmallCents(
+                String(
+                  (variation.sizes.find((s) => s.size === selectedSizeId)
+                    ?.price ?? variation.sizes[0].price) * quantity
+                )
+              )}
             </span>
           </div>
 
