@@ -16,7 +16,7 @@ import {
   getTotalUsersReq,
 } from "../requests/adminRequests";
 import { useGlobalContext } from "../context/globalContext";
-import LoadSpinner from "../components/loadSpinner";
+import LoadSpinner from "../components/KoadSpinner";
 
 interface Stats {
   totalPosts: number;

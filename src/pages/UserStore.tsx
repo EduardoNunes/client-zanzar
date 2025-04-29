@@ -10,7 +10,7 @@ import {
 } from "../requests/storeRequests";
 import { logOut } from "../utils/logout";
 import { toast } from "react-toastify";
-import LoadSpinner from "../components/loadSpinner";
+import LoadSpinner from "../components/KoadSpinner";
 
 interface UserStore {
   userStoreId: string;

@@ -7,7 +7,7 @@ import LikeButton from "./LikeButton";
 import { useGlobalContext } from "../context/globalContext";
 import Sound from "./Sound";
 import { getSinglePostReq } from "../requests/singlePostRequests";
-import LoadSpinner from "./loadSpinner";
+import LoadSpinner from "./KoadSpinner";
 interface SinglePostModalProps {
   postId: string;
   onClose: () => void;
