@@ -141,7 +141,10 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
 
           {/* Seleção de quantidade */}
           <div className="mb-2 flex flex-col items-center justify-center">
-            <span className={`text-red-500 font-semibold ${(variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? 99) < 10 ? 'block' : 'hidden'}`}>ÚLTIMAS UNIDADES</span>
+            <div className={`flex flex-col text-center text-red-500 ${(variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? 99) < 10 ? 'block' : 'hidden'}`}>
+              <span className="text-sm font-semibold">ÚLTIMAS UNIDADES</span>
+              <span className="text-xs">Restam apenas {variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock}</span>
+            </div>
             <div className="flex items-center gap-2 mb-2">
               <label className="block font-medium">Quantidade:</label>
               <span className="flex flex-col items-center text-xs text-gray-500">
@@ -193,6 +196,9 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
                 +
               </button>
             </div>
+            <span className="text-indigo-700 font-semibold text-lg mt-1">
+              Total: {formatCurrencyWithSmallCents(String(((variation.sizes.find(s => s.size === selectedSizeId)?.price ?? variation.sizes[0].price) * quantity)))}
+            </span>
           </div>
 
           {/* Botão adicionar ao carrinho */}
