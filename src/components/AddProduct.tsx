@@ -5,6 +5,8 @@ import { useGlobalContext } from "../context/globalContext";
 import AddProductVariants from "./AddProductVariants";
 import { addProductReq, loadCategoriesReq, loadSubCategoriesReq, createCategoryReq, createSubCategoryReq } from "../requests/productRequests";
 import { ProductVariationsProps } from "../types/ProductVariant";
+import { addProductSchema } from "../validations/addProductSchema";
+import { ValidationError } from "yup";
 
 export default function AddProduct({ productFeePercentage, userStoreId }: { productFeePercentage?: number; userStoreId?: string }) {
   const { token, profileId } = useGlobalContext();
@@ -71,19 +73,21 @@ export default function AddProduct({ productFeePercentage, userStoreId }: { prod
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      addProductSchema.validateSync({
+        name,
+        description,
+        selectedCategory,
+        selectedSubCategory,
+        variants,
+      });
 
-    if (!name || !description) {
-      toast.info("Por favor, informa o nome e a descrição do produto");
-      return;
-    }
-
-    if (!selectedCategory) {
-      toast.info("Por favor, selecione uma categoria");
-      return;
-    }
-
-    if (!selectedSubCategory) {
-      toast.info("Por favor, selecione uma subcategoria");
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        toast.error(error.errors[0]);
+      } else {
+        toast.info("Erro inesperado ao validar o produto.");
+      }
       return;
     }
 

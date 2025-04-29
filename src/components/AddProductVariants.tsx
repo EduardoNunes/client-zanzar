@@ -4,6 +4,9 @@ import { ProductImageProps, ProductVariationsProps } from '../types/ProductVaria
 import { colorNames } from '../utils/colorNames';
 import formatCurrencyInput from '../utils/formatRealCoin';
 import ColorPickerWithName from './ColorPickerWithNames';
+import { addProductVariantSchema } from '../validations/addProductSchema';
+import { toast } from 'react-toastify';
+import { ValidationError } from 'yup';
 
 const initialVariantDraft: ProductVariationsProps & {
   tempSize?: string;
@@ -47,6 +50,21 @@ const ProductForm = ({
 
   // Adiciona a variante preenchida à lista e reseta o draft
   const handleAddVariant = () => {
+    if (!variantDraft.colorName) {
+      toast.error("Informe uma cor.");
+      return;
+    }
+
+    if (!variantDraft.images.length) {
+      toast.error("Selecione ao menos uma imagem JPG, JPEG ou PNG.");
+      return;
+    }
+
+    if (variantDraft.sizes.length === 0) {
+      toast.error("Adicione pelo menos um grupo de informações.");
+      return;
+    }
+
     setVariants([
       ...variants,
       {
@@ -106,6 +124,33 @@ const ProductForm = ({
 
   // Adiciona o tamanho preenchido à lista de tamanhos do draft e zera os inputs temporários
   const handleAddSizeToDraft = () => {
+
+    if (!variantDraft.tempBasePrice) {
+      toast.error("Informe o preço base.");
+      return;
+    }
+
+    if (!variantDraft.tempStock) {
+      toast.error("Informe o estoque.");
+      return;
+    }
+
+    try {
+      addProductVariantSchema.validateSync({
+        tamanho: variantDraft.tempSize,
+        preco: Number(variantDraft.tempBasePrice.replace("R$", "").replace(/\./g, "").replace(",", ".").trim()),
+        estoque: Number(variantDraft.tempStock.replace("R$", "").replace(/\./g, "").replace(",", ".").trim()),
+      });
+
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        toast.error(error.errors[0]);
+      } else {
+        toast.info("Erro inesperado ao validar a variante.");
+      }
+      return;
+    }
+
     setVariantDraft(prev => {
       const newSize = {
         id: Date.now().toString() + Math.random().toString(36).substring(2, 8),
