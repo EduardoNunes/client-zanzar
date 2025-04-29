@@ -46,11 +46,11 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
       >
         {/* Imagens/Carrossel */}
         <div className="flex flex-col items-center">
-          <div className="relative w-full flex justify-center mb-4">
+          <div className="relative w-full flex justify-center mb-4" style={{ aspectRatio: '16/9', maxHeight: '35vh' }}>
             <img
               src={images[selectedImageIndex]?.url || "/placeholder.png"}
               alt={product.name}
-              className="object-contain max-h-96 w-full rounded-lg"
+              className="object-contain w-full h-full rounded-lg" style={{ aspectRatio: '16/9', maxHeight: '35vh' }}
             />
             <button
               onClick={onClose}
@@ -140,17 +140,59 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose, onAddToCart })
           )}
 
           {/* Seleção de quantidade */}
-          <div className="mb-2 flex items-center gap-2">
-            <label className="block font-medium">Quantidade:</label>
-            <input
-              type="number"
-              className="border rounded px-2 py-1 w-20"
-              min={1}
-              max={variation.sizes[0].stock}
-              value={quantity}
-              onChange={e => setQuantity(Math.max(1, Math.min(variation.sizes[0].stock, Number(e.target.value))))}
-            />
-            <span className="text-xs text-gray-500">Estoque: {variation.sizes[0].stock}</span>
+          <div className="mb-2 flex flex-col items-center justify-center">
+            <span className={`text-red-500 font-semibold ${(variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? 99) < 10 ? 'block' : 'hidden'}`}>ÚLTIMAS UNIDADES</span>
+            <div className="flex items-center gap-2 mb-2">
+              <label className="block font-medium">Quantidade:</label>
+              <span className="flex flex-col items-center text-xs text-gray-500">
+                Estoque: {variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="px-2 py-1 border rounded bg-gray-100 hover:bg-gray-200 text-lg font-bold"
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                disabled={quantity <= 1}
+              >
+                -
+              </button>
+              <input
+                type="number"
+                className="border rounded px-2 py-1 w-20 text-center"
+                min={1}
+                max={variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock}
+                value={quantity === 0 ? '' : quantity}
+                onChange={e => {
+                  const val = e.target.value;
+                  // Permite campo vazio
+                  if (val === '') {
+                    setQuantity(0);
+                  } else {
+                    const maxStock = variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock;
+                    setQuantity(Math.max(0, Math.min(maxStock, Number(val))));
+                  }
+                }}
+                onBlur={e => {
+                  // Se sair do campo vazio ou zero, volta para 1
+                  if (!e.target.value || Number(e.target.value) < 1) {
+                    setQuantity(1);
+                  }
+                }}
+                style={{ MozAppearance: 'textfield' }}
+              />
+              <button
+                type="button"
+                className="px-2 py-1 border rounded bg-gray-100 hover:bg-gray-200 text-lg font-bold"
+                onClick={() => {
+                  const maxStock = variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock;
+                  setQuantity(q => Math.min(maxStock, q + 1))
+                }}
+                disabled={quantity >= (variation.sizes.find(s => s.size === selectedSizeId)?.stock ?? variation.sizes[0].stock)}
+              >
+                +
+              </button>
+            </div>
           </div>
 
           {/* Botão adicionar ao carrinho */}
