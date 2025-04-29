@@ -10,6 +10,7 @@ import {
 } from "../requests/storeRequests";
 import { logOut } from "../utils/logout";
 import { toast } from "react-toastify";
+import LoadSpinner from "../components/loadSpinner";
 
 interface UserStore {
   userStoreId: string;
@@ -50,10 +51,10 @@ export default function UserStore() {
     try {
       setLoading(true);
       const userStoreData = slug && profileId && (await getUserStoreReq(slug, token, profileId));
+      
+      if (!userStoreData) return;
+
       userStoreData && setUserStore(userStoreData);
-
-      console.log("USERSTOREDATA", userStoreData)
-
       setIsFavorited(userStoreData.isFavorited);
 
       const isCurrentUserProfile = profileId === userStoreData.profileId;
@@ -117,13 +118,7 @@ export default function UserStore() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
+  {loading && <LoadSpinner />}
 
   return (
     <>
