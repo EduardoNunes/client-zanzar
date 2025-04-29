@@ -4,6 +4,8 @@ import { useGlobalContext } from "../context/globalContext";
 import { loadProductsReq } from "../requests/productRequests";
 import AddProduct from "./AddProduct";
 import ProductCard from "./ProductCard";
+import { ProductVariationsProps } from "../types/ProductVariant";
+import LoadSpinner from "./loadSpinner";
 
 
 interface UserStoreGridProps {
@@ -19,7 +21,7 @@ interface ProductCardProps {
   rating: number;
   ratingCount: number;
   totalSold: number;
-  variations: VariationsProps[];
+  variations: ProductVariationsProps[];
   onCartClick: () => void;
 }
 
@@ -34,29 +36,6 @@ interface CategoryProps {
   name: string;
 }
 
-interface VariationsProps {
-  colorName: string;
-  colorCode: string;
-  id: string;
-  images: ImageProps[];
-  productId: string;
-  sizes: SizesProps[];
-}
-
-interface SizesProps {
-  id: string;
-  price: number;
-  basePrice: number;
-  stock: number;
-  size: string;
-}
-
-interface ImageProps {
-  id: string;
-  url: string;
-  position: number;
-}
-
 interface UserStoreGridProps {
   productFeePercentage?: number;
   userStoreId?: string;
@@ -69,6 +48,7 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId, onPro
   const [allProducts, setAllProducts] = useState<ProductCardProps[]>([]);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   let scrollTriggered = false;
 
@@ -96,10 +76,12 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId, onPro
   }, [loadingMore]);
 
   const fetchProducts = async () => {
+    setLoading(true);
     if (userStoreId && profileId) {
       const initialProducts = await loadProductsReq(userStoreId, 1, token, profileId);
       setAllProducts(initialProducts);
     }
+    setLoading(false);
   };
 
   const loadMoreProducts = async () => {
@@ -145,7 +127,7 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId, onPro
       <button className="w-9 h-9 my-4" onClick={handleAddProduct}>
         <PackagePlus className="w-full h-full" />
       </button>
-
+      {loading && <LoadSpinner />}
       <div className="grid grid-cols-2 gap-2">
         {allProducts.length > 0 ? (
           allProducts.map((product, _) => (
@@ -177,7 +159,7 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId, onPro
 
       {!loadingMore && allProducts.length > 0 && (
         <div className="text-center text-gray-500 py-4">
-          No more products to load.
+          Sem mais produtos.
         </div>
       )}
       <div
