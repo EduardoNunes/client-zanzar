@@ -93,7 +93,9 @@ export default function Profile() {
     }
   };
 
-  if (loading) { return <LoadSpinner /> }
+  if (loading) {
+    return <LoadSpinner />;
+  }
 
   return (
     <>
