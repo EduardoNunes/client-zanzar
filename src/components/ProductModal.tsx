@@ -1,14 +1,17 @@
+import { ShoppingCart } from "lucide-react";
 import React, { useState } from "react";
-import { X, ShoppingCart } from "lucide-react";
-import RatingStars from "./RatingStars";
-import formatCurrencyWithSmallCents from "../utils/centsReduct";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useGlobalContext } from "../context/globalContext";
+import { addToCartReq } from "../requests/cartProductsRequests";
 import { ProductProps } from "../types/ProductVariant";
+import formatCurrencyWithSmallCents from "../utils/centsReduct";
+import { logOut } from "../utils/logout";
+import RatingStars from "./RatingStars";
+import ShowFullImage from "./ShowFullImage";
 
-const ProductModal: React.FC<ProductProps> = ({
-  product,
-  onClose,
-  onAddToCart,
-}) => {
+const ProductModal: React.FC<ProductProps> = ({ product, onClose }) => {
+  const { profileId, token } = useGlobalContext();
   const [selectedVariationIndex, setSelectedVariationIndex] = useState(0);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -17,9 +20,9 @@ const ProductModal: React.FC<ProductProps> = ({
   const [selectedSizeId, setSelectedSizeId] = useState(
     variation.sizes && variation.sizes.length > 0 ? variation.sizes[0].id : ""
   );
-  const [showFullImage, setShowFullImage] = useState(false);
+  const [sizeToCart, setSizeToCart] = useState("");
 
-  console.log("PRODUCT", product);
+  const navigate = useNavigate();
 
   const handleColorSelect = (index: number) => {
     setSelectedVariationIndex(index);
@@ -27,8 +30,9 @@ const ProductModal: React.FC<ProductProps> = ({
     setSelectedSizeId(product.variations[index].sizes[0]?.id || "");
   };
 
-  const handleSizeSelect = (sizeId: string) => {
-    setSelectedSizeId(sizeId);
+  const handleSizeSelect = (sizeName: string, sizeId: string) => {
+    setSizeToCart(sizeId);
+    setSelectedSizeId(sizeName);
   };
 
   const handleImageSelect = (index: number) => {
@@ -36,7 +40,24 @@ const ProductModal: React.FC<ProductProps> = ({
   };
 
   const handleAddToCart = () => {
-    onAddToCart(product.id, variation, quantity);
+    if (!sizeToCart) {
+      toast.info("Selecione um tamanho.");
+      return;
+    }
+
+    if (!profileId) {
+      logOut(navigate);
+      return;
+    }
+
+    addToCartReq(
+      profileId,
+      product.id,
+      variation.id,
+      sizeToCart,
+      quantity,
+      token
+    );
   };
 
   return (
@@ -49,87 +70,14 @@ const ProductModal: React.FC<ProductProps> = ({
         className="relative bg-white w-full h-full overflow-y-auto p-6 flex flex-col md:flex-row"
       >
         {/* Imagens/Carrossel */}
-        <div className="flex flex-col items-center">
-          <div
-            className="relative w-full flex justify-center mb-4"
-            style={{ aspectRatio: "16/9", maxHeight: "35vh" }}
-          >
-            <img
-              src={images[selectedImageIndex]?.url || "/placeholder.png"}
-              alt={product.name}
-              className="object-contain w-full h-full rounded-lg"
-              style={{ aspectRatio: "16/9", maxHeight: "35vh" }}
-              onClick={() => setShowFullImage(true)}
-            />
-            <button
-              onClick={onClose}
-              className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1"
-            >
-              <X size={24} />
-            </button>
-            {showFullImage && (
-              <div
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
-                onClick={() => setShowFullImage(false)}
-              >
-                <button
-                  className="absolute left-4 bg-black/80 text-white rounded-full p-2 hover:bg-black"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedImageIndex(
-                      (prevIndex) =>
-                        (prevIndex - 1 + images.length) % images.length
-                    );
-                  }}
-                >
-                  {"<"}
-                </button>
-                <img
-                  src={images[selectedImageIndex]?.url || "/placeholder.png"}
-                  alt={product.name}
-                  className="max-w-full max-h-full rounded-lg shadow-2xl border-4 border-white"
-                  style={{ objectFit: "contain" }}
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <button
-                  className="absolute right-4 bg-black/80 text-white rounded-full p-2 hover:bg-black"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedImageIndex(
-                      (prevIndex) => (prevIndex + 1) % images.length
-                    );
-                  }}
-                >
-                  {">"}
-                </button>
-                <button
-                  onClick={() => setShowFullImage(false)}
-                  className="absolute top-4 right-4 bg-black/80 text-white rounded-full p-2 hover:bg-black"
-                >
-                  <X size={32} />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Miniaturas */}
-          <div className="flex gap-2 mt-2">
-            {images.map((img, idx) => (
-              <img
-                key={idx}
-                src={img.url}
-                alt={product.name}
-                className={`w-16 h-16 object-cover rounded-lg border-2 ${
-                  selectedImageIndex === idx
-                    ? "border-indigo-600"
-                    : "border-transparent"
-                }`}
-                onClick={() => handleImageSelect(idx)}
-                style={{ cursor: "pointer" }}
-              />
-            ))}
-          </div>
-        </div>
+        <ShowFullImage
+          images={images}
+          selectedImageIndex={selectedImageIndex}
+          setSelectedImageIndex={setSelectedImageIndex}
+          product={product}
+          onClose={onClose}
+          handleImageSelect={handleImageSelect}
+        />
 
         {/* Detalhes do produto */}
         <div className="flex-1 flex flex-col gap-3 mt-4">
@@ -214,7 +162,7 @@ const ProductModal: React.FC<ProductProps> = ({
                       name="product-size"
                       value={size.id}
                       checked={selectedSizeId === size.size}
-                      onChange={() => handleSizeSelect(size.size)}
+                      onChange={() => handleSizeSelect(size.size, size.id)}
                       className="mr-2"
                     />
                     <span>{size.size}</span>
