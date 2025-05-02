@@ -8,6 +8,7 @@ import {
   Send,
   Shield,
   ShoppingBag,
+  ShoppingCart,
   StickyNote,
   User,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import { MessageIndicator } from "../indicators/MessageIndicator";
 import { NotificationIndicator } from "../indicators/NotificationIndicator";
 import { logOut } from "../utils/logout";
 import AdModal from "./AdModal";
+import CartModal from "./CartModal";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { token, autentication, userName, totalUnread } = useGlobalContext();
@@ -31,6 +33,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [unreadChatsCount, setUnreadChatsCount] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [unreadInvites, setUnreadInvites] = useState(0);
+  const [isOpenCart, setIsOpenCart] = useState(false);
 
   useEffect(() => {
     const authenticate = async () => {
@@ -165,6 +168,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     />
                   </div>
                 </div>
+                <ShoppingCart
+                  className="w-8 h-8 text-gray-600"
+                  onClick={() => setIsOpenCart(true)}
+                />
               </div>
             </div>
             {/* Desktop Menu */}
@@ -293,6 +300,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </nav>
+      {isOpenCart && <CartModal setIsOpenCart={setIsOpenCart} />}
       <main className="max-w-5xl mx-auto px-4 py-8">
         <AdModal />
         {children}
