@@ -58,11 +58,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
             variations
           }}
           onClose={() => setIsProductModalOpen(false)}
-          onAddToCart={(productId, variation, quantity) => {
-            // lógica do carrinho
-            console.log(productId, variation, quantity);
-            /* setIsProductModalOpen(false); */
-          }}
         />
       }
       <div className="relative w-full flex justify-center mb-2">

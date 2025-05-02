@@ -9,7 +9,6 @@ export interface ProductProps {
     variations: ProductVariationsProps[];
   };
   onClose: () => void;
-  onAddToCart: (productId: string, variation: ProductVariationsProps, quantity: number) => void;
 }
 
 export interface ProductVariationsProps {
@@ -33,4 +32,5 @@ export interface ProductImageProps {
   id: string;
   url: string;
   position: number;
-  file?: File;}
+  file?: File;
+}
