@@ -3,7 +3,7 @@ import api from "../server/axios";
 
 export const getCartProductsReq = async (
   profileId: string,
-  token: string | null,
+  token: string | null
 ) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
@@ -35,7 +35,7 @@ export const addToCartReq = async (
   variationId: string,
   size: string,
   quantity: number,
-  token: string | null,
+  token: string | null
 ) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
@@ -56,18 +56,50 @@ export const addToCartReq = async (
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      },
+      }
     );
 
     toast.success("Produto adicionado ao carrinho com sucesso!");
-    console.log(response.data)
+    return response.data;
+  } catch (error: any) {
+    toast.info(error.response.data.message);
+  }
+};
+
+interface SelectedProductsProps {
+  productVariantSizeId: string;
+  quantity: number;
+}
+
+export const orderBuyProductsReq = async (
+  profileId: string,
+  token: string | null,
+  selectedProducts: SelectedProductsProps[]
+) => {
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.post(
+      "/user-cart/buy-products",
+      { profileId, selectedProducts },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    toast.success("Compra realizada com sucesso!");
     return response.data;
   } catch (error: any) {
     const errorMessage =
       error.response?.data?.message ||
-      "Erro ao adicionar produto ao carrinho. Tente novamente.";
+      "Erro ao realizar a compra. Tente novamente.";
 
     console.error("Error:", error);
     throw new Error(errorMessage);
   }
-}
+};
