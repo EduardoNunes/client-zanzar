@@ -1,6 +1,12 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "./App.css";
 import Layout from "./components/Layout";
@@ -16,10 +22,13 @@ import Register from "./pages/Register";
 import AdminRoutes from "./routes/AdminRoutes";
 import UserStorePage from "./pages/UserStore";
 import CreateStore from "./pages/CreateStore";
+import MyCart from "./pages/MyCart";
+import { App as CapacitorApp } from "@capacitor/app";
 
 export default function App() {
-  const [isTokenLoaded, setIsTokenLoaded] = useState(false);
   const { token, autentication, isLoadingToken } = useGlobalContext();
+  const [isTokenLoaded, setIsTokenLoaded] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadToken = async () => {
@@ -29,6 +38,34 @@ export default function App() {
 
     loadToken();
   }, []);
+
+  useEffect(() => {
+    let backButtonListener: any;
+
+    const setupBackButtonListener = async () => {
+      if (CapacitorApp) {
+        backButtonListener = await CapacitorApp.addListener(
+          "backButton",
+          () => {
+            if (window.history.state && window.history.state.idx > 0) {
+              navigate(-1);
+            } else {
+              console.log("No more history to go back to.");
+              return;
+            }
+          }
+        );
+      }
+    };
+
+    setupBackButtonListener();
+
+    return () => {
+      if (backButtonListener) {
+        backButtonListener.remove();
+      }
+    };
+  }, [navigate]);
 
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     if (!isTokenLoaded || isLoadingToken) {
@@ -149,6 +186,16 @@ export default function App() {
                 <ProtectedRoute>
                   <Layout>
                     <CreateStore />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-cart"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MyCart />
                   </Layout>
                 </ProtectedRoute>
               }
