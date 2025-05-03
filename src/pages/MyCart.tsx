@@ -1,12 +1,11 @@
-import { Loader2, Minus, Plus, Trash2, X } from "lucide-react";
+import { Loader2, Minus, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useGlobalContext } from "../context/globalContext";
-import { getCartProductsReq } from "../requests/cartProductsRequests";
-import LoadSpinner from "../components/LoadSpinner";
-import formatCurrencyInput from "../utils/formatRealCoin";
-import { orderBuyProductsReq } from "../requests/cartProductsRequests";
-import { logOut } from "../utils/logout";
 import { useNavigate } from "react-router-dom";
+import LoadSpinner from "../components/LoadSpinner";
+import { useGlobalContext } from "../context/globalContext";
+import { getCartProductsReq, orderBuyProductsReq } from "../requests/cartProductsRequests";
+import formatCurrencyInput from "../utils/formatRealCoin";
+import { logOut } from "../utils/logout";
 
 export default function MyCart() {
   const { token, profileId } = useGlobalContext();
