@@ -34,16 +34,13 @@ function App() {
 
     const setupBackButtonListener = async () => {
       if (CapacitorApp) {
-        backButtonListener = await CapacitorApp.addListener(
-          "backButton",
-          () => {
-            if (window.history.state && window.history.state.idx > 0) {
-              navigate(-1);
-            } else {
-              console.log("No more history to go back to.");
-            }
+        backButtonListener = await CapacitorApp.addListener("backButton", () => {
+          if (window.history.state && window.history.state.idx > 0) {
+            navigate(-1);
+          } else {
+            console.log("No more history to go back to.");
           }
-        );
+        });
       }
     };
 
