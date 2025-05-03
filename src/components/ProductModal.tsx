@@ -174,21 +174,29 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose }) => {
 
           {/* Seleção de quantidade */}
           <div className="mb-2 flex flex-col items-center justify-center">
-            <div
-              className={`flex flex-col text-center text-red-500 ${
-                (variation.sizes.find((s) => s.size === selectedSizeId)
-                  ?.stock ?? 99) < 10
-                  ? "block"
-                  : "hidden"
-              }`}
-            >
-              <span className="text-sm font-semibold">ÚLTIMAS UNIDADES</span>
-              <span className="text-xs">
-                Restam apenas{" "}
-                {variation.sizes.find((s) => s.size === selectedSizeId)
-                  ?.stock ?? variation.sizes[0].stock}
-              </span>
-            </div>
+            {variation.sizes.find((s) => s.size === selectedSizeId)?.stock ===
+            0 ? (
+              <div className="flex flex-col text-center text-red-500">
+                <span className="text-sm font-semibold">ESGOTADO</span>
+              </div>
+            ) : (
+              <div
+                className={`flex flex-col text-center text-red-500 ${
+                  (variation.sizes.find((s) => s.size === selectedSizeId)
+                    ?.stock ?? 99) < 10
+                    ? "block"
+                    : "hidden"
+                }`}
+              >
+                <span className="text-sm font-semibold">ÚLTIMAS UNIDADES</span>
+                <span className="text-xs">
+                  Restam apenas{" "}
+                  {variation.sizes.find((s) => s.size === selectedSizeId)
+                    ?.stock ?? variation.sizes[0].stock}
+                </span>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 mb-2">
               <label className="block font-medium">Quantidade:</label>
               <span className="flex flex-col items-center text-xs text-gray-500">
@@ -197,12 +205,22 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose }) => {
                   ?.stock ?? variation.sizes[0].stock}
               </span>
             </div>
-            <div className="flex items-center gap-2">
+
+            <div
+              className={`flex items-center gap-2 ${
+                variation.sizes.find((s) => s.size === selectedSizeId)
+                  ?.stock === 0 && "opacity-50"
+              }`}
+            >
               <button
                 type="button"
                 className="px-2 py-1 border rounded bg-gray-100 hover:bg-gray-200 text-lg font-bold"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                disabled={quantity <= 1}
+                disabled={
+                  quantity <= 1 ||
+                  variation.sizes.find((s) => s.size === selectedSizeId)
+                    ?.stock === 0
+                }
               >
                 -
               </button>
@@ -217,7 +235,6 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose }) => {
                 value={quantity === 0 ? "" : quantity}
                 onChange={(e) => {
                   const val = e.target.value;
-                  // Permite campo vazio
                   if (val === "") {
                     setQuantity(0);
                   } else {
@@ -228,11 +245,14 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose }) => {
                   }
                 }}
                 onBlur={(e) => {
-                  // Se sair do campo vazio ou zero, volta para 1
                   if (!e.target.value || Number(e.target.value) < 1) {
                     setQuantity(1);
                   }
                 }}
+                disabled={
+                  variation.sizes.find((s) => s.size === selectedSizeId)
+                    ?.stock === 0
+                }
                 style={{ MozAppearance: "textfield" }}
               />
               <button
@@ -246,8 +266,10 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose }) => {
                 }}
                 disabled={
                   quantity >=
-                  (variation.sizes.find((s) => s.size === selectedSizeId)
-                    ?.stock ?? variation.sizes[0].stock)
+                    (variation.sizes.find((s) => s.size === selectedSizeId)
+                      ?.stock ?? variation.sizes[0].stock) ||
+                  variation.sizes.find((s) => s.size === selectedSizeId)
+                    ?.stock === 0
                 }
               >
                 +
@@ -266,9 +288,17 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose }) => {
 
           {/* Botão adicionar ao carrinho */}
           <button
-            className="flex items-center gap-2 bg-indigo-600 text-white justify-center px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-lg font-bold mt-2"
+            className={`flex items-center gap-2 justify-center px-4 py-2 rounded-lg transition-colors text-lg font-bold mt-2 ${
+              variation.sizes.find((s) => s.size === selectedSizeId)?.stock ===
+              0
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-indigo-600 hover:bg-indigo-700 text-white"
+            }`}
             onClick={handleAddToCart}
-            disabled={variation.sizes[0].stock === 0}
+            disabled={
+              variation.sizes.find((s) => s.size === selectedSizeId)?.stock ===
+              0
+            }
           >
             <ShoppingCart size={20} /> Adicionar ao carrinho
           </button>
