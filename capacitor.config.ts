@@ -1,4 +1,4 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   plugins: {
@@ -6,13 +6,13 @@ const config: CapacitorConfig = {
       webUseInput: true, // Isso força o uso do input file no PWA
     },
   },
-  appId: 'com.example.zanzar',
-  appName: 'zanzar',
-  webDir: 'dist',
+  appId: "com.example.zanzar",
+  appName: "Zanzar",
+  webDir: "dist",
   server: {
-    url: 'https://zanzar.netlify.app', 
+    url: "https://zanzar.netlify.app",
     cleartext: true, // Se você estiver usando HTTP durante o desenvolvimento local, isso pode ser necessário
-  }
+  },
 };
 
 export default config;
