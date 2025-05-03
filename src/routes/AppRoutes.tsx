@@ -18,13 +18,7 @@ import AdminRoutes from "./AdminRoutes";
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { token, isLoadingToken } = useGlobalContext();
 
-  if (isLoadingToken) {
-    // Exibe um fallback enquanto o token está sendo carregado
-    return <div>Carregando...</div>;
-  }
-
-  if (!token) {
-    // Redireciona para a página de login se o token não estiver presente
+  if (!token && !isLoadingToken) {
     return <Navigate to="/login" replace />;
   }
 
