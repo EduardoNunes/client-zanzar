@@ -1,5 +1,5 @@
-import React from "react";
-import { useEffect, useState } from "react";
+import { App as CapacitorApp } from "@capacitor/app";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter,
   Navigate,
@@ -12,18 +12,17 @@ import "./App.css";
 import Layout from "./components/Layout";
 import { GlobalProvider, useGlobalContext } from "./context/globalContext";
 import CreatePost from "./pages/CreatePost";
+import CreateStore from "./pages/CreateStore";
 import Feed from "./pages/Feed";
 import InvitesPage from "./pages/InvitesPage";
 import Login from "./pages/Login";
 import Messages from "./pages/Messages";
+import MyCart from "./pages/MyCart";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
-import AdminRoutes from "./routes/AdminRoutes";
 import UserStorePage from "./pages/UserStore";
-import CreateStore from "./pages/CreateStore";
-import MyCart from "./pages/MyCart";
-import { App as CapacitorApp } from "@capacitor/app";
+import AdminRoutes from "./routes/AdminRoutes";
 
 export default function App() {
   const { token, autentication, isLoadingToken } = useGlobalContext();
