@@ -12,8 +12,8 @@ import MyCart from "../pages/MyCart";
 import NotificationsPage from "../pages/Notifications";
 import Profile from "../pages/Profile";
 import Register from "../pages/Register";
-import UserStore from "../pages/UserStore";
 import AdminRoutes from "./AdminRoutes";
+import StoreRoutes from "./StoreRoutes";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { token, isLoadingToken } = useGlobalContext();
@@ -30,6 +30,17 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/register/:token" element={<Register />} />
+
+      {/* Store routes */}
+      <Route
+        path="/store/:slug/*"
+        element={
+          <Layout>
+            <StoreRoutes />
+          </Layout>
+        }
+      />
 
       {/* Protected routes */}
       <Route
@@ -103,16 +114,6 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="/user-store/:slug"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <UserStore />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/create-store"
         element={
           <ProtectedRoute>
@@ -128,6 +129,18 @@ export default function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <MyCart />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Rotas da loja separadas */}
+      <Route
+        path="/user-store/*"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <StoreRoutes />
             </Layout>
           </ProtectedRoute>
         }
