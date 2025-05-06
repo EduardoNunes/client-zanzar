@@ -57,7 +57,9 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose }) => {
       sizeToCart,
       quantity,
       token
-    );
+    ).then(() => {
+      setQuantity(1);
+    });
   };
 
   return (
