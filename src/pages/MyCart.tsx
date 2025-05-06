@@ -3,16 +3,20 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadSpinner from "../components/LoadSpinner";
 import { useGlobalContext } from "../context/globalContext";
-import { getCartProductsReq, orderBuyProductsReq } from "../requests/cartProductsRequests";
+import {
+  getCartProductsReq,
+  orderBuyProductsReq,
+} from "../requests/cartProductsRequests";
 import formatCurrencyInput from "../utils/formatRealCoin";
 import { logOut } from "../utils/logout";
+import { toast } from "react-toastify";
 
 export default function MyCart() {
   const { token, profileId } = useGlobalContext();
   const [cartProducts, setCartProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set()); // Estado para itens selecionados
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,7 +27,7 @@ export default function MyCart() {
     try {
       if (!profileId || !token) return;
       const data = await getCartProductsReq(profileId, token);
-      console.log("Dados do carrinho:", data);
+
       setCartProducts(data);
     } catch (error) {
       console.error("Erro ao buscar produtos do carrinho:", error);
@@ -62,13 +66,20 @@ export default function MyCart() {
   };
 
   const toggleSelectItem = (productId: string) => {
+    if (selectedItems.size >= 5 && !selectedItems.has(productId)) {
+      toast.info("Você só pode selecionar até 5 itens.");
+      return;
+    }
+
     setSelectedItems((prev) => {
       const updated = new Set(prev);
+
       if (updated.has(productId)) {
-        updated.delete(productId); // Desmarca o item
+        updated.delete(productId);
       } else {
-        updated.add(productId); // Marca o item
+        updated.add(productId);
       }
+
       return updated;
     });
   };
@@ -98,6 +109,14 @@ export default function MyCart() {
       return;
     }
 
+    if (selectedItems.size > 5) {
+      toast.info(
+        "Somente 5 produtos diferentes podem ser enviados em uma compra por vez."
+      );
+      setCheckoutLoading(false);
+      return;
+    }
+
     try {
       const selectedProducts = cartProducts
         .filter((item) => selectedItems.has(item.id))
@@ -106,8 +125,6 @@ export default function MyCart() {
           quantity: item.quantity,
           cartId: item.id,
         }));
-
-      console.log("Itens selecionados para checkout:", selectedProducts);
 
       await orderBuyProductsReq(profileId, token, selectedProducts);
 
@@ -171,7 +188,7 @@ export default function MyCart() {
                         {cartProduct.size}
                       </span>
                     </div>
-                    <div className="mt-2 flex items-center gap-4">
+                    <div className="mt-2 flex flex-wrap items-center gap-4">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() =>
