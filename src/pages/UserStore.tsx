@@ -15,6 +15,7 @@ import LoadSpinner from "../components/LoadSpinner";
 interface UserStore {
   userStoreId: string;
   id: string;
+  slug: string;
   name: string;
   bannerUrl: string | null;
   logoUrl: string | null;
@@ -141,6 +142,8 @@ export default function UserStore() {
         <UserStoreGrid
           productFeePercentage={userStore?.productFeePercentage}
           userStoreId={userStore?.id}
+          userStoreSlug={userStore?.slug}
+          isCurrentUser={isCurrentUser}
           onProductAdded={() => {
             setUserStore(prev => prev ? { ...prev, totalProducts: (prev.totalProducts || 0) + 1 } : prev);
           }}

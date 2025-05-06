@@ -18,7 +18,11 @@ interface StoreDataProps {
   };
 }
 
-export const createStoreReq = async (data: StoreDataProps, profileId: string, token: string | null) => {
+export const createStoreReq = async (
+  data: StoreDataProps,
+  profileId: string,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -50,7 +54,11 @@ export const createStoreReq = async (data: StoreDataProps, profileId: string, to
   }
 };
 
-export const getUserStoreReq = async (slug: string, token: string | null, profileId: string) => {
+export const getUserStoreReq = async (
+  slug: string,
+  token: string | null,
+  profileId: string
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -153,7 +161,11 @@ export const updateLogoReq = async (
   }
 };
 
-export const favoriteStoreReq = async (profileId: string, storeId: string, token: string | null) => {
+export const favoriteStoreReq = async (
+  profileId: string,
+  storeId: string,
+  token: string | null
+) => {
   if (!token) {
     toast.error("Token de acesso não encontrado.");
     return;
@@ -175,5 +187,82 @@ export const favoriteStoreReq = async (profileId: string, storeId: string, token
       error.response?.data?.message || "Erro ao favoritar loja.";
     toast.error(errorMessage);
     throw new Error(errorMessage);
+  }
+};
+
+export const getStoreOrders = async (
+  profileId: string,
+  token: string,
+  slug: string,
+  page: number,
+  limit: number
+) => {
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.get(
+      `/store/orders/${slug}?profileId=${profileId}&page=${page}&limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log("RESPONSE", response.data);
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Erro ao buscar pedidos.";
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+export const updateOrderStatus = async (
+  orderItem: string,
+  newStatus: string,
+  token: string
+) => {
+  if (!token) {
+    toast.error("Token de acesso não encontrado.");
+    return;
+  }
+
+  try {
+    const response = await api.put(
+      `/store/orders/${orderItem}/status`,
+      { newStatus },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Erro ao atualizar status do pedido.";
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+export const getStoreBySlug = async (slug: string, token: string) => {
+  try {
+    const response = await api.get(`/store/is-my-store/${slug}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar loja:", error);
+    throw new Error("Erro ao buscar loja.");
   }
 };
