@@ -1,4 +1,4 @@
-import { PackagePlus } from "lucide-react";
+import { PackagePlus, ClipboardList } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useGlobalContext } from "../context/globalContext";
 import { loadProductsReq } from "../requests/productRequests";
@@ -6,7 +6,7 @@ import AddProduct from "./AddProduct";
 import ProductCard from "./ProductCard";
 import { ProductVariationsProps } from "../types/ProductVariant";
 import LoadSpinner from "./LoadSpinner";
-
+import { useNavigate } from "react-router-dom";
 
 interface UserStoreGridProps {
   productFeePercentage?: number;
@@ -39,16 +39,26 @@ interface CategoryProps {
 interface UserStoreGridProps {
   productFeePercentage?: number;
   userStoreId?: string;
+  userStoreSlug?: string;
+  isCurrentUser?: boolean;
   onProductAdded?: () => void;
 }
 
-export default function UserStoreGrid({ productFeePercentage, userStoreId, onProductAdded }: UserStoreGridProps) {
+export default function UserStoreGrid({
+  productFeePercentage,
+  userStoreId,
+  userStoreSlug,
+  isCurrentUser,
+  onProductAdded,
+}: UserStoreGridProps) {
   const { profileId, token, isOpen, setIsOpen } = useGlobalContext();
-  const [selectedProduct, setSelectedProduct] = useState<ProductCardProps | null>(null);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductCardProps | null>(null);
   const [allProducts, setAllProducts] = useState<ProductCardProps[]>([]);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   let scrollTriggered = false;
 
@@ -79,7 +89,12 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId, onPro
     setLoading(true);
 
     if (userStoreId && profileId) {
-      const initialProducts = await loadProductsReq(userStoreId, 1, token, profileId);
+      const initialProducts = await loadProductsReq(
+        userStoreId,
+        1,
+        token,
+        profileId
+      );
       setAllProducts(initialProducts);
     }
     setLoading(false);
@@ -113,23 +128,43 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId, onPro
 
   const handleAddProduct = () => {
     setIsOpen(true);
-  }
+  };
 
-  if (loading) { return <LoadSpinner /> }
+  const handleOpenOrders = () => {
+    if (userStoreSlug) {
+      navigate(`/store/${userStoreSlug}/orders`);
+    }
+  };
+
+  if (loading) {
+    return <LoadSpinner />;
+  }
 
   return (
     <div>
-      {
-        isOpen &&
-        <AddProduct productFeePercentage={productFeePercentage} userStoreId={userStoreId} onProductAdded={async () => {
-          await fetchProducts();
-          if (typeof onProductAdded === 'function') onProductAdded();
-        }} />
-      }
-      <button className="w-9 h-9 my-4" onClick={handleAddProduct}>
-        <PackagePlus className="w-full h-full" />
-      </button>
-      <div className="grid grid-cols-2 gap-2">
+      {isOpen && (
+        <AddProduct
+          productFeePercentage={productFeePercentage}
+          userStoreId={userStoreId}
+          onProductAdded={async () => {
+            await fetchProducts();
+            if (typeof onProductAdded === "function") onProductAdded();
+          }}
+        />
+      )}
+      <div
+        className={`flex items-center justify-center gap-4 ${
+          isCurrentUser ? "block" : "hidden"
+        }`}
+      >
+        <button className="w-9 h-9 my-4" onClick={handleAddProduct}>
+          <PackagePlus className="w-full h-full text-gray-600" />
+        </button>
+        <button className="w-9 h-9 my-4" onClick={handleOpenOrders}>
+          <ClipboardList className="w-full h-full text-gray-600" />
+        </button>
+      </div>
+      <div className="grid grid-cols-2 gap-2 mt-4">
         {allProducts.length > 0 ? (
           allProducts.map((product, _) => (
             <ProductCard
@@ -150,7 +185,7 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId, onPro
             Nenhum produto ainda
           </div>
         )}
-      </div>      
+      </div>
 
       {loadingMore && (
         <div className="flex justify-center items-center py-4">
@@ -159,17 +194,15 @@ export default function UserStoreGrid({ productFeePercentage, userStoreId, onPro
       )}
 
       {!loadingMore && allProducts.length > 0 && (
-        <div className="text-center text-gray-500 py-4">
-          Sem mais produtos.
-        </div>
+        <div className="text-center text-gray-500 py-4">Sem mais produtos.</div>
       )}
       <div
-        className={`md:hidden transition-all duration-100 ease-in-out ${selectedProduct
-          ? "max-h-screen opacity-100 visible"
-          : "max-h-0 opacity-0 invisible"
-          }`}
-      >
-      </div>
+        className={`md:hidden transition-all duration-100 ease-in-out ${
+          selectedProduct
+            ? "max-h-screen opacity-100 visible"
+            : "max-h-0 opacity-0 invisible"
+        }`}
+      ></div>
     </div>
   );
 }
