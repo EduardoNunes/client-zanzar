@@ -143,3 +143,57 @@ export const getPostsByCategoryReq = async (
     throw new Error(errorMessage);
   }
 };
+
+export const getUserDataReq = async (
+  profileId: string,
+  token: string | null
+) => {
+  if (!token) {
+    throw new Error("Token de acesso não encontrado.");
+  }
+
+  try {
+    const response = await api.get(
+      `/profile/get-user-data?profileId=${profileId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Erro ao buscar dados.";
+    throw new Error(errorMessage);
+  }
+};
+
+export const updateUserDataReq = async (
+  profileId: string,
+  completeData: any,
+  token: string
+) => {
+  if (!token) {
+    throw new Error("Token de acesso não encontrado.");
+  }
+
+  try {
+    const response = await api.put(
+      `/profile/update-user-data/${profileId}`,
+      completeData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Erro ao atualizar dados.";
+    throw new Error(errorMessage);
+  }
+};

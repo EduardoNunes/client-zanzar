@@ -10,6 +10,8 @@ import {
 import formatCurrencyInput from "../utils/formatRealCoin";
 import { logOut } from "../utils/logout";
 import { toast } from "react-toastify";
+import UserDataRegister from "../components/UserDataRegister";
+import { getUserDataReq } from "../requests/profileRequests";
 
 export default function MyCart() {
   const { token, profileId } = useGlobalContext();
@@ -17,6 +19,8 @@ export default function MyCart() {
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [openUserDataRegister, setOpenUserDataRegister] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -118,6 +122,29 @@ export default function MyCart() {
     }
 
     try {
+      const userDataResponse = await getUserDataReq(profileId, token);
+
+      if (
+        !userDataResponse.fullName ||
+        !userDataResponse.birthDate ||
+        !userDataResponse.phoneNumber ||
+        !userDataResponse.addressId ||
+        !userDataResponse.address.city ||
+        !userDataResponse.address.country ||
+        !userDataResponse.address.neighborhood ||
+        !userDataResponse.address.number ||
+        !userDataResponse.address.postalCode ||
+        !userDataResponse.address.state ||
+        !userDataResponse.address.street
+      ) {
+        toast.info("Preencha os dados para prosseguir com a compra");
+
+        setOpenUserDataRegister(true);
+        setUserData(userDataResponse);
+        return;
+      }
+
+      console.log("PASSOU");
       const selectedProducts = cartProducts
         .filter((item) => selectedItems.has(item.id))
         .map((item) => ({
@@ -146,6 +173,17 @@ export default function MyCart() {
 
   return (
     <div className="flex justify-center items-center w-full h-full">
+      {openUserDataRegister && (
+        <div
+          className="absolute top-0 left-0 flex justify-center items-center h-full w-full shadow-md rounded z-50"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+        >
+          <UserDataRegister
+            setOpenUserDataRegister={setOpenUserDataRegister}
+            userDataResponse={userData}
+          />
+        </div>
+      )}
       <div className="bg-white rounded-lg shadow-lg w-full h-full flex flex-col">
         {/* Header */}
         <div className="p-4 border-b flex justify-between items-center">
