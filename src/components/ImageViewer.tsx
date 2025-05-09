@@ -34,7 +34,6 @@ export default function ImageViewer({
   setUserLikes,
   updatePostInFeed,
   commentsCount,
-  setCommentsCount,
   isFullscreen,
 }: ImageViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -94,9 +93,6 @@ export default function ImageViewer({
   };
 
   const handleClose = () => {
-    if (setCommentsCount) {
-      setCommentsCount({});
-    }
     onClose();
   };
 
@@ -172,9 +168,9 @@ export default function ImageViewer({
             >
               <MessageCircle className="w-6 h-6" />
               <span>
-                {commentsCount === undefined
-                  ? post.commentCount
-                  : commentsCount[post.id] || 0}
+                {commentsCount && commentsCount[post.id] !== undefined
+                  ? commentsCount[post.id]
+                  : post.commentCount}
               </span>
             </button>
           </div>
