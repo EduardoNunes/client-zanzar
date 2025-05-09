@@ -122,6 +122,7 @@ export default function MyCart() {
     }
 
     try {
+      // verifica se o usuário já preencheu os dados nome, contato, endereço, etc.
       const userDataResponse = await getUserDataReq(profileId, token);
 
       if (
@@ -144,7 +145,6 @@ export default function MyCart() {
         return;
       }
 
-      console.log("PASSOU");
       const selectedProducts = cartProducts
         .filter((item) => selectedItems.has(item.id))
         .map((item) => ({
