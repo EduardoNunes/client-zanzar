@@ -549,16 +549,16 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
             caption: fullscreenImage.caption || "",
             likeCount: fullscreenImage.likeCount,
             likedByLoggedInUser: userLikes[fullscreenImage.id] || false,
-            commentCount: commentsCount[fullscreenImage.id] || 0,
+            commentCount: fullscreenImage.commentCount,
           }}
+          commentsCount={commentsCount}
+          setCommentsCount={setCommentsCount}
           onClose={() => setFullscreenImage(null)}
           selectedPost={selectedPost}
           setSelectedPost={setSelectedPost}
           userLikes={userLikes}
-          setUserLikes={setUserLikes}
           updatePostInFeed={updatePostInFeed}
-          commentsCount={commentsCount}
-          setCommentsCount={setCommentsCount}
+          setUserLikes={setUserLikes}
         />
       )}
 
