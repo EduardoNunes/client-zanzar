@@ -12,6 +12,7 @@ interface Order {
   quantity: number;
   product: Product;
   priceAtPurchase: number;
+  priceAtPurchaseBase: number;
   status: string;
   variant: Variant;
 }
@@ -158,7 +159,7 @@ export default function UserOrderStore() {
               <p className="mt-2 font-semibold">
                 Total a receber:{" "}
                 {formatCurrencyInput(
-                  String(order.variant.basePrice * order.quantity)
+                  String(order.priceAtPurchaseBase)
                 )}
               </p>
               <div className="flex mt-4">
