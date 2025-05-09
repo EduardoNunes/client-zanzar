@@ -154,12 +154,15 @@ export default function UserOrderStore() {
                 {order.variant.size} - {order.quantity} unidade(s)
               </ul>
               <p className="mt-2 font-semibold">
-                Total pago: {formatCurrencyInput(String(order.priceAtPurchase))}
+                Total pago:{" "}
+                {formatCurrencyInput(
+                  String(order.priceAtPurchase * order.quantity)
+                )}
               </p>
               <p className="mt-2 font-semibold">
                 Total a receber:{" "}
                 {formatCurrencyInput(
-                  String(order.priceAtPurchaseBase)
+                  String(order.priceAtPurchaseBase * order.quantity)
                 )}
               </p>
               <div className="flex mt-4">
