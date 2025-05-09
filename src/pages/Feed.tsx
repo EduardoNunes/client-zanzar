@@ -140,14 +140,16 @@ export default function Feed() {
       setVideoLoading(initialVideoLoadingState);
       setPosts(processedPosts || []);
 
-      const likesMap = processedPosts.reduce(
-        (acc: Record<string, boolean>, post: Post) => {
-          acc[post.id] = post.likedByLoggedInUser || false;
-          return acc;
-        }
-      );
+      if (processedPosts.length > 0) {
+        const likesMap = processedPosts.reduce(
+          (acc: Record<string, boolean>, post: Post) => {
+            acc[post.id] = post.likedByLoggedInUser || false;
+            return acc;
+          }
+        );
 
-      setUserLikes(likesMap);
+        setUserLikes(likesMap);
+      }
     } catch (error) {
       console.error("Error fetching posts:", error);
     } finally {
