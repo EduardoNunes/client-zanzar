@@ -14,6 +14,7 @@ import Profile from "../pages/Profile";
 import Register from "../pages/Register";
 import AdminRoutes from "./AdminRoutes";
 import StoreRoutes from "./StoreRoutes";
+import MyPurchases from "../pages/MyPurchases";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { token, isLoadingToken } = useGlobalContext();
@@ -31,16 +32,6 @@ export default function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/register/:token" element={<Register />} />
-
-      {/* Store routes */}
-      <Route
-        path="/store/:slug/*"
-        element={
-          <Layout>
-            <StoreRoutes />
-          </Layout>
-        }
-      />
 
       {/* Protected routes */}
       <Route
@@ -129,6 +120,16 @@ export default function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <MyCart />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-purchases"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <MyPurchases />
             </Layout>
           </ProtectedRoute>
         }

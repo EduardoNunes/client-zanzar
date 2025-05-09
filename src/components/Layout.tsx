@@ -77,9 +77,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           },
           {
             icon: <ShoppingBag className="w-8 h-8" />,
-            label: "Loja",
-            path: "/store",
-            onClick: () => navigate("/store"),
+            label: "Minhas compras",
+            path: "/my-purchases",
+            onClick: () => navigate("/my-purchases"),
           },
           {
             icon: <MessageSquare className="w-8 h-8" />,
