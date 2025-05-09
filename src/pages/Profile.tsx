@@ -56,7 +56,6 @@ export default function Profile() {
       profileData && setProfile(profileData);
 
       setIsFollowing(profileData.isFollowed);
-
       const isCurrentUserProfile = profileId === profileData.profileId;
       setIsCurrentUser(isCurrentUserProfile);
 
