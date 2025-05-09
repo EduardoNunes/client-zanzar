@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import formatCurrencyInput from "../utils/formatRealCoin";
 
 interface PurchaseDetailsModalProps {
@@ -35,6 +36,7 @@ export default function PurchaseDetailsModal({
   onClose,
   purchase,
 }: PurchaseDetailsModalProps) {
+  const navigate = useNavigate();
   if (!isOpen) return null;
 
   const statusText = {
@@ -107,7 +109,9 @@ export default function PurchaseDetailsModal({
                 </p>
                 <p className="w-1/2">
                   <strong>Preço:</strong>{" "}
-                  {formatCurrencyInput(String(item.priceAtPurchase))}
+                  {formatCurrencyInput(
+                    String(item.priceAtPurchase * item.quantity)
+                  )}
                 </p>
               </div>
               <div className="flex mb-2">
@@ -125,12 +129,12 @@ export default function PurchaseDetailsModal({
 
               <p className="mb-4">
                 <strong>Loja:</strong>{" "}
-                <a
-                  href={`/user-store/${item.storeSlug}`}
+                <button
+                  onClick={() => navigate(`/user-store/${item.storeSlug}`)}
                   className="text-blue-500 underline"
                 >
                   {item.storeName}
-                </a>
+                </button>
               </p>
 
               <div className="flex gap-2 mt-2">
