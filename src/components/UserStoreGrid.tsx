@@ -22,6 +22,7 @@ interface ProductCardProps {
   ratingCount: number;
   totalSold: number;
   variations: ProductVariationsProps[];
+  avaliableQuantity?: number;
   onCartClick: () => void;
 }
 
@@ -95,6 +96,7 @@ export default function UserStoreGrid({
         token,
         profileId
       );
+
       setAllProducts(initialProducts);
     }
     setLoading(false);
@@ -132,7 +134,7 @@ export default function UserStoreGrid({
 
   const handleOpenOrders = () => {
     if (userStoreSlug) {
-      navigate(`/store/${userStoreSlug}/orders`);
+      navigate(`/user-store/${userStoreSlug}/orders`);
     }
   };
 
@@ -166,20 +168,25 @@ export default function UserStoreGrid({
       </div>
       <div className="grid grid-cols-2 gap-2 mt-4">
         {allProducts.length > 0 ? (
-          allProducts.map((product, _) => (
-            <ProductCard
-              key={product.id}
-              id={product.id}
-              name={product.name}
-              description={product.description}
-              productSubCategory={product.productSubCategory}
-              rating={product.rating}
-              ratingCount={product.ratingCount ?? 0}
-              totalSold={product.totalSold ?? 0}
-              variations={product.variations ?? []}
-              onCartClick={() => setSelectedProduct(product)}
-            />
-          ))
+          allProducts
+            .filter(
+              (product) =>
+                product.avaliableQuantity && product.avaliableQuantity > 0
+            )
+            .map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                description={product.description}
+                productSubCategory={product.productSubCategory}
+                rating={product.rating}
+                ratingCount={product.ratingCount ?? 0}
+                totalSold={product.totalSold ?? 0}
+                variations={product.variations ?? []}
+                onCartClick={() => setSelectedProduct(product)}
+              />
+            ))
         ) : (
           <div className="text-center py-12 text-gray-500">
             Nenhum produto ainda

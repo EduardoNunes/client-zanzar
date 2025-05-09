@@ -8,7 +8,7 @@ export default function StoreRoutes() {
     <Routes>
       <Route path=":slug" element={<UserStore />} />
       <Route
-        path="orders"
+        path=":slug/orders"
         element={
           <StoreOwnerRoute>
             <UserOrderStore />
