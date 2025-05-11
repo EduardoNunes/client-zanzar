@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-import { SOCKET_URL } from "../server/socket";
+import { useEffect } from "react";
 import { Preferences } from "@capacitor/preferences";
-import { io, Socket } from "socket.io-client";
+import { useSocket } from "../hooks/useSocket";
 import { useGlobalContext } from "../context/globalContext";
 
 interface MessageIndicatorProps {
@@ -10,94 +9,51 @@ interface MessageIndicatorProps {
   setUnreadChatsCount?: (count: number) => void;
 }
 
-export const MessageIndicator: React.FC<MessageIndicatorProps> = ({
+export const MessageIndicator = ({
   isMenuOpen,
   unreadChatsCount,
   setUnreadChatsCount,
-}) => {
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+}: MessageIndicatorProps) => {
+  const socket = useSocket();
   const { profileId } = useGlobalContext();
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
-    const fetchMessagesStorage = async () => {
-      let messagesStorage;
+    const fetchStorage = async () => {
+      const result = isMobile
+        ? await Preferences.get({ key: "unread_chat_messages" })
+        : { value: localStorage.getItem("unread_chat_messages") };
 
-      if (isMobile) {
-        const result = await Preferences.get({ key: "unread_chat_messages" });
-        messagesStorage = result.value;
-      } else {
-        messagesStorage = localStorage.getItem("unread_chat_messages");
-      }
-
-      if (setUnreadChatsCount) {
-        const parsedValue = messagesStorage ? parseInt(messagesStorage, 10) : 0;
-
-        setUnreadChatsCount(parsedValue);
-      }
+      const parsed = result.value ? parseInt(result.value, 10) : 0;
+      setUnreadChatsCount?.(parsed);
     };
 
-    fetchMessagesStorage();
-  }, [isMenuOpen, setUnreadChatsCount, unreadChatsCount]);
+    fetchStorage();
+  }, [isMenuOpen, setUnreadChatsCount]);
 
   useEffect(() => {
-    if (profileId) {
-      const newSocket = io(SOCKET_URL, {
-        query: { userId: profileId },
-      });
+    if (!socket) return;
 
-      newSocket.on("connect", () => {});
+    socket.on("newMessage", async (message) => {
+      if (message.profileId !== profileId) {
+        socket.emit("getUnreadChatsCount");
+      }
+    });
 
-      newSocket.on("connect_error", (error) => {
-        console.error("ERRO NA CONEXÃO DO SOCKET:", error);
-      });
+    socket.on("unreadChatsCount", async (data) => {
+      setUnreadChatsCount?.(data.count);
+      isMobile
+        ? await Preferences.set({ key: "unread_chat_messages", value: data.count.toString() })
+        : localStorage.setItem("unread_chat_messages", data.count.toString());
+    });
 
-      setSocket(newSocket);
-
-      return () => {
-        if (newSocket) {
-          newSocket.disconnect();
-        }
-      };
-    }
-  }, [profileId]);
-
-  useEffect(() => {
-    if (socket) {
-      socket.on("newMessage", async (message) => {
-        // Verificar se a mensagem é para o usuário atual
-        if (message.profileId !== profileId) {
-          // Emitir evento para obter o número de chats não lidos
-          socket.emit("getUnreadChatsCount");
-        }
-      });
-
-      // Listener para o evento unreadChatsCount
-      socket.on("unreadChatsCount", async (data) => {
-        if (setUnreadChatsCount) {
-          setUnreadChatsCount(data.count);
-          if (isMobile) {
-            await Preferences.set({
-              key: "unread_chat_messages",
-              value: data.count.toString(),
-            });
-          } else {
-            localStorage.setItem("unread_chat_messages", data.count.toString());
-          }
-        }
-      });
-    }
     return () => {
-      if (socket) {
-        socket.off("newMessage");
-        socket.off("unreadChatsCount");
-      }
+      socket.off("newMessage");
+      socket.off("unreadChatsCount");
     };
-  }, [socket, isMobile, setUnreadChatsCount, profileId]);
+  }, [socket, profileId, isMobile, setUnreadChatsCount]);
 
-  if (!unreadChatsCount || unreadChatsCount <= 0) {
-    return null;
-  }
+  if (!unreadChatsCount || unreadChatsCount <= 0) return null;
 
   return (
     <div className="absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-xs rotate-270">

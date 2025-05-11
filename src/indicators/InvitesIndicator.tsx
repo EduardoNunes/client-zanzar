@@ -1,8 +1,7 @@
+import { useEffect, useRef } from "react";
 import { Preferences } from "@capacitor/preferences";
-import { useEffect } from "react";
-import { io } from "socket.io-client";
+import { useSocket } from "../hooks/useSocket";
 import { useGlobalContext } from "../context/globalContext";
-import { SOCKET_URL } from "../server/socket";
 
 interface InvitesIndicatorProps {
   className?: string;
@@ -17,79 +16,71 @@ export function InvitesIndicator({
   unreadInvites = 0,
   setUnreadInvites,
 }: InvitesIndicatorProps) {
-  const { profileId, token } = useGlobalContext();
+  const socket = useSocket();
+  const { profileId } = useGlobalContext();
+  const unreadRef = useRef(unreadInvites);
+
+  // Atualiza a ref sempre que unreadInvites mudar
+  useEffect(() => {
+    unreadRef.current = unreadInvites;
+  }, [unreadInvites]);
 
   useEffect(() => {
     const fetchUnreadInvites = async () => {
-      let invitesStorage;
-
       const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-      if (isMobile) {
-        const result = await Preferences.get({ key: "invites" });
-        invitesStorage = result.value;
-      } else {
-        invitesStorage = localStorage.getItem("invites");
-      }
+      const result = isMobile
+        ? await Preferences.get({ key: "invites" })
+        : { value: localStorage.getItem("invites") };
 
-      if (setUnreadInvites) {
-        const parsedValue = invitesStorage ? parseInt(invitesStorage, 10) : 0;
-        setUnreadInvites(parsedValue);
-      }
+      const parsed = result.value ? parseInt(result.value, 10) : 0;
+      setUnreadInvites?.(parsed);
     };
 
     fetchUnreadInvites();
   }, [isMenuOpen, setUnreadInvites]);
 
   useEffect(() => {
-    if (!token || !profileId) return;
+    if (!socket || !profileId) return;
 
-    // Inicializar socket
-    const newSocket = io(SOCKET_URL, {
-      query: { userId: profileId },
-    });
+    const eventName = `invite:new:${profileId}`;
 
-    // Ouvir novas convites
-    newSocket.on("get-unread-invites", async () => {
-      const newUnreadCount = (unreadInvites ?? 0) + 1;
-      console.log("NEW SOCKET", newSocket);
-      if (setUnreadInvites) {
-        setUnreadInvites(newUnreadCount);
-      }
+    const handleNewInvite = async () => {
+      const newUnread = unreadRef.current + 1;
+      setUnreadInvites?.(newUnread);
 
       const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-      if (isMobile) {
-        await Preferences.set({
-          key: "invites",
-          value: newUnreadCount.toString(),
-        });
-      } else {
-        localStorage.setItem("invites", newUnreadCount.toString());
-      }
-    });
+      const value = newUnread.toString();
 
-    // Ouvir resposta da contagem de convites não lidos
-    newSocket.on("unread-invites-count", async (data: { invites: number }) => {
-      if (setUnreadInvites) {
-        setUnreadInvites(data.invites);
+      if (isMobile) {
+        await Preferences.set({ key: "invites", value });
+      } else {
+        localStorage.setItem("invites", value);
       }
+    };
+
+    const handleUnreadCount = async (data: { invites: number }) => {
+      setUnreadInvites?.(data.invites);
 
       const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-      if (isMobile) {
-        await Preferences.set({
-          key: "invites",
-          value: data.invites.toString(),
-        });
-      } else {
-        localStorage.setItem("invites", data.invites.toString());
-      }
-    });
+      const value = data.invites.toString();
 
-    newSocket.emit("get-unread-invites", profileId);
+      if (isMobile) {
+        await Preferences.set({ key: "invites", value });
+      } else {
+        localStorage.setItem("invites", value);
+      }
+    };
+
+    socket.on(eventName, handleNewInvite);
+    socket.on("unread-invites-count", handleUnreadCount);
+
+    socket.emit("get-unread-invites", profileId);
 
     return () => {
-      newSocket.disconnect();
+      socket.off(eventName, handleNewInvite);
+      socket.off("unread-invites-count", handleUnreadCount);
     };
-  }, [token, profileId, setUnreadInvites, isMenuOpen]);
+  }, [socket, profileId, setUnreadInvites, isMenuOpen]);
 
   if (unreadInvites === 0) return null;
 
