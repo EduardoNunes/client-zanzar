@@ -20,4 +20,8 @@ export const dataShopSchema = yup.object().shape({
       /^\(\d{2}\) \d{4,5}-\d{4}$/,
       "Preencha o telefone para contato corretamente."
     ),
+  cpf: yup
+    .string()
+    .required("O CPF é obrigatório.")
+    .matches(/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/, "Insira um CPF válido."),
 });

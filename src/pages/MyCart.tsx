@@ -129,6 +129,7 @@ export default function MyCart() {
         !userDataResponse.fullName ||
         !userDataResponse.birthDate ||
         !userDataResponse.phoneNumber ||
+        !userDataResponse.cpf ||
         !userDataResponse.addressId ||
         !userDataResponse.address.city ||
         !userDataResponse.address.country ||

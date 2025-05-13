@@ -9,6 +9,8 @@ import { updateUserDataReq } from "../requests/profileRequests";
 import { logOut } from "../utils/logout";
 import { useGlobalContext } from "../context/globalContext";
 import { useNavigate } from "react-router-dom";
+import formatCPF from "../utils/formatCPF";
+import isValidCpf from "../validations/validateCpf";
 
 type UserDataRegisterProps = {
   setOpenUserDataRegister: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,6 +18,7 @@ type UserDataRegisterProps = {
     fullName?: string;
     birthDate?: string;
     phoneNumber?: string;
+    cpf?: string;
     addressId?: string;
     address?: {
       street?: string;
@@ -41,6 +44,7 @@ export default function UserDataRegister({
     fullName: "",
     birthDate: "",
     phoneNumber: "",
+    cpf: "",
     addressId: userDataResponse.addressId || "",
   });
 
@@ -62,6 +66,7 @@ export default function UserDataRegister({
         fullName: userDataResponse.fullName || "",
         birthDate: userDataResponse.birthDate || "",
         phoneNumber: userDataResponse.phoneNumber || "",
+        cpf: userDataResponse.cpf || "",
         addressId: userDataResponse.addressId || "",
       });
 
@@ -98,6 +103,13 @@ export default function UserDataRegister({
       await addressSchema.validate(address, { abortEarly: false });
 
       await dataShopSchema.validate(formData, { abortEarly: false });
+
+      const validateCpf = isValidCpf(completeData.cpf)
+
+      if(!validateCpf) {
+        toast.error("CPF inválido");
+        return;
+      }
 
       if (!profileId || !token) {
         logOut(navigate);
@@ -185,6 +197,24 @@ export default function UserDataRegister({
                 required
               />
             </div>
+          </div>
+          <div className="w-1/2 mb-4">
+            <label
+              className="block text-gray-700 font-semibold mb-1"
+              htmlFor="cpf"
+            >
+              CPF
+            </label>
+            <input
+              type="cpf"
+              id="cpf"
+              name="cpf"
+              value={formatCPF(formData.cpf)}
+              onChange={handleInputChange}
+              className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              placeholder="Digite seu CPF"
+              required
+            />
           </div>
           <div className="mb-4">
             <AddressForm address={address} setAddress={setAddress} />
