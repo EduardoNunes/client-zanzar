@@ -1,6 +1,5 @@
-import { useEffect, useRef } from "react";
 import { Preferences } from "@capacitor/preferences";
-import { useSocket } from "../hooks/useSocket";
+import { useEffect, useRef } from "react";
 import { useGlobalContext } from "../context/globalContext";
 
 interface InvitesIndicatorProps {
@@ -16,8 +15,7 @@ export function InvitesIndicator({
   unreadInvites = 0,
   setUnreadInvites,
 }: InvitesIndicatorProps) {
-  const socket = useSocket();
-  const { profileId } = useGlobalContext();
+  const { profileId, socketConnect: socket } = useGlobalContext();
   const unreadRef = useRef(unreadInvites);
 
   // Atualiza a ref sempre que unreadInvites mudar

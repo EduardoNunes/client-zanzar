@@ -14,9 +14,10 @@ export const MessageIndicator = ({
   unreadChatsCount,
   setUnreadChatsCount,
 }: MessageIndicatorProps) => {
-  const socket = useSocket();
   const { profileId } = useGlobalContext();
+  
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  const socket = useSocket();
 
   useEffect(() => {
     const fetchStorage = async () => {
@@ -43,7 +44,10 @@ export const MessageIndicator = ({
     socket.on("unreadChatsCount", async (data) => {
       setUnreadChatsCount?.(data.count);
       isMobile
-        ? await Preferences.set({ key: "unread_chat_messages", value: data.count.toString() })
+        ? await Preferences.set({
+            key: "unread_chat_messages",
+            value: data.count.toString(),
+          })
         : localStorage.setItem("unread_chat_messages", data.count.toString());
     });
 

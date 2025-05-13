@@ -20,6 +20,8 @@ interface GlobalContextType {
   totalUnread: number;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  socketConnect: any;
+  setSocketConnect: (socketConnect: any) => void;
 }
 
 const GlobalContext = createContext<GlobalContextType | null>(null);
@@ -43,6 +45,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const totalUnread =
     (unreadNotifications || 0) + (unreadChatMessages || 0) + (invites || 0);
   const [isOpen, setIsOpen] = useState(false);
+  const [socketConnect, setSocketConnect] = useState();
 
   const autentication = async () => {
     setIsLoadingToken(true);
@@ -120,6 +123,8 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     totalUnread,
     isOpen,
     setIsOpen,
+    socketConnect,
+    setSocketConnect,
   };
 
   return (

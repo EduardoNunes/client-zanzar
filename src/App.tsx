@@ -5,6 +5,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GlobalProvider, useGlobalContext } from "./context/globalContext";
 import AppRoutes from "./routes/AppRoutes";
+import { useSocket } from "./hooks/useSocket";
 
 function AppWrapper() {
   return (
@@ -17,9 +18,16 @@ function AppWrapper() {
 }
 
 function App() {
-  const { autentication } = useGlobalContext();
+  const { autentication, setSocketConnect, token } = useGlobalContext();
   const [isTokenLoaded, setIsTokenLoaded] = useState(false);
   const navigate = useNavigate();
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (socket && token) {
+      setSocketConnect(socket);
+    }
+  }, [socket, setSocketConnect]);
 
   useEffect(() => {
     const loadToken = async () => {
@@ -34,13 +42,16 @@ function App() {
 
     const setupBackButtonListener = async () => {
       if (CapacitorApp) {
-        backButtonListener = await CapacitorApp.addListener("backButton", () => {
-          if (window.history.state && window.history.state.idx > 0) {
-            navigate(-1);
-          } else {
-            console.log("No more history to go back to.");
+        backButtonListener = await CapacitorApp.addListener(
+          "backButton",
+          () => {
+            if (window.history.state && window.history.state.idx > 0) {
+              navigate(-1);
+            } else {
+              console.log("No more history to go back to.");
+            }
           }
-        });
+        );
       }
     };
 

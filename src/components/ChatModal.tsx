@@ -7,8 +7,6 @@ import { SOCKET_URL } from "../server/socket";
 import { useGlobalContext } from "../context/globalContext";
 import { ptBR } from "date-fns/locale";
 
-const socket = io(SOCKET_URL);
-
 interface Message {
   profileId: string;
   id: string;
@@ -39,6 +37,8 @@ export default function ChatModal({
   const [offset, setOffset] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  const socket = io(SOCKET_URL);
 
   // Variável para controlar se devemos rolar automaticamente para o final
   const shouldScrollToBottom = useRef(true);
@@ -83,13 +83,10 @@ export default function ChatModal({
 
   useEffect(() => {
     if (conversationId && socket) {
-      // Listen for conversation read confirmation
       socket.on("conversationRead", (readResult) => {
         console.log("Conversation marked as read:", readResult);
-        // Optional: Update UI or state if needed
       });
 
-      // Cleanup listener
       return () => {
         socket.off("conversationRead");
       };

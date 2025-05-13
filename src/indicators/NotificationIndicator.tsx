@@ -1,8 +1,8 @@
 import { Preferences } from "@capacitor/preferences";
-import React, { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
-import { SOCKET_URL } from "../server/socket";
+import React, { useEffect } from "react";
+import { io } from "socket.io-client";
 import { useGlobalContext } from "../context/globalContext";
+import { SOCKET_URL } from "../server/socket";
 
 interface NotificationIndicatorProps {
   className?: string;
@@ -17,8 +17,11 @@ export const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
   unreadNotifications,
   setUnreadNotifications,
 }) => {
-  const { profileId } = useGlobalContext();
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const {
+    profileId,
+    socketConnect: socket,
+    setSocketConnect,
+  } = useGlobalContext();
 
   // Inicializar o contador de notificações não lidas
   useEffect(() => {
@@ -100,7 +103,7 @@ export const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
       // Solicitar estatísticas ao conectar
       newSocket.emit("requestUserStats");
 
-      setSocket(newSocket);
+      setSocketConnect(newSocket);
       return () => {
         newSocket.off("newNotification");
         newSocket.off("userStatsUpdate");
