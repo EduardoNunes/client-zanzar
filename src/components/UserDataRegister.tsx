@@ -11,6 +11,7 @@ import { useGlobalContext } from "../context/globalContext";
 import { useNavigate } from "react-router-dom";
 import formatCPF from "../utils/formatCPF";
 import isValidCpf from "../validations/validateCpf";
+import { createCustomerAsaasReq } from "../requests/asaasRequests";
 
 type UserDataRegisterProps = {
   setOpenUserDataRegister: React.Dispatch<React.SetStateAction<boolean>>;
@@ -104,9 +105,9 @@ export default function UserDataRegister({
 
       await dataShopSchema.validate(formData, { abortEarly: false });
 
-      const validateCpf = isValidCpf(completeData.cpf)
+      const validateCpf = isValidCpf(completeData.cpf);
 
-      if(!validateCpf) {
+      if (!validateCpf) {
         toast.error("CPF inválido");
         return;
       }
@@ -116,10 +117,25 @@ export default function UserDataRegister({
         return;
       }
 
-      await updateUserDataReq(profileId, completeData, token);
+      const response = await createCustomerAsaasReq(
+        profileId,
+        token,
+        completeData
+      );
 
-      toast.success("Dados cadastrados com sucesso!");
-      setOpenUserDataRegister(false);
+      if (response.statusCode === 200 || response.statusCode === 201) {
+        await updateUserDataReq(profileId, completeData, token);
+        
+        toast.success("Dados cadastrados com sucesso!");
+        setOpenUserDataRegister(false);        
+        return;
+      } else {
+        toast.error(
+          "Ops, deu ruim aqui :D, contate um administrador para averiguar a causa."
+        );
+        return;
+      }
+
     } catch (validationError) {
       if (validationError instanceof yup.ValidationError) {
         console.error("Erros de validação:", validationError.errors);

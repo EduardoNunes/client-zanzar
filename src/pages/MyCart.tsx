@@ -1,17 +1,19 @@
-import { Loader2, Minus, Plus, Trash2 } from "lucide-react";
+import { Copy, Loader2, Minus, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import LoadSpinner from "../components/LoadSpinner";
+import UserDataRegister from "../components/UserDataRegister";
 import { useGlobalContext } from "../context/globalContext";
+import { usePaymentSocket } from "../hooks/usePaymentSocket";
+import { orderPaymentAsaasReq } from "../requests/asaasRequests";
 import {
   getCartProductsReq,
   orderBuyProductsReq,
 } from "../requests/cartProductsRequests";
+import { getUserDataReq } from "../requests/profileRequests";
 import formatCurrencyInput from "../utils/formatRealCoin";
 import { logOut } from "../utils/logout";
-import { toast } from "react-toastify";
-import UserDataRegister from "../components/UserDataRegister";
-import { getUserDataReq } from "../requests/profileRequests";
 
 export default function MyCart() {
   const { token, profileId } = useGlobalContext();
@@ -21,7 +23,20 @@ export default function MyCart() {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [openUserDataRegister, setOpenUserDataRegister] = useState(false);
   const [userData, setUserData] = useState<any>(null);
+  const [isResponseStatus, setIsResponseStatus] = useState(false);
+  const [qrCode, setQrCode] = useState("");
+  const [pixCopyPaste, setPixCopyPaste] = useState("");
   const navigate = useNavigate();
+
+  usePaymentSocket(profileId, () => {
+    toast.success("Pagamento confirmado com sucesso!");
+    setIsResponseStatus(false);
+    setQrCode("");
+    setPixCopyPaste("");
+    setIsResponseStatus(false);
+
+    console.log("PROFILEIDSOCKET front", profileId);
+  });
 
   useEffect(() => {
     fetchMyCartProducts();
@@ -44,7 +59,7 @@ export default function MyCart() {
     setCartProducts((prev) => prev.filter((item) => item.id !== productId));
     setSelectedItems((prev) => {
       const updated = new Set(prev);
-      updated.delete(productId); // Remove o item dos selecionados
+      updated.delete(productId);
       return updated;
     });
   };
@@ -59,7 +74,7 @@ export default function MyCart() {
     }
 
     if (newQuantity > stock) {
-      newQuantity = stock; // Limita a quantidade ao estoque disponível
+      newQuantity = stock;
     }
 
     setCartProducts((prev) =>
@@ -110,6 +125,7 @@ export default function MyCart() {
     }
 
     if (selectedItems.size === 0) {
+      toast.info("Você deve selecionar ao menos 1 produto.");
       return;
     }
 
@@ -154,18 +170,54 @@ export default function MyCart() {
           cartId: item.id,
         }));
 
-      await orderBuyProductsReq(profileId, token, selectedProducts);
+      // Efetua registro da compra dos produtos selecionados
+      const orderResponse = await orderBuyProductsReq(
+        profileId,
+        token,
+        selectedProducts
+      );
+
+      if (!orderResponse.success) {
+        toast.error("Erro ao registrar ordem de compra.");
+        setCheckoutLoading(false);
+        return;
+      }
+
+      const orderIdZanzar = orderResponse.order.id;
+
+      // Efetua abertura de ordem de pagamento com o asaas
+      const value = orderResponse.totalPrice;
+      const response = await orderPaymentAsaasReq(
+        profileId,
+        token,
+        value,
+        orderIdZanzar
+      );
+
+      if (response && response.status === 201) {
+        setQrCode(response.data.pix.pixQrCode);
+        setPixCopyPaste(response.data.pix.pixCopyPasteKey);
+        setIsResponseStatus(true);
+      } else {
+        toast.error("Erro ao processar a ordem de compra");
+        /* IMPLEMENTAR LÓGICA DE DESFAZER orderBuyProductsReq */
+      }
 
       setCartProducts((prev) =>
         prev.filter((item) => !selectedItems.has(item.id))
       );
 
       setSelectedItems(new Set());
+      toast.success("Solicitação conluída, efetue o pagamento.");
     } catch (error) {
       console.error("Erro ao processar o checkout:", error);
     } finally {
       setCheckoutLoading(false);
     }
+  };
+
+  const cancelOrder = async () => {
+    setIsResponseStatus(false);
   };
 
   if (loading) {
@@ -183,6 +235,56 @@ export default function MyCart() {
             setOpenUserDataRegister={setOpenUserDataRegister}
             userDataResponse={userData}
           />
+        </div>
+      )}
+      {isResponseStatus && (
+        <div
+          className="absolute top-0 left-0 flex flex-col justify-center items-center h-full w-full shadow-md z-50 p-6"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
+        >
+          {/* Header com botão de cancelar */}
+          <div className="w-full flex justify-center items-center mb-4">
+            <button
+              onClick={() => cancelOrder()}
+              className="text-red-600 font-semibold bg-white px-6 py-2 rounded-lg shadow hover:bg-red-100 transition"
+            >
+              Cancelar
+            </button>
+          </div>
+
+          {/* QR Code */}
+          <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Escaneie o QR Code para pagar
+            </h3>
+            <img
+              src={`data:image/png;base64,${qrCode}`}
+              className="w-full h-auto max-h-64 object-contain rounded-lg"
+              alt="PIX QR Code"
+            />
+          </div>
+
+          {/* PIX Copia e Cola */}
+          <div className="mt-6 bg-white p-4 rounded-lg shadow-lg w-full max-w-md flex items-center justify-between">
+            <span className="text-sm text-gray-800 break-all mr-2 text-ellipsis whitespace-nowrap overflow-hidden">
+              {pixCopyPaste}
+            </span>
+            <button
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(pixCopyPaste);
+                  toast.success("Código PIX copiado!");
+                } catch (err) {
+                  toast.error("Erro ao copiar o código PIX.");
+                }
+              }}
+              className="flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-800 transition whitespace-nowrap"
+              aria-label="Copiar código PIX"
+            >
+              <Copy className="w-5 h-5" />
+              <span>Copiar PIX</span>
+            </button>
+          </div>
         </div>
       )}
       <div className="bg-white rounded-lg shadow-lg w-full h-full flex flex-col">
