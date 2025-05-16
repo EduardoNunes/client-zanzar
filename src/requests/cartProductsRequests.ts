@@ -92,7 +92,7 @@ export const orderBuyProductsReq = async (
       }
     );
 
-    toast.success("Compra realizada com sucesso!");
+
     return response.data;
   } catch (error: any) {
     const errorMessage =
