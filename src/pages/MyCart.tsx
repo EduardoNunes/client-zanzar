@@ -33,6 +33,7 @@ export default function MyCart() {
     setIsResponseStatus(false);
     setQrCode("");
     setPixCopyPaste("");
+    navigate("/my-purchases");
     setIsResponseStatus(false);
 
     console.log("PROFILEIDSOCKET front", profileId);
