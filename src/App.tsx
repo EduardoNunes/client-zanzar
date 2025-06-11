@@ -65,7 +65,7 @@ function App() {
   if (!isTokenLoaded) return null;
 
   return (
-    <div className="h-full">
+    <div>
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       <AppRoutes />
     </div>
