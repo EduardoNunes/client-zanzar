@@ -65,15 +65,34 @@ function App() {
   if (!isTokenLoaded) return null;
 
   return (
-    <div
-      style={{
-        paddingTop: "env(safe-area-inset-top)",
-        backgroundColor: "#111111",
-      }}
-    >
-      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
-      <AppRoutes />
-    </div>
+    <>
+      <div
+        className="fixed top-0 left-0 right-0 z-50"
+        style={{
+          height: "env(safe-area-inset-top)",
+          backgroundColor: "#222222",
+        }}
+      />
+
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50"
+        style={{
+          height: "env(safe-area-inset-bottom)",
+          backgroundColor: "#222222",
+        }}
+      />
+
+      <div
+        className="min-h-screen bg-white"
+        style={{
+          paddingTop: "env(safe-area-inset-top)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
+      >
+        <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+        <AppRoutes />
+      </div>
+    </>
   );
 }
 
