@@ -65,10 +65,10 @@ function App() {
   if (!isTokenLoaded) return null;
 
   return (
-    <>
+    <div className="pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       <AppRoutes />
-    </>
+    </div>
   );
 }
 
