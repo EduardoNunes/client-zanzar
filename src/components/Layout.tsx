@@ -229,7 +229,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           )}
         </button>
       </div>
-      {/* Mobile Menu */}
+      {/* Mobile Menu aberto */}
       <div
         className={`md:hidden transition-all duration-300 ease-in-out ${
           isMenuOpen
@@ -239,13 +239,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         style={{
           position: "fixed",
           bottom: "60px",
-          left: "0px",
-          right: "20px",
+          left: "50%",
+          transform: "translateX(-50%)",
           width: "calc(100% - 40px)",
           maxHeight: "calc(100vh - 100px)",
           backgroundColor: "white",
-          borderTopLeftRadius: "16px",
-          borderTopRightRadius: "16px",
+          borderRadius: "16px",
           boxShadow: "0px -4px 6px rgba(0, 0, 0, 0.1)",
           overflowY: "auto",
           zIndex: 1000,
@@ -273,7 +272,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 className="absolute bottom-10 left-11"
                 style={{
                   transition: "transform 0.3s ease-in-out",
-                  transform: "rotate(90deg)",
+                  transform: "translate(-50%, -50%) rotate(90deg)",
                 }}
               >
                 {item.label === "Notificações" && (
