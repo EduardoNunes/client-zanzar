@@ -86,13 +86,13 @@ function App() {
 
       {/* Conteúdo com padding para respeitar as safe areas */}
       <div
-        className="bg-gray-100 h-[calc(100vh_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] overflow-auto"
+        className="bg-gray-100 h-screen"
         style={{
           paddingTop: "env(safe-area-inset-top)",
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
-        <div>
+        <div className="h-[calc(100vh_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] overflow-auto">
           <ToastContainer
             position="top-right"
             autoClose={3000}
