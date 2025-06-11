@@ -86,7 +86,7 @@ function App() {
 
       {/* Conteúdo com padding para respeitar as safe areas */}
       <div
-        className="min-h-screen"
+        className="h-screen"
         style={{
           paddingTop: "env(safe-area-inset-top)",
           paddingBottom: "env(safe-area-inset-bottom)",

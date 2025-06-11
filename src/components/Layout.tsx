@@ -138,7 +138,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="h-full bg-gray-100">
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
