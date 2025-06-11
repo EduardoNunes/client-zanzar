@@ -138,8 +138,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <div className="min-h-screen bg-gray-100 safe-area">
+      <nav className="bg-white shadow-sm sticky top-0 z-50 safe-area-top">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -192,117 +192,119 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </button>
               ))}
             </div>
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => handleOpenMenu()}
-              className="md:hidden p-2 rounded-md hover:bg-gray-100"
-              style={{
-                position: "fixed",
-                bottom: "0",
-                left: "0",
-                width: "50px",
-                height: "50px",
-                clipPath: "polygon(0% 0%, 100% 0%, 0% 100%)",
-                backgroundColor: "#4f46e5",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                transition: "transform 0.3s ease-in-out",
-                transform: isMenuOpen ? "rotate(90deg)" : "rotate(270deg)",
-              }}
-            >
-              {totalUnread > 0 && (
-                <div className="absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-xs rotate-270">
-                  {isMenuOpen
-                    ? (unreadInvites ?? 0) +
-                      (unreadChatsCount ?? 0) +
-                      (unreadNotifications ?? 0)
-                    : ""}
-                </div>
-              )}
-            </button>
-          </div>
-          {/* Mobile Menu */}
-          <div
-            className={`md:hidden transition-all duration-300 ease-in-out ${
-              isMenuOpen
-                ? "opacity-100 visible scale-100"
-                : "opacity-0 invisible scale-0"
-            }`}
-            style={{
-              position: "fixed",
-              bottom: "60px",
-              left: "0",
-              width: "100%",
-              maxHeight: "calc(100vh - 60px)",
-              backgroundColor: "white",
-              borderTopLeftRadius: "16px",
-              borderTopRightRadius: "16px",
-              boxShadow: "0px -4px 6px rgba(0, 0, 0, 0.1)",
-              overflowY: "auto",
-              zIndex: 1000,
-            }}
-          >
-            <div
-              className="grid grid-cols-3 gap-4 p-4"
-              style={{
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-              }}
-            >
-              {menuItems.map((item, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    item.onClick();
-                    setIsMenuOpen(false);
-                  }}
-                  className="relative flex flex-col items-center space-y-2 p-2 rounded-md hover:bg-gray-100 text-gray-700"
-                >
-                  {React.cloneElement(item.icon, {
-                    className: "w-8 h-8",
-                  })}
-                  <div
-                    className="absolute bottom-10 left-11"
-                    style={{
-                      transition: "transform 0.3s ease-in-out",
-                      transform: "rotate(90deg)",
-                    }}
-                  >
-                    {item.label === "Notificações" && (
-                      <NotificationIndicator
-                        isMenuOpen={isMenuOpen}
-                        unreadNotifications={unreadNotifications}
-                        setUnreadNotifications={setUnreadNotifications}
-                      />
-                    )}
-                    {item.label === "Conversas" && (
-                      <MessageIndicator
-                        isMenuOpen={isMenuOpen}
-                        unreadChatsCount={unreadChatsCount}
-                        setUnreadChatsCount={setUnreadChatsCount}
-                      />
-                    )}
-                    {item.label === "Convites" && (
-                      <InvitesIndicator
-                        isMenuOpen={isMenuOpen}
-                        unreadInvites={unreadInvites}
-                        setUnreadInvites={setUnreadInvites}
-                      />
-                    )}
-                  </div>
-                  <span className="text-xs">{item.label}</span>
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       </nav>
-      
-      <main className="max-w-5xl mx-auto px-4 py-8">
+
+      <main className="max-w-5xl mx-auto px-4 pb-20 safe-area-bottom">
         <AdModal />
         {children}
       </main>
+
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => handleOpenMenu()}
+        className="md:hidden p-2 rounded-md hover:bg-gray-100 safe-area-bottom"
+        style={{
+          position: "fixed",
+          bottom: "env(safe-area-inset-bottom)",
+          left: "0",
+          width: "50px",
+          height: "50px",
+          clipPath: "polygon(0% 0%, 100% 0%, 0% 100%)",
+          backgroundColor: "#4f46e5",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          transition: "transform 0.3s ease-in-out",
+          transform: isMenuOpen ? "rotate(90deg)" : "rotate(270deg)",
+        }}
+      >
+        {totalUnread > 0 && (
+          <div className="absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-xs rotate-270">
+            {isMenuOpen
+              ? (unreadInvites ?? 0) +
+                (unreadChatsCount ?? 0) +
+                (unreadNotifications ?? 0)
+              : ""}
+          </div>
+        )}
+      </button>
+
+      {/* Mobile Menu */}
+      <div
+        className={`md:hidden transition-all duration-300 ease-in-out ${
+          isMenuOpen
+            ? "opacity-100 visible scale-100"
+            : "opacity-0 invisible scale-0"
+        } safe-area-bottom`}
+        style={{
+          position: "fixed",
+          bottom: "calc(60px + env(safe-area-inset-bottom))",
+          left: "0",
+          width: "100%",
+          maxHeight: "calc(100vh - 60px - env(safe-area-inset-bottom))",
+          backgroundColor: "white",
+          borderTopLeftRadius: "16px",
+          borderTopRightRadius: "16px",
+          boxShadow: "0px -4px 6px rgba(0, 0, 0, 0.1)",
+          overflowY: "auto",
+          zIndex: 1000,
+        }}
+      >
+        <div
+          className="grid grid-cols-3 gap-4 p-4"
+          style={{
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          }}
+        >
+          {menuItems.map((item, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                item.onClick();
+                setIsMenuOpen(false);
+              }}
+              className="relative flex flex-col items-center space-y-2 p-2 rounded-md hover:bg-gray-100 text-gray-700"
+            >
+              {React.cloneElement(item.icon, {
+                className: "w-8 h-8",
+              })}
+              <div
+                className="absolute bottom-10 left-11"
+                style={{
+                  transition: "transform 0.3s ease-in-out",
+                  transform: "rotate(90deg)",
+                }}
+              >
+                {item.label === "Notificações" && (
+                  <NotificationIndicator
+                    isMenuOpen={isMenuOpen}
+                    unreadNotifications={unreadNotifications}
+                    setUnreadNotifications={setUnreadNotifications}
+                  />
+                )}
+                {item.label === "Conversas" && (
+                  <MessageIndicator
+                    isMenuOpen={isMenuOpen}
+                    unreadChatsCount={unreadChatsCount}
+                    setUnreadChatsCount={setUnreadChatsCount}
+                  />
+                )}
+                {item.label === "Convites" && (
+                  <InvitesIndicator
+                    isMenuOpen={isMenuOpen}
+                    unreadInvites={unreadInvites}
+                    setUnreadInvites={setUnreadInvites}
+                  />
+                )}
+              </div>
+              <span className="text-xs">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
