@@ -196,36 +196,43 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
       {/* Mobile Menu Button */}
-      <button
-        onClick={() => handleOpenMenu()}
-        className="md:hidden p-2 rounded-md hover:bg-gray-100"
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white flex justify-center items-center h-[56px] shadow-md"
         style={{
-          position: "fixed",
-          bottom: "0px",
-          left: "0px",
-          width: "50px",
-          height: "50px",
-          clipPath: "polygon(0% 0%, 100% 0%, 0% 100%)",
-          backgroundColor: "#4f46e5",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "white",
-          transition: "transform 0.3s ease-in-out",
-          transform: isMenuOpen ? "rotate(90deg)" : "rotate(270deg)",
-          zIndex: 1001,
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
-        {totalUnread > 0 && (
-          <div className="absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-xs rotate-270">
-            {isMenuOpen
-              ? (unreadInvites ?? 0) +
-                (unreadChatsCount ?? 0) +
-                (unreadNotifications ?? 0)
-              : ""}
-          </div>
-        )}
-      </button>
+        <button
+          onClick={() => handleOpenMenu()}
+          className="md:hidden p-2 rounded-md hover:bg-gray-100"
+          style={{
+            position: "fixed",
+            bottom: "0px",
+            left: "0px",
+            width: "50px",
+            height: "50px",
+            clipPath: "polygon(0% 0%, 100% 0%, 0% 100%)",
+            backgroundColor: "#4f46e5",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+            transition: "transform 0.3s ease-in-out",
+            transform: isMenuOpen ? "rotate(90deg)" : "rotate(270deg)",
+            zIndex: 1001,
+          }}
+        >
+          {totalUnread > 0 && (
+            <div className="absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-xs rotate-270">
+              {isMenuOpen
+                ? (unreadInvites ?? 0) +
+                  (unreadChatsCount ?? 0) +
+                  (unreadNotifications ?? 0)
+                : ""}
+            </div>
+          )}
+        </button>
+      </div>
       {/* Mobile Menu */}
       <div
         className={`md:hidden transition-all duration-300 ease-in-out ${
