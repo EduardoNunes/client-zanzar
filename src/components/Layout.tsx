@@ -195,11 +195,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {/* Mobile Menu Button */}
             <button
               onClick={() => handleOpenMenu()}
-              className="md:hidden p-2 rounded-md hover:bg-gray-100"
+              className="md:hidden p-2 rounded-md hover:bg-gray-100 fixed"
               style={{
-                position: "absolute",
-                bottom: "0",
-                left: "0",
+                position: "fixed",
+                bottom: "20px",
+                left: "20px",
                 width: "50px",
                 height: "50px",
                 clipPath: "polygon(0% 0%, 100% 0%, 0% 100%)",
@@ -210,6 +210,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 color: "white",
                 transition: "transform 0.3s ease-in-out",
                 transform: isMenuOpen ? "rotate(90deg)" : "rotate(270deg)",
+                zIndex: 1001,
               }}
             >
               {totalUnread > 0 && (
@@ -231,11 +232,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 : "opacity-0 invisible scale-0"
             }`}
             style={{
-              position: "absolute",
-              bottom: "60px",
-              left: "0",
-              width: "100%",
-              maxHeight: "calc(100vh - 60px)",
+              position: "fixed",
+              bottom: "80px",
+              left: "20px",
+              width: "calc(100% - 40px)",
+              maxHeight: "calc(100vh - 100px)",
               backgroundColor: "white",
               borderTopLeftRadius: "16px",
               borderTopRightRadius: "16px",
@@ -298,7 +299,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </nav>
-      
+
       <main className="max-w-5xl mx-auto px-4 py-8">
         <AdModal />
         {children}
