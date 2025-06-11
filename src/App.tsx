@@ -65,10 +65,15 @@ function App() {
   if (!isTokenLoaded) return null;
 
   return (
-    <>
+    <div
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        backgroundColor: "#111111",
+      }}
+    >
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       <AppRoutes />
-    </>
+    </div>
   );
 }
 
