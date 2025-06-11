@@ -196,17 +196,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
       {/* Mobile Menu Button */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white flex justify-center items-center h-[56px] shadow-md"
-        style={{
-          paddingBottom: "env(safe-area-inset-bottom)",
-        }}
-      >
+      <div>
         <button
           onClick={() => handleOpenMenu()}
           className="md:hidden p-2 rounded-md hover:bg-gray-100"
           style={{
             position: "fixed",
+            marginBottom: "env(safe-area-inset-bottom)",
             bottom: "0px",
             left: "0px",
             width: "50px",
