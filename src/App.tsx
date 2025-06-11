@@ -1,4 +1,4 @@
-/* import { App as CapacitorApp } from "@capacitor/app"; */
+import { App as CapacitorApp } from "@capacitor/app";
 import { useEffect, useState } from "react";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -38,7 +38,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    /* let backButtonListener: any;
+    let backButtonListener: any;
 
     const setupBackButtonListener = async () => {
       if (CapacitorApp) {
@@ -59,16 +59,16 @@ function App() {
 
     return () => {
       if (backButtonListener) backButtonListener.remove();
-    }; */
+    };
   }, [navigate]);
 
   if (!isTokenLoaded) return null;
 
   return (
-    <>
+    <div className="h-full">
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       <AppRoutes />
-    </>
+    </div>
   );
 }
 
