@@ -65,25 +65,28 @@ function App() {
   if (!isTokenLoaded) return null;
 
   return (
-    <>
+    <div className="relative min-h-screen bg-white">
+      {/* Safe Area Top (fixa, sempre visível) */}
       <div
-        className="fixed top-0 left-0 right-0 z-50"
+        className="absolute top-0 left-0 right-0 z-1000"
         style={{
           height: "env(safe-area-inset-top)",
           backgroundColor: "#222222",
         }}
       />
 
+      {/* Safe Area Bottom (fixa, sempre visível) */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50"
+        className="absolute bottom-0 left-0 right-0 z-1000"
         style={{
           height: "env(safe-area-inset-bottom)",
           backgroundColor: "#222222",
         }}
       />
 
+      {/* Conteúdo com padding para respeitar as safe areas */}
       <div
-        className="min-h-screen bg-white"
+        className="min-h-screen"
         style={{
           paddingTop: "env(safe-area-inset-top)",
           paddingBottom: "env(safe-area-inset-bottom)",
@@ -92,7 +95,7 @@ function App() {
         <ToastContainer position="top-right" autoClose={3000} theme="colored" />
         <AppRoutes />
       </div>
-    </>
+    </div>
   );
 }
 
