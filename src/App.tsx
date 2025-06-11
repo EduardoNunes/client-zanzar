@@ -65,7 +65,7 @@ function App() {
   if (!isTokenLoaded) return null;
 
   return (
-    <div className="relative min-h-screen bg-white">
+    <div className="relative h-screen bg-white">
       {/* Safe Area Top (fixa, sempre visível) */}
       <div
         className="absolute top-0 left-0 right-0 z-1000"
