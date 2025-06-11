@@ -68,7 +68,7 @@ function App() {
     <div className="relative h-screen bg-white">
       {/* Safe Area Top (fixa, sempre visível) */}
       <div
-        className="absolute top-0 left-0 right-0 z-1000"
+        className="fixed top-0 left-0 right-0 z-1000"
         style={{
           height: "env(safe-area-inset-top)",
           backgroundColor: "#222222",
@@ -77,7 +77,7 @@ function App() {
 
       {/* Safe Area Bottom (fixa, sempre visível) */}
       <div
-        className="absolute bottom-0 left-0 right-0 z-1000"
+        className="fixed bottom-0 left-0 right-0 z-1000"
         style={{
           height: "env(safe-area-inset-bottom)",
           backgroundColor: "#222222",
