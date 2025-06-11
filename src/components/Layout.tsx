@@ -139,23 +139,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gray-100 safe-area flex flex-col">
-      <nav className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50 safe-area-top">
+      <nav className="bg-black shadow-sm fixed top-0 left-0 right-0 z-50 safe-area-top">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center space-x-2">
                 <img src={LogoZanzar} alt="Zanzar Logo" className="w-10 h-10" />
-                <span className="ml-2 font-semibold text-lg">Zanzar</span>
+                <span className="ml-2 font-semibold text-lg text-white">
+                  Zanzar
+                </span>
               </div>
               <div className="flex items-center space-x-3">
                 <PlusSquare
-                  className="w-8 h-8 text-gray-600"
+                  className="w-8 h-8 text-white"
                   onClick={() => navigate("/create")}
                 />
                 <div className="relative">
                   <MessageSquare
-                    className="w-8 h-8 text-gray-600"
+                    className="w-8 h-8 text-white"
                     onClick={() => navigate("/messages")}
                   />
                   <div className="absolute bottom-5 left-[-8px] rotate-90">
@@ -167,7 +169,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
                 <ShoppingCart
-                  className="w-8 h-8 text-gray-600"
+                  className="w-8 h-8 text-white"
                   onClick={() => navigate("/my-cart")}
                 />
               </div>
@@ -178,10 +180,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <button
                   key={index}
                   onClick={item.onClick}
-                  className={`relative flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-gray-100 ${
+                  className={`relative flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-gray-800 ${
                     item.path === location.pathname
-                      ? "text-indigo-600"
-                      : "text-gray-700"
+                      ? "text-indigo-400"
+                      : "text-white"
                   } ${item.className || ""}`}
                 >
                   {item.icon}
@@ -204,7 +206,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Mobile Menu Button */}
       <button
         onClick={() => handleOpenMenu()}
-        className="md:hidden p-2 rounded-md hover:bg-gray-100 safe-area-bottom"
+        className="md:hidden p-2 rounded-md hover:bg-gray-800 safe-area-bottom"
         style={{
           position: "fixed",
           bottom: "env(safe-area-inset-bottom)",
@@ -212,7 +214,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           width: "50px",
           height: "50px",
           clipPath: "polygon(0% 0%, 100% 0%, 0% 100%)",
-          backgroundColor: "#4f46e5",
+          backgroundColor: "#000000",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -239,7 +241,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           isMenuOpen
             ? "opacity-100 visible scale-100"
             : "opacity-0 invisible scale-0"
-        } safe-area-bottom`}
+        } safe-area-bottom bg-black`}
         style={{
           position: "fixed",
           bottom: "calc(60px + env(safe-area-inset-bottom))",
@@ -247,10 +249,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           right: "0",
           width: "100%",
           maxHeight: "calc(100vh - 60px - env(safe-area-inset-bottom))",
-          backgroundColor: "white",
           borderTopLeftRadius: "16px",
           borderTopRightRadius: "16px",
-          boxShadow: "0px -4px 6px rgba(0, 0, 0, 0.1)",
+          boxShadow: "0px -4px 6px rgba(0, 0, 0, 0.3)",
           overflowY: "auto",
           zIndex: 1000,
         }}
@@ -268,7 +269,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 item.onClick();
                 setIsMenuOpen(false);
               }}
-              className="relative flex flex-col items-center space-y-2 p-2 rounded-md hover:bg-gray-100 text-gray-700"
+              className="relative flex flex-col items-center space-y-2 p-2 rounded-md hover:bg-gray-800 text-white"
             >
               {React.cloneElement(item.icon, {
                 className: "w-8 h-8",
