@@ -138,8 +138,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 safe-area">
-      <nav className="bg-white shadow-sm sticky top-0 z-50 safe-area-top">
+    <div className="min-h-screen bg-gray-100 safe-area flex flex-col">
+      <nav className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50 safe-area-top">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -196,7 +196,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-4 pb-20 safe-area-bottom">
+      <main className="max-w-5xl mx-auto px-4 pb-20 mt-16 safe-area-bottom flex-grow">
         <AdModal />
         {children}
       </main>
@@ -219,6 +219,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           color: "white",
           transition: "transform 0.3s ease-in-out",
           transform: isMenuOpen ? "rotate(90deg)" : "rotate(270deg)",
+          zIndex: 1001,
         }}
       >
         {totalUnread > 0 && (
@@ -243,6 +244,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           position: "fixed",
           bottom: "calc(60px + env(safe-area-inset-bottom))",
           left: "0",
+          right: "0",
           width: "100%",
           maxHeight: "calc(100vh - 60px - env(safe-area-inset-bottom))",
           backgroundColor: "white",
