@@ -1,4 +1,5 @@
 import { App as CapacitorApp } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
 import { useEffect, useState } from "react";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -22,6 +23,11 @@ function App() {
   const [isTokenLoaded, setIsTokenLoaded] = useState(false);
   const navigate = useNavigate();
   const socket = useSocket();
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setIsMobile(Capacitor.getPlatform() !== "web");
+  }, []);
 
   useEffect(() => {
     if (socket && token) {
@@ -62,37 +68,26 @@ function App() {
     };
   }, [navigate]);
 
-  if (!isTokenLoaded) return null;
+  if (!isTokenLoaded || isMobile === null) return null;
+
+  if (!isMobile) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-100 text-center p-4">
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">
+          Acesso não permitido
+        </h1>
+        <p className="text-gray-600">
+          Este aplicativo foi projetado para ser usado apenas em dispositivos
+          móveis.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-screen bg-white">
-      {/* Safe Area Top (fixa, sempre visível) */}
-      <div
-        className="fixed top-0 left-0 right-0 z-999"
-        style={{
-          height: "env(safe-area-inset-top)",
-          backgroundColor: "#222222",
-        }}
-      />
-
-      {/* Safe Area Bottom (fixa, sempre visível) */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-999"
-        style={{
-          height: "env(safe-area-inset-bottom)",
-          backgroundColor: "#222222",
-        }}
-      />
-
-      {/* Conteúdo com padding para respeitar as safe areas */}
-      <div
-        className="bg-gray-100 h-screen"
-        style={{
-          paddingTop: "env(safe-area-inset-top)",
-          paddingBottom: "env(safe-area-inset-bottom)",
-        }}
-      >
-        <div className="h-[calc(100vh_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] overflow-auto">
+      <div className="bg-gray-100 h-screen">
+        <div>
           <ToastContainer
             position="top-right"
             autoClose={3000}
