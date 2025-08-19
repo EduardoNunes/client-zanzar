@@ -83,7 +83,7 @@ function App() {
   if (!isTokenLoaded) return null;
 
   return (
-    <div className="relative min-h-screen bg-white">
+    <div className="relative bg-white">
       <div className="bg-gray-100 min-h-screen">
         <ToastContainer position="top-right" autoClose={3000} theme="colored" />
         <AppRoutes />
