@@ -1,4 +1,5 @@
 import { App as CapacitorApp } from "@capacitor/app";
+import { StatusBar, Style } from '@capacitor/status-bar';
 import { useEffect, useState } from "react";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -16,6 +17,19 @@ function AppWrapper() {
     </GlobalProvider>
   );
 }
+
+const setupBars = async () => {
+  // StatusBar
+  await StatusBar.setOverlaysWebView({ overlay: false });
+  await StatusBar.setBackgroundColor({ color: '#000000' });
+  await StatusBar.setStyle({ style: Style.Light });
+/* 
+  // NavigationBar
+  await NavigationBar.setBackgroundColor({ color: '#000000' });
+  await NavigationBar.setStyle({ style: 'LIGHT' }); */
+};
+
+setupBars();
 
 function App() {
   const { autentication, setSocketConnect, token } = useGlobalContext();
@@ -66,13 +80,15 @@ function App() {
 
   return (
     <div className="relative h-screen bg-white">
-      <div className="h-full bg-gray-100 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          theme="colored"
-        />
-        <AppRoutes />
+      <div className="bg-gray-100 h-screen">
+        <div>
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            theme="colored"
+          />
+          <AppRoutes />
+        </div>
       </div>
     </div>
   );
