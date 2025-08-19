@@ -1,5 +1,5 @@
 import { App as CapacitorApp } from "@capacitor/app";
-import { StatusBar, Style } from '@capacitor/status-bar';
+import { StatusBar, Style } from "@capacitor/status-bar";
 import { useEffect, useState } from "react";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -18,31 +18,20 @@ function AppWrapper() {
   );
 }
 
-const setupBars = async () => {
-  // StatusBar
-  await StatusBar.setOverlaysWebView({ overlay: false });
-  await StatusBar.setBackgroundColor({ color: '#000000' });
-  await StatusBar.setStyle({ style: Style.Light });
-/* 
-  // NavigationBar
-  await NavigationBar.setBackgroundColor({ color: '#000000' });
-  await NavigationBar.setStyle({ style: 'LIGHT' }); */
-};
-
-setupBars();
-
 function App() {
   const { autentication, setSocketConnect, token } = useGlobalContext();
   const [isTokenLoaded, setIsTokenLoaded] = useState(false);
   const navigate = useNavigate();
   const socket = useSocket();
 
+  // Conexão do socket
   useEffect(() => {
     if (socket && token) {
       setSocketConnect(socket);
     }
-  }, [socket, setSocketConnect]);
+  }, [socket, setSocketConnect, token]);
 
+  // Autenticação inicial
   useEffect(() => {
     const loadToken = async () => {
       await autentication();
@@ -51,6 +40,7 @@ function App() {
     loadToken();
   }, []);
 
+  // Listener para botão de voltar (Android)
   useEffect(() => {
     let backButtonListener: any;
 
@@ -76,19 +66,33 @@ function App() {
     };
   }, [navigate]);
 
+  // Configuração da StatusBar
+  useEffect(() => {
+    const setupStatusBar = async () => {
+      try {
+        await StatusBar.setOverlaysWebView({ overlay: false }); // impede que o conteúdo vá por baixo da status bar
+        await StatusBar.setBackgroundColor({ color: "#000000" }); // fundo preto
+        await StatusBar.setStyle({ style: Style.Light }); // ícones brancos
+      } catch (err) {
+        console.warn("Erro ao configurar StatusBar:", err);
+      }
+    };
+    setupStatusBar();
+  }, []);
+
   if (!isTokenLoaded) return null;
 
   return (
-    <div className="relative h-screen bg-white">
-      <div className="bg-gray-100 h-screen">
-        <div>
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            theme="colored"
-          />
-          <AppRoutes />
-        </div>
+    <div
+      className="relative min-h-screen bg-white"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+      }}
+    >
+      <div className="bg-gray-100 min-h-screen">
+        <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+        <AppRoutes />
       </div>
     </div>
   );
