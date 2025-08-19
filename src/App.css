@@ -3,3 +3,8 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}

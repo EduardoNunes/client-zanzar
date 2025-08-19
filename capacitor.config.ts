@@ -5,6 +5,9 @@ const config: CapacitorConfig = {
     Camera: {
       webUseInput: true, // Isso força o uso do input file no PWA
     },
+    StatusBar: {
+      overlaysWebView: false,
+    },
   },
   appId: "com.example.zanzar",
   appName: "Zanzar",
