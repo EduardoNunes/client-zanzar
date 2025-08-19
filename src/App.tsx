@@ -1,5 +1,4 @@
 import { App as CapacitorApp } from "@capacitor/app";
-import { StatusBar, Style } from "@capacitor/status-bar";
 import { useEffect, useState } from "react";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -63,24 +62,11 @@ function App() {
     };
   }, [navigate]);
 
-  useEffect(() => {
-    const setupStatusBar = async () => {
-      try {
-        await StatusBar.setOverlaysWebView({ overlay: false });
-        await StatusBar.setBackgroundColor({ color: "#000000" });
-        await StatusBar.setStyle({ style: Style.Light });
-      } catch (err) {
-        console.warn("Erro ao configurar StatusBar:", err);
-      }
-    };
-    setupStatusBar();
-  }, []);
-
   if (!isTokenLoaded) return null;
 
   return (
-    <div className="relative h-full bg-white">
-      <div className="bg-gray-100">
+    <div className="relative h-screen bg-white">
+      <div className="bg-gray-100 h-screen">
         <div>
           <ToastContainer
             position="top-right"
