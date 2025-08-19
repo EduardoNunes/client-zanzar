@@ -82,16 +82,8 @@ function App() {
   if (!isTokenLoaded) return null;
 
   return (
-    <div
-      className="relative bg-white"
-      style={{
-        paddingTop: "env(safe-area-inset-top)",
-        paddingBottom: "env(safe-area-inset-bottom)",
-        paddingLeft: "env(safe-area-inset-left)",
-        paddingRight: "env(safe-area-inset-right)",
-      }}
-    >
-      <div className="bg-gray-100 min-h-screen">
+    <div className="relative bg-white h-full">
+      <div className="bg-gray-100 h-full">
         <ToastContainer position="top-right" autoClose={3000} theme="colored" />
         <AppRoutes />
       </div>
