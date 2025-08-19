@@ -1,20 +1,22 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
+  appId: "com.example.zanzar",
+  appName: "Zanzar",
+  webDir: "dist",
   plugins: {
     Camera: {
-      webUseInput: true, // Isso força o uso do input file no PWA
+      webUseInput: true,
     },
     StatusBar: {
       overlaysWebView: false,
     },
   },
-  appId: "com.example.zanzar",
-  appName: "Zanzar",
-  webDir: "dist",
   server: {
-    url: "https://zanzar.netlify.app",
-    cleartext: true, // Se você estiver usando HTTP durante o desenvolvimento local, isso pode ser necessário
+    androidScheme: "https",
+    // ❌ Remover "url" em produção
+    // url: "https://zanzar.netlify.app",
+    cleartext: true,
   },
 };
 
