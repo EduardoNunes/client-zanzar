@@ -65,7 +65,7 @@ function App() {
   if (!isTokenLoaded) return null;
 
   return (
-    <div className="relative bg-white">
+    <div className="relative h-full bg-white">
       <div className="bg-gray-100">
         <div>
           <ToastContainer
