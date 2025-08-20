@@ -162,7 +162,12 @@ export default function CommentModal({
                   key={comment.id}
                   className="flex flex-col items-start text-sm"
                 >
-                  <button className="font-semibold text-indigo-600 mr-1">
+                  <button
+                    className="font-semibold text-indigo-600 mr-1"
+                    onClick={() =>
+                      navigate(`/profile/${comment.profile.username}`)
+                    }
+                  >
                     {comment.profile.username}:
                   </button>
                   <span>{comment.content}</span>
