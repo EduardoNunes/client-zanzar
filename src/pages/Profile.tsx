@@ -5,9 +5,12 @@ import ProfileHeader from "../components/ProfileHeader";
 import {
   getProfileReq,
   updateProfileImageReq,
+  updateUsernameReq,
 } from "../requests/profileRequests";
 import { useGlobalContext } from "../context/globalContext";
 import LoadSpinner from "../components/LoadSpinner";
+import { toast } from "react-toastify";
+import { Preferences } from "@capacitor/preferences";
 
 interface Profile {
   profileId: string;
@@ -96,6 +99,39 @@ export default function Profile() {
     return <LoadSpinner />;
   }
 
+  const handleEditUserName = async (newUsername: string) => {
+    if (!profileId || !token) {
+      navigate("/login");
+      return;
+    }
+
+    if (newUsername.length < 3 || newUsername.length > 20) {
+      toast.info("O username deve ter entre 3 e 20 caracteres.");
+      return;
+    }
+
+    try {
+      await updateUsernameReq(profileId, newUsername, token);
+      await Preferences.set({ key: "user_name", value: newUsername });
+      toast.success("Username atualizado com sucesso!");
+      setProfile((prevProfile) => {
+        if (prevProfile) {
+          return { ...prevProfile, username: newUsername };
+        }
+        return prevProfile;
+      });
+      navigate(`/profile/${newUsername}`);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+        console.error(error);
+      } else {
+        toast.error("Ocorreu um erro desconhecido.");
+        console.error(error);
+      }
+    }
+  };
+
   return (
     <>
       <div className="max-w-4xl mx-auto">
@@ -108,6 +144,7 @@ export default function Profile() {
           handleAvatarChange={handleAvatarChange}
           setIsFollowing={setIsFollowing}
           setFollowStats={setFollowStats}
+          handleEditUserName={handleEditUserName}
         />
         <PostsGridProfile username={username} />
       </div>

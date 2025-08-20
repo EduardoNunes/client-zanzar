@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Camera, ShoppingBag } from "lucide-react";
 import FollowButton from "./handleFollowToggle";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "./ConfirmModal";
 import { useGlobalContext } from "../context/globalContext";
+import { Pencil } from "lucide-react";
 import { toast } from "react-toastify";
 
 interface Profile {
@@ -31,6 +32,7 @@ interface ProfileHeaderProps {
   handleAvatarChange: (
     event: React.ChangeEvent<HTMLInputElement>
   ) => Promise<void>;
+  handleEditUserName: (newUsername: string) => void;
   setIsFollowing: React.Dispatch<React.SetStateAction<boolean>>;
   setFollowStats: React.Dispatch<
     React.SetStateAction<{
@@ -49,9 +51,12 @@ export default function ProfileHeader({
   handleAvatarChange,
   setIsFollowing,
   setFollowStats,
+  handleEditUserName,
 }: ProfileHeaderProps) {
   const { isOpen, setIsOpen } = useGlobalContext();
   const navigate = useNavigate();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
 
   const handleClickUserStore = () => {
     if (profile?.hasUserStore) {
@@ -66,6 +71,19 @@ export default function ProfileHeader({
   const handleCreateStore = () => {
     navigate("/create-store");
     setIsOpen(false);
+  };
+
+  const openEditModal = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setNewUsername(""); // Clear the input when closing the modal
+  };
+
+  const confirmEditUserName = () => {
+    handleEditUserName(newUsername);
   };
 
   return (
@@ -125,9 +143,17 @@ export default function ProfileHeader({
         </div>
 
         <div className="flex-1 text-center md:text-left">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {profile?.username}
-          </h1>
+          <div className="flex justify-center md:justify-start gap-1">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {profile?.username}
+            </h1>
+            {isCurrentUser && (
+              <Pencil
+                className="w-3 h-3 mt-2 cursor-pointer"
+                onClick={openEditModal}
+              />
+            )}
+          </div>
           <div className="flex justify-center md:justify-start space-x-6 text-gray-600">
             <div>
               <span className="font-bold text-gray-900 mr-1">
@@ -171,6 +197,49 @@ export default function ProfileHeader({
           </div>
         </div>
       </div>
+
+      {/* Edit Username Modal */}
+      {isEditModalOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-10000"
+          style={{ background: "rgba(0, 0, 0, 0.5)" }}
+        >
+          <div className="relative p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">
+                Editar nome de usuário
+              </h3>
+              <div className="mt-2">
+                <input
+                  type="text"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-4 py-2"
+                  placeholder="Novo nome de usuário"
+                  value={newUsername}
+                  onChange={(e) =>
+                    setNewUsername(
+                      e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "")
+                    )
+                  }
+                />
+              </div>
+              <div className="items-center px-4 py-3">
+                <button
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 mr-2"
+                  onClick={closeEditModal}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700"
+                  onClick={confirmEditUserName}
+                >
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -197,3 +197,31 @@ export const updateUserDataReq = async (
     throw new Error(errorMessage);
   }
 };
+
+export const updateUsernameReq = async (
+  profileId: string,
+  newUsername: string,
+  token: string
+) => {
+  if (!token) {
+    throw new Error("Token de acesso não encontrado.");
+  }
+
+  try {
+    const response = await api.put(
+      `/profile/update-username/${profileId}`,
+      { newUsername },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Erro ao atualizar username.";
+    throw new Error(errorMessage);
+  }
+}
