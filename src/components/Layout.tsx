@@ -202,7 +202,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           className="md:hidden p-2 rounded-md hover:bg-gray-100"
           style={{
             position: "fixed",
-            marginBottom: "env(safe-area-inset-bottom)",
             bottom: "0px",
             left: "0px",
             width: "50px",
