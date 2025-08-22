@@ -18,28 +18,32 @@ function AppWrapper() {
 }
 
 function App() {
-  const { autentication, setSocketConnect, token } = useGlobalContext();
-  const [isTokenLoaded, setIsTokenLoaded] = useState(false);
+  const { autentication, setSocketConnect, profileId, token } =
+    useGlobalContext();
+  const [isReady, setIsReady] = useState(false);
   const navigate = useNavigate();
   const socket = useSocket();
 
+  // Carrega token e profileId antes de renderizar
   useEffect(() => {
-    if (socket && token) {
+    const loadAuth = async () => {
+      await autentication();
+      setIsReady(true);
+    };
+    loadAuth();
+  }, [autentication]);
+
+  // Quando o socket estiver pronto, guarda no contexto
+  useEffect(() => {
+    if (socket && profileId && token) {
+      console.log("Socket pronto e conectado para profileId:", profileId);
       setSocketConnect(socket);
     }
-  }, [socket, setSocketConnect]);
+  }, [socket, profileId, token, setSocketConnect]);
 
-  useEffect(() => {
-    const loadToken = async () => {
-      await autentication();
-      setIsTokenLoaded(true);
-    };
-    loadToken();
-  }, []);
-
+  // Botão de voltar no Capacitor
   useEffect(() => {
     let backButtonListener: any;
-
     const setupBackButtonListener = async () => {
       if (CapacitorApp) {
         backButtonListener = await CapacitorApp.addListener(
@@ -54,27 +58,19 @@ function App() {
         );
       }
     };
-
     setupBackButtonListener();
-
     return () => {
       if (backButtonListener) backButtonListener.remove();
     };
   }, [navigate]);
 
-  if (!isTokenLoaded) return null;
+  if (!isReady) return null;
 
   return (
     <div className="relative h-screen bg-white">
       <div className="bg-gray-100 h-screen">
-        <div>
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            theme="colored"
-          />
-          <AppRoutes />
-        </div>
+        <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+        <AppRoutes />
       </div>
     </div>
   );
