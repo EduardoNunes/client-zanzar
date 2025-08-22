@@ -72,7 +72,6 @@ function App() {
             position="top-right"
             autoClose={3000}
             theme="colored"
-            style={{ zIndex: 10001 }}
           />
           <AppRoutes />
         </div>
