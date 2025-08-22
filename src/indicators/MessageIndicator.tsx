@@ -15,47 +15,48 @@ export const MessageIndicator = ({
   setUnreadChatsCount,
 }: MessageIndicatorProps) => {
   const { profileId } = useGlobalContext();
-  
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
   const socket = useSocket();
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     const fetchStorage = async () => {
       const result = isMobile
         ? await Preferences.get({ key: "unread_chat_messages" })
         : { value: localStorage.getItem("unread_chat_messages") };
-
-      const parsed = result.value ? parseInt(result.value, 10) : 0;
-      setUnreadChatsCount?.(parsed);
+      setUnreadChatsCount?.(result.value ? parseInt(result.value, 10) : 0);
     };
-
     fetchStorage();
-  }, [isMenuOpen, setUnreadChatsCount]);
+  }, [isMenuOpen, setUnreadChatsCount, isMobile]);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !profileId) return;
 
-    socket.on("newMessage", async (message) => {
+    const handleNewMessage = (message: any) => {
       if (message.profileId !== profileId) {
         socket.emit("getUnreadChatsCount");
       }
-    });
+    };
 
-    socket.on("unreadChatsCount", async (data) => {
+    const handleUnreadCount = (data: { count: number }) => {
       setUnreadChatsCount?.(data.count);
-      isMobile
-        ? await Preferences.set({
-            key: "unread_chat_messages",
-            value: data.count.toString(),
-          })
-        : localStorage.setItem("unread_chat_messages", data.count.toString());
-    });
+      if (isMobile) {
+        Preferences.set({
+          key: "unread_chat_messages",
+          value: data.count.toString(),
+        });
+      } else {
+        localStorage.setItem("unread_chat_messages", data.count.toString());
+      }
+    };
+
+    socket.on("newMessage", handleNewMessage);
+    socket.on("unreadChatsCount", handleUnreadCount);
 
     return () => {
-      socket.off("newMessage");
-      socket.off("unreadChatsCount");
+      socket.off("newMessage", handleNewMessage);
+      socket.off("unreadChatsCount", handleUnreadCount);
     };
-  }, [socket, profileId, isMobile, setUnreadChatsCount]);
+  }, [socket, profileId, setUnreadChatsCount, isMobile]);
 
   if (!unreadChatsCount || unreadChatsCount <= 0) return null;
 

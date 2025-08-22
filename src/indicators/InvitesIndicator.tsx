@@ -1,6 +1,7 @@
-import { Preferences } from "@capacitor/preferences";
 import { useEffect, useRef } from "react";
+import { Preferences } from "@capacitor/preferences";
 import { useGlobalContext } from "../context/globalContext";
+import { useSocket } from "../hooks/useSocket";
 
 interface InvitesIndicatorProps {
   className?: string;
@@ -15,10 +16,10 @@ export function InvitesIndicator({
   unreadInvites = 0,
   setUnreadInvites,
 }: InvitesIndicatorProps) {
-  const { profileId, socketConnect: socket } = useGlobalContext();
+  const { profileId } = useGlobalContext();
+  const socket = useSocket();
   const unreadRef = useRef(unreadInvites);
 
-  // Atualiza a ref sempre que unreadInvites mudar
   useEffect(() => {
     unreadRef.current = unreadInvites;
   }, [unreadInvites]);
@@ -48,20 +49,6 @@ export function InvitesIndicator({
 
       const isMobile = /Mobi|Android/i.test(navigator.userAgent);
       const value = newUnread.toString();
-
-      if (isMobile) {
-        await Preferences.set({ key: "invites", value });
-      } else {
-        localStorage.setItem("invites", value);
-      }
-    };
-
-    const handleUnreadCount = async (data: { invites: number }) => {
-      setUnreadInvites?.(data.invites);
-
-      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-      const value = data.invites.toString();
-
       if (isMobile) {
         await Preferences.set({ key: "invites", value });
       } else {
@@ -70,15 +57,14 @@ export function InvitesIndicator({
     };
 
     socket.on(eventName, handleNewInvite);
-    socket.on("unread-invites-count", handleUnreadCount);
 
+    // Solicita contagem inicial
     socket.emit("get-unread-invites", profileId);
 
     return () => {
       socket.off(eventName, handleNewInvite);
-      socket.off("unread-invites-count", handleUnreadCount);
     };
-  }, [socket, profileId, setUnreadInvites, isMenuOpen]);
+  }, [socket, profileId, setUnreadInvites]);
 
   if (unreadInvites === 0) return null;
 

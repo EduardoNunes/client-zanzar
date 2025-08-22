@@ -1,170 +1,83 @@
+import { useEffect } from "react";
 import { Preferences } from "@capacitor/preferences";
-import React, { useEffect } from "react";
-import { io } from "socket.io-client";
+import { useSocket } from "../hooks/useSocket";
 import { useGlobalContext } from "../context/globalContext";
-import { SOCKET_URL } from "../server/socket";
 
 interface NotificationIndicatorProps {
   className?: string;
   isMenuOpen?: boolean;
   unreadNotifications?: number;
-  setUnreadNotifications?: (unreadNotifications: number) => void;
+  setUnreadNotifications?: (count: number) => void;
 }
 
-export const NotificationIndicator: React.FC<NotificationIndicatorProps> = ({
-  isMenuOpen,
+export const NotificationIndicator = ({
   className,
+  isMenuOpen,
   unreadNotifications,
   setUnreadNotifications,
-}) => {
-  const {
-    profileId,
-    socketConnect: socket,
-    setSocketConnect,
-  } = useGlobalContext();
+}: NotificationIndicatorProps) => {
+  const { profileId } = useGlobalContext();
+  const socket = useSocket();
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-  // Inicializar o contador de notificações não lidas
   useEffect(() => {
     const fetchUnreadNotifications = async () => {
-      let notificationsStorage;
-      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      const result = isMobile
+        ? await Preferences.get({ key: "unread_notifications" })
+        : { value: localStorage.getItem("unread_notifications") };
+      const parsed = result.value ? parseInt(result.value, 10) : 0;
+      setUnreadNotifications?.(parsed);
+    };
+    fetchUnreadNotifications();
+  }, [isMenuOpen, setUnreadNotifications, isMobile]);
 
+  useEffect(() => {
+    if (!socket || !profileId) return;
+
+    const handleNewNotification = (data: any) => {
+      const newCount = (unreadNotifications ?? 0) + 1;
+      setUnreadNotifications?.(newCount);
       if (isMobile) {
-        const result = await Preferences.get({ key: "unread_notifications" });
-        notificationsStorage = result.value;
+        Preferences.set({
+          key: "unread_notifications",
+          value: newCount.toString(),
+        });
       } else {
-        notificationsStorage = localStorage.getItem("unread_notifications");
-      }
-
-      if (setUnreadNotifications) {
-        const parsedValue = notificationsStorage
-          ? parseInt(notificationsStorage, 10)
-          : 0;
-        setUnreadNotifications(parsedValue);
+        localStorage.setItem("unread_notifications", newCount.toString());
       }
     };
 
-    fetchUnreadNotifications();
-  }, [isMenuOpen, setUnreadNotifications]);
+    const handleStatsUpdate = (data: { unreadNotifications: number }) => {
+      setUnreadNotifications?.(data.unreadNotifications);
+      if (isMobile) {
+        Preferences.set({
+          key: "unread_notifications",
+          value: data.unreadNotifications.toString(),
+        });
+      } else {
+        localStorage.setItem(
+          "unread_notifications",
+          data.unreadNotifications.toString()
+        );
+      }
+    };
 
-  // Socket conexão e tratamento de nova notificação
-  useEffect(() => {
-    if (profileId) {
-      const newSocket = io(SOCKET_URL, {
-        query: { userId: profileId },
-      });
+    socket.on("newNotification", handleNewNotification);
+    socket.on("userStatsUpdate", handleStatsUpdate);
 
-      // Listener para novas notificações
-      newSocket.on("newNotification", async () => {
-        const newUnreadCount = (unreadNotifications ?? 0) + 1;
+    return () => {
+      socket.off("newNotification", handleNewNotification);
+      socket.off("userStatsUpdate", handleStatsUpdate);
+    };
+  }, [
+    socket,
+    profileId,
+    unreadNotifications,
+    setUnreadNotifications,
+    isMobile,
+  ]);
 
-        if (setUnreadNotifications) {
-          setUnreadNotifications(newUnreadCount);
-        }
-
-        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-        if (isMobile) {
-          await Preferences.set({
-            key: "unread_notifications",
-            value: newUnreadCount.toString(),
-          });
-        } else {
-          localStorage.setItem(
-            "unread_notifications",
-            newUnreadCount.toString()
-          );
-        }
-      });
-
-      // Listener para atualizações de estatísticas
-      newSocket.on(
-        "userStatsUpdate",
-        async (stats: { unreadNotifications: number }) => {
-          if (setUnreadNotifications) {
-            setUnreadNotifications(stats.unreadNotifications);
-          }
-
-          // Atualizar storage
-          const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-          if (isMobile) {
-            await Preferences.set({
-              key: "unread_notifications",
-              value: stats.unreadNotifications.toString(),
-            });
-          } else {
-            localStorage.setItem(
-              "unread_notifications",
-              stats.unreadNotifications.toString()
-            );
-          }
-        }
-      );
-
-      // Solicitar estatísticas ao conectar
-      newSocket.emit("requestUserStats");
-
-      setSocketConnect(newSocket);
-      return () => {
-        newSocket.off("newNotification");
-        newSocket.off("userStatsUpdate");
-        newSocket.disconnect();
-      };
-    }
-  }, [profileId, setUnreadNotifications, unreadNotifications, isMenuOpen]);
-
-  // Listener para leitura de notificações
-  useEffect(() => {
-    if (socket) {
-      /* socket.on("notificationRead", async () => {
-        // Decrementar o contador de notificações não lidas
-        if (unreadNotifications && unreadNotifications > 0) {
-          const newUnreadCount = unreadNotifications - 1;
-
-          if (setUnreadNotifications) {
-            setUnreadNotifications(newUnreadCount);
-          }
-
-          const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-          if (isMobile) {
-            await Preferences.set({
-              key: "unread_notifications",
-              value: newUnreadCount.toString(),
-            });
-          } else {
-            localStorage.setItem(
-              "unread_notifications",
-              newUnreadCount.toString()
-            );
-          }
-        }
-      }); */
-
-      socket.on("allNotificationsMarkedAsRead", async () => {
-        if (setUnreadNotifications) {
-          setUnreadNotifications(0);
-        }
-
-        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-        if (isMobile) {
-          await Preferences.set({
-            key: "unread_notifications",
-            value: "0",
-          });
-        } else {
-          localStorage.setItem("unread_notifications", "0");
-        }
-      });
-
-      return () => {
-        socket.off("notificationRead");
-        socket.off("allNotificationsMarkedAsRead");
-      };
-    }
-  }, [socket, unreadNotifications, setUnreadNotifications]);
-
-  if (!unreadNotifications || unreadNotifications <= 0) {
-    return null;
-  }
+  if (!unreadNotifications || unreadNotifications <= 0) return null;
 
   return (
     <div
