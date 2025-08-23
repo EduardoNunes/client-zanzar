@@ -238,7 +238,7 @@ export default function Messages() {
                     className="relative w-full px-3 py-1 text-left hover:bg-gray-50 rounded-lg flex items-center space-x-3 transition-colors disabled:opacity-50"
                   >
                     {userChat.messagesCount > 0 ? (
-                      <div className="absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex justify-center pb-[2px] items-center text-center text-xs z-10">
+                      <div className="absolute bottom-7 left-2 bg-red-500 text-white rounded-full w-3 h-3 flex justify-center pb-[2px] items-center text-center text-xs z-3">
                         {userChat.messagesCount}
                       </div>
                     ) : null}

@@ -78,7 +78,7 @@ export default function AdModal() {
   if (!isOpen || !ad) return null;
 
   return (
-    <div className="fixed inset-0 bg-white/10 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-white/10 backdrop-blur-sm z-5 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div className="p-4 border-b flex justify-between items-center">
           <h2 className="text-xl font-semibold">{ad.title}</h2>
@@ -102,7 +102,7 @@ export default function AdModal() {
             ) : (
               <div className="relative w-full">
                 {videoLoading && (
-                  <div className="absolute inset-0 z-20 flex justify-center items-center bg-gray-100/50">
+                  <div className="absolute inset-0 z-4 flex justify-center items-center bg-gray-100/50">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
                   </div>
                 )}

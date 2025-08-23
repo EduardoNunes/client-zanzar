@@ -41,7 +41,7 @@ export default function ShowFullImage({
         </button>
         {showFullImage && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+            className="fixed inset-0 flex items-center justify-center bg-black/90"
             onClick={() => setShowFullImage(false)}
           >
             <button

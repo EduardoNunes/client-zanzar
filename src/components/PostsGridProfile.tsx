@@ -339,7 +339,7 @@ export default function PostsGridProfile({ username }: PostsGridProfileProps) {
           {post.mediaType === "video" ? (
             <div className="relative w-full h-full">
               {videoLoading[index] && (
-                <div className="absolute inset-0 z-20 flex justify-center items-center bg-gray-100/50">
+                <div className="absolute inset-0 z-2 flex justify-center items-center bg-gray-100/50">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
                 </div>
               )}

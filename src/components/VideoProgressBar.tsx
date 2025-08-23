@@ -85,7 +85,7 @@ const VideoProgressBar: React.FC<VideoProgressBarProps> = ({
   if (!videoElement) return null;
 
   return (
-    <div className="absolute inset-0 z-10" onClick={toggleVideoPlayPause}>
+    <div className="absolute inset-0 z-3" onClick={toggleVideoPlayPause}>
       {isControlsVisible && isVideoPaused && (
         <div
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"

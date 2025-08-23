@@ -65,7 +65,7 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose }) => {
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 w-full h-full z-1001 flex items-center justify-center bg-black bg-opacity-80"
+      className="fixed inset-0 w-full h-full z-3 flex items-center justify-center bg-black bg-opacity-80"
     >
       <div
         onClick={(e) => e.stopPropagation()}

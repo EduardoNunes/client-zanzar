@@ -13,7 +13,7 @@ export default function ConfirmModal({ onConfirm, text, text2 }: any) {
   }
 
   return (
-    <div className="fixed top-0 left-0 flex items-center justify-center w-full h-full z-50 p-8"
+    <div className="fixed top-0 left-0 flex items-center justify-center w-full h-full z-4 p-8"
       style={{ backgroundColor: "rgba(0, 0, 0, .5)" }}>
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md flex flex-col p-8">
         <h1 className="font-inter font-semibold text-[18px] text-gray-900 mb-4 text-center">

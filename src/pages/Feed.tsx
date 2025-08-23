@@ -360,7 +360,7 @@ export default function Feed() {
                   {post.mediaType === "video" ? (
                     <div className="relative w-full h-full">
                       {videoLoading[index] && (
-                        <div className="absolute inset-0 z-20 flex justify-center items-center bg-gray-100/50">
+                        <div className="absolute inset-0 flex justify-center items-center bg-gray-100/50">
                           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
                         </div>
                       )}
@@ -400,7 +400,7 @@ export default function Feed() {
                         className="w-full h-full object-cover"
                       />
 
-                      <div className="absolute bottom-12 right-0 p-2 z-30 rounded-tr-lg">
+                      <div className="absolute bottom-12 right-0 p-2 z-4 rounded-tr-lg">
                         {videoRefs.current[index] && (
                           <Sound
                             isVideoMuted={index !== activeVideoIndex}

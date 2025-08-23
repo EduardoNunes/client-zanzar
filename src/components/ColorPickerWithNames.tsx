@@ -60,7 +60,7 @@ export default function ColorPickerWithName({ variant, handleChange, index }: Co
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Digite ou escolha uma cor"
             />
-            <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white shadow-lg z-10">
+            <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white shadow-lg z-1">
               {filteredColors.length === 0 && query !== "" ? (
                 <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                   Nenhuma cor encontrada.

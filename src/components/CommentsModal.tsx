@@ -140,7 +140,7 @@ export default function CommentModal({
   };
 
   return (
-    <div className="fixed inset-0 flex justify-center items-end bg-opacity-50 z-80">
+    <div className="fixed inset-0 flex justify-center items-end bg-opacity-50 z-4">
       <div className="bg-white rounded-t-lg w-full max-w-lg flex flex-col h-[500px]">
         <div className="text-end p-6">
           <button

@@ -139,7 +139,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative h-full w-full bg-gray-100">
-      <nav className="w-full bg-white shadow-sm z-50">
+      <nav className="w-full bg-white shadow-sm">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -214,7 +214,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             color: "white",
             transition: "transform 0.3s ease-in-out",
             transform: isMenuOpen ? "rotate(90deg)" : "rotate(270deg)",
-            zIndex: 1001,
+            zIndex: 2,
           }}
         >
           {totalUnread > 0 && (

@@ -113,7 +113,7 @@ export default function AddProduct({ productFeePercentage, userStoreId, onProduc
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-center items-start bg-black/30 p-4">
+    <div className="fixed inset-0 z-3 flex justify-center items-start bg-black/30 p-4">
       <form
         className="max-w-2xl w-full bg-white p-6 rounded-lg shadow mt-10 h-[90vh] overflow-y-auto"
         onSubmit={handleSubmit}

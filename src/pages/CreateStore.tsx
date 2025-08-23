@@ -207,7 +207,7 @@ export default function CreateStore() {
                   setLogo(null);
                   setLogoPreview("");
                 }}
-                className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 z-20"
+                className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
               >
                 <Trash2 className="w-5 h-5" />
               </button>
@@ -244,7 +244,7 @@ export default function CreateStore() {
                   setBanner(null);
                   setBannerPreview("");
                 }}
-                className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 z-20"
+                className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
               >
                 <Trash2 className="w-5 h-5" />
               </button>

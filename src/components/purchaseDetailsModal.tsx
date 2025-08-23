@@ -48,7 +48,7 @@ export default function PurchaseDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50"
+      className="fixed inset-0 flex items-center justify-center z-3"
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
       <div className="bg-white rounded-lg shadow-lg w-[90%] h-[85%] max-w-3xl p-6 overflow-auto">

@@ -110,7 +110,7 @@ export default function SinglePostModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/10"
+      className="fixed inset-0 z-3 flex items-center justify-center backdrop-blur-sm bg-white/10"
       onClick={onClose}
     >
       <div
@@ -156,7 +156,7 @@ export default function SinglePostModal({
           {post.mediaType === "video" ? (
             <div className="relative w-full">
               {videoLoading && (
-                <div className="absolute inset-0 z-20 flex justify-center items-center bg-gray-100/50">
+                <div className="absolute inset-0 flex justify-center items-center bg-gray-100/50">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
                 </div>
               )}
@@ -170,7 +170,7 @@ export default function SinglePostModal({
                 className="w-full max-h-[600px] min-h-[200px] object-cover"
                 onLoadedData={() => setVideoLoading(false)}
               />
-              <div className="absolute bottom-0 right-0 p-2 z-[70]rounded-tr-lg">
+              <div className="absolute bottom-0 right-0 p-2 rounded-tr-lg">
                 <Sound
                   isVideoMuted={isVideoMuted}
                   setIsVideoMuted={setIsVideoMuted}
@@ -219,7 +219,7 @@ export default function SinglePostModal({
 
       {selectedPost && (
         <div
-          className="md:hidden fixed inset-0 z-50 flex items-end"
+          className="md:hidden fixed inset-0 flex items-end"
           onClick={onClose}
         >
           <div

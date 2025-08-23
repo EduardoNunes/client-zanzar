@@ -99,12 +99,12 @@ export default function ImageViewer({
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-1002 bg-black bg-opacity-90 flex items-center justify-center overflow-hidden touch-pan-x touch-pan-y"
+      className="fixed inset-0 z-3 bg-black bg-opacity-90 flex items-center justify-center overflow-hidden touch-pan-x touch-pan-y"
     >
-      <button
+{/*       <button
         className="absolute top-4 right-4 h-full w-full text-white hover:text-gray-300 transition-colors z-[60]"
         onClick={handleClose}
-      />
+      /> */}
       <div
         className="relative w-full h-full flex items-center justify-center overflow-auto"
         onClick={(e) => e.stopPropagation()}
@@ -115,7 +115,7 @@ export default function ImageViewer({
         {post.mediaType === "video" ? (
           <div className="relative w-full h-full flex items-center justify-center">
             {videoLoading && (
-              <div className="absolute inset-0 z-20 flex justify-center items-center bg-gray-100/50">
+              <div className="absolute inset-0 z-4 flex justify-center items-center bg-gray-100/50">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
               </div>
             )}
@@ -134,7 +134,7 @@ export default function ImageViewer({
                 setVideoLoading(false);
               }}
             />
-            <div className="absolute w-full h-full z-[70]">
+            <div className="absolute w-full h-full z-4">
               <VideoProgressBar videoElement={videoRef.current} />
             </div>
           </div>
@@ -153,7 +153,7 @@ export default function ImageViewer({
           />
         )}
 
-        <div className="absolute bottom-0 w-full left-0 p-4 z-[70] bg-black/60 rounded-tr-lg">
+        <div className="absolute bottom-0 w-full left-0 p-4 z-4 bg-black/60 rounded-tr-lg">
           <div className="flex items-center space-x-4 mb-4">
             <LikeButton
               postId={post.id}
@@ -177,7 +177,7 @@ export default function ImageViewer({
           <p className="text-white">{post.caption}</p>
           <div className="flex items-center justify-between">
             <button
-              className="text-white hover:text-gray-300 transition-colors z-[80]"
+              className="text-white hover:text-gray-300 transition-colors"
               onClick={handleClose}
             >
               <ChevronLeft className="w-6 h-6" />

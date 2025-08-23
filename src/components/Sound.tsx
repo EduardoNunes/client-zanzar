@@ -40,7 +40,7 @@ export default function Sound({
   return (
     <>
       <button
-        className="bg-black/50 text-white p-2 rounded-full z-10"
+        className="bg-black/50 text-white p-2 rounded-full"
         onClick={toggleMute}
       >
         {getVolumeIcon()}

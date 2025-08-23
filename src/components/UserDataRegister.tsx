@@ -145,7 +145,7 @@ export default function UserDataRegister({
   };
 
   return (
-    <div className="w-[90%] py-4 bg-white shadow-md rounded z-10 overflow-auto">
+    <div className="w-[90%] py-4 bg-white shadow-md rounded z-3 overflow-auto">
       <div className="p-4">
         <form onSubmit={handleSubmit}>
           <div className="flex justify-between items-center mb-4">

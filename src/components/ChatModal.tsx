@@ -188,7 +188,7 @@ export default function ChatModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-3 flex items-center justify-center">
       <div className="bg-white w-full max-w-2xl h-full flex flex-col">
         <div className="p-4 border-b flex justify-between items-center mb-1">
           <h2 className="text-xl font-semibold">Diálogo</h2>
