@@ -36,7 +36,6 @@ function App() {
   // Quando o socket estiver pronto, guarda no contexto
   useEffect(() => {
     if (socket && profileId && token) {
-      console.log("Socket pronto e conectado para profileId:", profileId);
       setSocketConnect(socket);
     }
   }, [socket, profileId, token, setSocketConnect]);
