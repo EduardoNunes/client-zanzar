@@ -12,22 +12,27 @@ export const useSocket = (): Socket | null => {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    if (!profileId || !token) {
-      console.warn("profileId ou token ausente, socket não será criado");
-      return;
-    }
+    if (!profileId || !token) return;
 
     // Cria socket apenas uma vez
     if (!socketInstance) {
-      console.log("Criando nova conexão socket para profileId:", profileId);
+      console.log("Criando nova conexão socket:", profileId);
 
       socketInstance = io(SOCKET_URL, {
         auth: { profileId, token },
+        autoConnect: true,
+        reconnection: true,
         transports: ["websocket"],
       });
 
+      // Listeners adicionados apenas na criação
       socketInstance.on("connect", () => {
-        console.log("✅ Socket conectado!", socketInstance?.id);
+        console.log(
+          "✅ Socket conectado!",
+          socketInstance?.id,
+          "profileId:",
+          profileId
+        );
       });
 
       socketInstance.on("payment-confirmed", () => {
@@ -35,7 +40,7 @@ export const useSocket = (): Socket | null => {
         toast.success("Pagamento confirmado!");
       });
 
-      socketInstance.on("notification", (data) => {
+      socketInstance.on("notification", (data: any) => {
         console.log("🔔 Notificação recebida:", data);
         toast.info(data.message || "Nova notificação");
       });
@@ -45,16 +50,12 @@ export const useSocket = (): Socket | null => {
       });
     }
 
+    // Atribui a referência local
     socketRef.current = socketInstance;
 
-    // Cleanup: remove listeners específicos do componente
+    // Cleanup só limpa referência local (não remove listeners do singleton)
     return () => {
-      if (socketRef.current) {
-        socketRef.current.off("payment-confirmed");
-        socketRef.current.off("notification");
-        socketRef.current.off("connect");
-        socketRef.current.off("connect_error");
-      }
+      socketRef.current = null;
     };
   }, [profileId, token]);
 
