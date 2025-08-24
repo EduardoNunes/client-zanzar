@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import LoadSpinner from "../components/LoadSpinner";
 import UserDataRegister from "../components/UserDataRegister";
 import { useGlobalContext } from "../context/globalContext";
-import { usePaymentSocket } from "../hooks/usePaymentSocket";
 import { orderPaymentAsaasReq } from "../requests/asaasRequests";
 import {
   getCartProductsReq,
@@ -14,9 +13,10 @@ import {
 import { getUserDataReq } from "../requests/profileRequests";
 import formatCurrencyInput from "../utils/formatRealCoin";
 import { logOut } from "../utils/logout";
+import { onEvent } from "../hooks/useSocket";
 
 export default function MyCart() {
-  const { token, profileId } = useGlobalContext();
+  const { token, profileId, socketConnect } = useGlobalContext();
   const [cartProducts, setCartProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -28,16 +28,21 @@ export default function MyCart() {
   const [pixCopyPaste, setPixCopyPaste] = useState("");
   const navigate = useNavigate();
 
-  usePaymentSocket(profileId, () => {
-    toast.success("Pagamento confirmado com sucesso!");
-    setIsResponseStatus(false);
-    setQrCode("");
-    setPixCopyPaste("");
-    navigate("/my-purchases");
-    setIsResponseStatus(false);
+  useEffect(() => {
+    const paymentConfirmed = onEvent("payment-confirmed", (data) => {
+      setIsResponseStatus(false);
+      setQrCode("");
+      setPixCopyPaste("");
+      navigate("/my-purchases");
+      console.log("PROFILEIDSOCKET front", data);
+    });
 
-    console.log("PROFILEIDSOCKET front", profileId);
-  });
+    return paymentConfirmed; // será chamado apenas quando MyCart desmontar
+  }, []);
+
+  useEffect(() => {
+    console.log("SOCKET MYCART", socketConnect);
+  }, [socketConnect]);
 
   useEffect(() => {
     fetchMyCartProducts();
@@ -229,7 +234,7 @@ export default function MyCart() {
     <div className="flex justify-center items-center w-full h-full">
       {openUserDataRegister && (
         <div
-          className="absolute top-0 left-0 flex justify-center items-center h-full w-full shadow-md rounded z-50"
+          className="absolute top-0 left-0 flex justify-center items-center w-full shadow-md py-10"
           style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
         >
           <UserDataRegister
@@ -240,7 +245,7 @@ export default function MyCart() {
       )}
       {isResponseStatus && (
         <div
-          className="absolute top-0 left-0 flex flex-col justify-center items-center h-full w-full shadow-md z-50 p-6"
+          className="absolute top-0 left-0 flex flex-col justify-center items-center w-full h-[100vh] shadow-md z-3 p-6"
           style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
         >
           {/* Header com botão de cancelar */}

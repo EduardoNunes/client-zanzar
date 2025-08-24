@@ -34,7 +34,7 @@ export const NotificationIndicator = ({
   useEffect(() => {
     if (!socket || !profileId) return;
 
-    const handleNewNotification = (data: any) => {
+    const handleNewNotification = () => {
       const newCount = (unreadNotifications ?? 0) + 1;
       setUnreadNotifications?.(newCount);
       if (isMobile) {
