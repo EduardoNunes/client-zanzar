@@ -4,6 +4,26 @@ import { SOCKET_URL } from "../server/socket";
 import { useGlobalContext } from "../context/globalContext";
 import { toast } from "react-toastify";
 
+// Event bus simples em memória
+const listeners: Record<string, ((data: any) => void)[]> = {};
+
+function emit(event: string, data: any) {
+  if (listeners[event]) {
+    listeners[event].forEach((cb) => cb(data));
+  }
+}
+
+export function onEvent(event: string, cb: (data: any) => void) {
+  if (!listeners[event]) {
+    listeners[event] = [];
+  }
+  listeners[event].push(cb);
+
+  return () => {
+    listeners[event] = listeners[event].filter((fn) => fn !== cb);
+  };
+}
+
 // Socket singleton global
 let socketInstance: Socket | null = null;
 
@@ -35,12 +55,14 @@ export const useSocket = (): Socket | null => {
         );
       });
 
-      socketInstance.on("payment-confirmed", () => {
+      socketInstance.on("payment-confirmed", (data) => {
         console.log("💰 Pagamento confirmado recebido no front!");
         toast.success("Pagamento confirmado!");
+        emit("payment-confirmed", data); // <- emite para listeners locais
       });
 
       socketInstance.on("notification", (data: any) => {
+        emit("payment-confirmed", data);
         console.log("🔔 Notificação recebida:", data);
         toast.info(data.message || "Nova notificação");
       });
