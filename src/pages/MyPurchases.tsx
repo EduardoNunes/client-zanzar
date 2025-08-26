@@ -53,7 +53,6 @@ export default function MyPurchases() {
       logOut(navigate);
       return;
     }
-
     try {
       const data = await getUserPurchasesReq(profileId, token, page, 3);
 
@@ -99,8 +98,16 @@ export default function MyPurchases() {
     setOpenPurchaseDetails(true);
   };
 
+  const statusText = {
+    PENDENTE: "Aguardando pagamento",
+    PAGO: "Aguardando envio",
+    ENVIADO: "O produto está a caminho",
+    RECEBIDO: "Compra finalizada",
+    CANCELADO: "Cancelado",
+  };
+
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="p-4 max-w-4xl mx-auto h-full">
       <h1 className="text-2xl font-bold mb-6">Minhas Compras</h1>
       <div className="space-y-4">
         {purchases.map((purchase) => (
@@ -127,6 +134,7 @@ export default function MyPurchases() {
             <p className="text-sm text-gray-600">
               Total: {formatCurrencyInput(String(purchase.total))}
             </p>
+
             <ul className="mt-2 space-y-1">
               {purchase.items.map((item, index) => (
                 <li key={index} className="text-sm mb-2">
@@ -136,6 +144,27 @@ export default function MyPurchases() {
                   </p>
                   {item.quantity} unidade(s) -{" "}
                   {formatCurrencyInput(String(item.variantSizePrice))}
+                  <p className="mb-2">
+                    <strong>Status:</strong>{" "}
+                    <strong
+                      className={`${
+                        item.status === "PAGO"
+                          ? "text-green-500"
+                          : item.status === "PENDENTE"
+                          ? "text-yellow-400"
+                          : item.status === "ENVIADO"
+                          ? "text-yellow-400"
+                          : item.status === "CANCELADO"
+                          ? "text-red-600"
+                          : item.status === "RECEBIDO"
+                          ? "text-blue-600"
+                          : "text-gray-200"
+                      }`}
+                    >
+                      {item.status}
+                    </strong>{" "}
+                    - {statusText[item.status as keyof typeof statusText]}
+                  </p>
                 </li>
               ))}
             </ul>

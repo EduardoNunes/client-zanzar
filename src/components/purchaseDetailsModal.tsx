@@ -40,6 +40,7 @@ export default function PurchaseDetailsModal({
   if (!isOpen) return null;
 
   const statusText = {
+    PENDENTE: "Aguardando pagamento",
     PAGO: "Aguardando envio",
     ENVIADO: "O produto está a caminho",
     RECEBIDO: "Compra finalizada",
@@ -90,6 +91,8 @@ export default function PurchaseDetailsModal({
                   className={`${
                     item.status === "PAGO"
                       ? "text-green-500"
+                      : item.status === "PENDENTE"
+                      ? "text-yellow-400"
                       : item.status === "ENVIADO"
                       ? "text-yellow-400"
                       : item.status === "CANCELADO"

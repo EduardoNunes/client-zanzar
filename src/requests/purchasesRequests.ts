@@ -10,11 +10,13 @@ export const getUserPurchasesReq = async (
     console.log("Token de acesso não encontrado.");
     return;
   }
+
   try {
     const { data } = await api.get(`/purchases/get-user-purchases`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+
       params: {
         profileId,
         page,
