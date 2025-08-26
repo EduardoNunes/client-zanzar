@@ -237,9 +237,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         }`}
         style={{
           position: "fixed",
-          bottom: "60px",
-          left: "50%",
-          transform: "translateX(-50%)",
+          bottom: "-84px",
+          right: "50%",
+          transform: "translateX(50%) translateY(-50%)",
           width: "calc(100% - 40px)",
           maxHeight: "calc(100vh - 100px)",
           backgroundColor: "white",
