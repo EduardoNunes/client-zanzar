@@ -46,7 +46,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       onClick={() => setIsProductModalOpen(true)}
       className="bg-white rounded-lg shadow-md p-4 flex flex-col items-center w-full hover:shadow-lg transition-shadow"
     >
-      {isProductModalOpen &&
+      {isProductModalOpen && (
         <ProductModal
           product={{
             id,
@@ -55,11 +55,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
             totalSold,
             rating,
             ratingCount,
-            variations
+            variations,
           }}
           onClose={() => setIsProductModalOpen(false)}
         />
-      }
+      )}
       <div className="relative w-full flex justify-center mb-2">
         <img
           src={variations[0].images[0].url || "/placeholder.png"}
@@ -75,13 +75,25 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </button>
       </div>
       <div className="w-full text-left">
-        <h3 className="text-lg font-bold mb-1 text-gray-900 truncate" title={name}>{name}</h3>
+        <h3
+          className="text-lg font-bold mb-1 text-gray-900 truncate"
+          title={name}
+        >
+          {name}
+        </h3>
         <div className="w-full">
           <span
             className="w-full text-gray-700 text-justify text-sm cursor-pointer select-none line-clamp-2"
-            style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
             onClick={() => setDescExpanded((v) => !v)}
-            title={descExpanded ? "Clique para recolher" : "Clique para expandir"}
+            title={
+              descExpanded ? "Clique para recolher" : "Clique para expandir"
+            }
           >
             {descExpanded ? description : description}
             {description.length > 0 && (
@@ -98,11 +110,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </span>
         </div>
 
-        <div className={`flex items-center mb-1 ${rating === 0 ? 'hidden' : ''}`}>
-          <RatingStars rating={ratingCount / rating} />
-          <span className="ml-2 text-gray-500 text-sm">({ratingCount / rating})</span>
+        <div
+          className={`flex items-center mb-1 ${rating === 0 ? "hidden" : ""}`}
+        >
+          <RatingStars rating={rating / ratingCount} />
+          <span className="ml-2 text-gray-500 text-sm">
+            ({rating / ratingCount})
+          </span>
         </div>
-        <div className="text-gray-600 text-xs">Total vendidos: <span className="font-bold">{totalSold}</span></div>
+        <div className="text-gray-600 text-xs">
+          Total vendidos: <span className="font-bold">{totalSold}</span>
+        </div>
       </div>
     </div>
   );

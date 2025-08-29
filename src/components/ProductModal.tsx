@@ -107,12 +107,15 @@ const ProductModal: React.FC<ProductProps> = ({ product, onClose }) => {
                 product.rating === 0 ? "hidden" : ""
               }`}
             >
-              <div className="flex items-center">
-                <RatingStars
-                  rating={product.ratingCount / (product.rating || 1)}
-                />
-                <span className="ml-2 text-gray-500 text-sm">
-                  ({product.ratingCount})
+              <div className="flex flex-col items-center">
+                <div className="flex">
+                  <RatingStars rating={product.rating / product.ratingCount} />{" "}
+                  <span className="ml-2 text-gray-500 text-sm">
+                    ({product.rating / product.ratingCount})
+                  </span>
+                </div>
+                <span className="text-gray-500 text-sm text center flex">
+                  ({product.ratingCount} Avaliações)
                 </span>
               </div>
               <div className="text-gray-600 text-xs mt-2">

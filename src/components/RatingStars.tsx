@@ -38,11 +38,11 @@ export default function RatingStars({ rating }: { rating: number }) {
     }
   
     return (
-      <>
+      <div className="flex">
         <svg width="0" height="0">
           <defs>{gradients}</defs>
         </svg>
         {stars}
-      </>
+      </ div>
     );
   };

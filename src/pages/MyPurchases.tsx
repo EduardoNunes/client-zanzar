@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useGlobalContext } from "../context/globalContext";
-import { getUserPurchasesReq } from "../requests/purchasesRequests";
+import {
+  getUserPurchasesReq,
+  productEvaluationReq,
+} from "../requests/purchasesRequests";
 import { logOut } from "../utils/logout";
 import { useNavigate } from "react-router-dom";
 import formatCurrencyInput from "../utils/formatRealCoin";
 import PurchaseDetailsModal from "../components/purchaseDetailsModal";
+import ProductEvaluationModal from "../components/ProductEvaluationModal";
+import RatingStars from "../components/RatingStars";
 
 interface PurchaseProps {
   orderId: string;
@@ -29,6 +34,10 @@ interface PurchaseProps {
     variantId: string;
     variantSizeId: string;
     variantSize: string;
+    productReview: {
+      rating: number;
+      comment: string;
+    }[];
   }[];
 }
 
@@ -47,6 +56,11 @@ export default function MyPurchases() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const navigate = useNavigate();
+  const [isProductEvaluationModalOpen, setIsProductEvaluationModalOpen] =
+    useState(false);
+  const [selectedItemForEvaluation, setSelectedItemForEvaluation] = useState<
+    any | null
+  >(null);
 
   const fetchPurchases = async (page: number) => {
     if (!profileId || !token) {
@@ -55,7 +69,7 @@ export default function MyPurchases() {
     }
     try {
       const data = await getUserPurchasesReq(profileId, token, page, 3);
-
+      console.log("DATA", data);
       setPurchases((prev) => {
         const newPurchases: PurchaseProps[] = data.filter(
           (newPurchase: PurchaseProps) =>
@@ -81,12 +95,14 @@ export default function MyPurchases() {
   }, [page]);
 
   if (loading && purchases.length === 0) {
-    return <div className="text-center py-12">Carregando suas compras...</div>;
+    return (
+      <div className="text-center py-12 h-full">Carregando suas compras...</div>
+    );
   }
 
   if (purchases.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-gray-500 h-full">
         Você ainda não realizou nenhuma compra.
       </div>
     );
@@ -96,6 +112,73 @@ export default function MyPurchases() {
     if (!purchase) return;
     setSelectedPurchase(purchase);
     setOpenPurchaseDetails(true);
+  };
+
+  const handleOpenEvaluationModal = (item: any) => {
+    setSelectedItemForEvaluation(item);
+    setIsProductEvaluationModalOpen(true);
+  };
+
+  const handleCloseEvaluationModal = () => {
+    setIsProductEvaluationModalOpen(false);
+    setSelectedItemForEvaluation(null);
+  };
+
+  const handleSubmitEvaluation = async (
+    productRating: number,
+    productComment: string
+  ) => {
+    if (selectedItemForEvaluation) {
+      if (!profileId || !token) {
+        logOut(navigate);
+        return;
+      }
+
+      setLoading(true);
+      console.log(productRating, productComment);
+
+      try {
+        const data = await productEvaluationReq(
+          profileId,
+          token,
+          selectedItemForEvaluation.orderItemId,
+          productRating,
+          productComment
+        );
+
+        console.log("DATA", data);
+
+        // Update the purchases state
+        setPurchases((prevPurchases) => {
+          return prevPurchases.map((purchase) => {
+            return {
+              ...purchase,
+              items: purchase.items.map((item) => {
+                if (
+                  item.orderItemId === selectedItemForEvaluation.orderItemId
+                ) {
+                  return {
+                    ...item,
+                    productReview: [
+                      { rating: productRating, comment: productComment },
+                    ],
+                  };
+                }
+                return item;
+              }),
+            };
+          });
+        });
+
+        toast.success("Avaliação enviada com sucesso!");
+        handleCloseEvaluationModal();
+      } catch (error: any) {
+        console.error("Erro ao avaliar:", error);
+        toast.error(error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   const statusText = {
@@ -153,7 +236,7 @@ export default function MyPurchases() {
                           : item.status === "PENDENTE"
                           ? "text-yellow-400"
                           : item.status === "ENVIADO"
-                          ? "text-yellow-400"
+                          ? "text-orange-400"
                           : item.status === "CANCELADO"
                           ? "text-red-600"
                           : item.status === "RECEBIDO"
@@ -165,6 +248,21 @@ export default function MyPurchases() {
                     </strong>{" "}
                     - {statusText[item.status as keyof typeof statusText]}
                   </p>
+                  <div>
+                    {item.productReview && item.productReview.length >= 1 ? (
+                      <div className="flex">
+                        <p className="mr-1">Minha avaliação:</p>
+                        <RatingStars rating={item.productReview[0].rating} />
+                      </div>
+                    ) : (
+                      <button
+                        className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                        onClick={() => handleOpenEvaluationModal(item)}
+                      >
+                        Avaliar Produto
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -186,6 +284,14 @@ export default function MyPurchases() {
           isOpen={openPurchaseDetails}
           onClose={() => setOpenPurchaseDetails(false)}
           purchase={selectedPurchase}
+        />
+      )}
+      {selectedItemForEvaluation && (
+        <ProductEvaluationModal
+          isOpen={isProductEvaluationModalOpen}
+          onClose={handleCloseEvaluationModal}
+          onSubmit={handleSubmitEvaluation}
+          item={selectedItemForEvaluation}
         />
       )}
     </div>
