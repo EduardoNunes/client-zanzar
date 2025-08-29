@@ -211,7 +211,7 @@ export const getStoreOrders = async (
         },
       }
     );
-    console.log("RESPONSE", response.data);
+
     return response.data;
   } catch (error: any) {
     const errorMessage =

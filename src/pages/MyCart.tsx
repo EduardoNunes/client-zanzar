@@ -41,7 +41,6 @@ export default function MyCart() {
   }, []);
 
   useEffect(() => {
-    console.log("SOCKET MYCART", socketConnect);
   }, [socketConnect]);
 
   useEffect(() => {
