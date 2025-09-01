@@ -9,6 +9,8 @@ import { orderPaymentAsaasReq } from "../requests/asaasRequests";
 import {
   getCartProductsReq,
   orderBuyProductsReq,
+  removeFromCartReq,
+  updateCartQuantityReq,
 } from "../requests/cartProductsRequests";
 import { getUserDataReq } from "../requests/profileRequests";
 import formatCurrencyInput from "../utils/formatRealCoin";
@@ -41,9 +43,6 @@ export default function MyCart() {
   }, []);
 
   useEffect(() => {
-  }, [socketConnect]);
-
-  useEffect(() => {
     fetchMyCartProducts();
   }, []);
 
@@ -60,16 +59,23 @@ export default function MyCart() {
     }
   };
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = async (productId: string) => {
     setCartProducts((prev) => prev.filter((item) => item.id !== productId));
     setSelectedItems((prev) => {
       const updated = new Set(prev);
       updated.delete(productId);
       return updated;
     });
+
+    try {
+      if (!profileId || !token) return;
+      await removeFromCartReq(profileId, productId, token);
+    } catch (error) {
+      console.error("Erro ao remover produto do carrinho:", error);
+    }
   };
 
-  const updateQuantity = (
+  const updateQuantity = async (
     productId: string,
     newQuantity: number,
     stock: number
@@ -80,6 +86,7 @@ export default function MyCart() {
 
     if (newQuantity > stock) {
       newQuantity = stock;
+      return;
     }
 
     setCartProducts((prev) =>
@@ -87,6 +94,13 @@ export default function MyCart() {
         item.id === productId ? { ...item, quantity: newQuantity } : item
       )
     );
+
+    try {
+      if (!profileId || !token) return;
+      await updateCartQuantityReq(profileId, productId, newQuantity, token);
+    } catch (error) {
+      console.error("Erro ao atualizar");
+    }
   };
 
   const toggleSelectItem = (productId: string) => {
