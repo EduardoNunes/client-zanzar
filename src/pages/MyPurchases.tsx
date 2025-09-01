@@ -226,7 +226,7 @@ export default function MyPurchases() {
                     {item.variantColorName}
                   </p>
                   {item.quantity} unidade(s) -{" "}
-                  {formatCurrencyInput(String(item.variantSizePrice))}
+                  {formatCurrencyInput(String(item.priceAtPurchase))}
                   <p className="mb-2">
                     <strong>Status:</strong>{" "}
                     <strong

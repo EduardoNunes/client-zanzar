@@ -149,21 +149,19 @@ export default function UserOrderStore() {
               <p className="text-sm text-gray-600">
                 Email: {order.customer.email}
               </p>
-              <ul className="mt-2 space-y-1">
+              <p className="mt-2 space-y-1">
                 {order.product.name} - {order.variant.colorName} -{" "}
-                {order.variant.size} - {order.quantity} unidade(s)
-              </ul>
+                {order.variant.size}
+              </p>
+              <p className="font-bold">
+                {order.quantity} {order.quantity === 1 ? "unidade" : "unidades"}
+              </p>
               <p className="mt-2 font-semibold">
-                Total pago:{" "}
-                {formatCurrencyInput(
-                  String(order.priceAtPurchase * order.quantity)
-                )}
+                Total pago: {formatCurrencyInput(String(order.priceAtPurchase))}
               </p>
               <p className="mt-2 font-semibold">
                 Total a receber:{" "}
-                {formatCurrencyInput(
-                  String(order.priceAtPurchaseBase * order.quantity)
-                )}
+                {formatCurrencyInput(String(order.priceAtPurchaseBase))}
               </p>
               <div className="flex mt-4">
                 <div>

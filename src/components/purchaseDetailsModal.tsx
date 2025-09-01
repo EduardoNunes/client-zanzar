@@ -94,7 +94,7 @@ export default function PurchaseDetailsModal({
                       : item.status === "PENDENTE"
                       ? "text-yellow-400"
                       : item.status === "ENVIADO"
-                      ? "text-yellow-400"
+                      ? "text-orange-400"
                       : item.status === "CANCELADO"
                       ? "text-red-600"
                       : item.status === "RECEBIDO"
@@ -113,7 +113,7 @@ export default function PurchaseDetailsModal({
                 <p className="w-1/2">
                   <strong>Preço:</strong>{" "}
                   {formatCurrencyInput(
-                    String(item.priceAtPurchase * item.quantity)
+                    String(item.variantSizePrice * item.quantity)
                   )}
                 </p>
               </div>
