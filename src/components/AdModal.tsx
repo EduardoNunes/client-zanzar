@@ -102,7 +102,7 @@ export default function AdModal() {
             ) : (
               <div className="relative w-full">
                 {videoLoading && (
-                  <div className="absolute inset-0 z-4 flex justify-center items-center bg-gray-100/50">
+                  <div className="absolute inset-0 z-6 flex justify-center items-center bg-gray-100/50">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
                   </div>
                 )}

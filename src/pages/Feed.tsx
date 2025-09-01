@@ -400,7 +400,7 @@ export default function Feed() {
                         className="w-full h-full object-cover"
                       />
 
-                      <div className="absolute bottom-12 right-0 p-2 z-3 rounded-tr-lg">
+                      <div className="absolute bottom-12 right-0 p-2 z-4 rounded-tr-lg">
                         {videoRefs.current[index] && (
                           <Sound
                             isVideoMuted={index !== activeVideoIndex}

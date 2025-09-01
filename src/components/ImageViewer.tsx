@@ -99,9 +99,9 @@ export default function ImageViewer({
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-3 bg-black bg-opacity-90 flex items-center justify-center overflow-hidden touch-pan-x touch-pan-y"
+      className="fixed inset-0 z-4 bg-black bg-opacity-90 flex items-center justify-center overflow-hidden touch-pan-x touch-pan-y"
     >
-{/*       <button
+      {/*       <button
         className="absolute top-4 right-4 h-full w-full text-white hover:text-gray-300 transition-colors z-[60]"
         onClick={handleClose}
       /> */}
