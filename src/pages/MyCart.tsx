@@ -18,7 +18,7 @@ import { logOut } from "../utils/logout";
 import { onEvent } from "../hooks/useSocket";
 
 export default function MyCart() {
-  const { token, profileId, socketConnect } = useGlobalContext();
+  const { token, profileId } = useGlobalContext();
   const [cartProducts, setCartProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
